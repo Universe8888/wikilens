@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-04-30 (end of P1, start of P2)
+**Last updated:** 2026-04-30 (P2 complete, tagged `v0.2.0`)
 
 ---
 
@@ -12,7 +12,8 @@ where the previous session left off, without re-litigating decisions already mad
 Start a new chat. Tell the agent:
 
 > We're continuing the `wikilens` project. Read `HANDOFF.md` for orientation, then
-> `docs/p2-plan.md` for the current phase. Start P2 at step 1 (install deps).
+> `docs/p2-decisions.md` for what P2 shipped. P3 (Link Auditor agent) is next —
+> plan it from scratch before writing code.
 
 That's it.
 
@@ -39,27 +40,31 @@ under the MIT license.
 - 4/4 smoke tests pass
 - `.gitignore` with PII guards; `.env.example`
 
-### P2 — RAG Core (NEXT — planned, not started)
+### P2 — RAG Core (COMPLETE, 2026-04-30, tag `v0.2.0`)
 
-Full plan lives at `docs/p2-plan.md`. Summary:
+- `wikilens ingest <vault>` + `wikilens query "..."` working end-to-end.
+- Four retrieval modes: `dense`, `bm25`, `hybrid` (RRF), `rerank` (cross-encoder).
+- Hit@5 = 1.00 in every mode on the 20-query eval set (target was 0.60).
+- p95 rerank latency = 1846ms (target was < 2s); dense alone is 37ms p95.
+- 86 tests pass.
+- Decisions log: `docs/p2-decisions.md`. Benchmark: `BENCHMARK.md`.
+- Gotchas: G1 (torchcodec on Windows), G2 (LanceDB paginated response),
+  G3 (regex catastrophic backtracking on YAML flow lists).
 
-**Goal:** `wikilens ingest <vault>` + `wikilens query "..."` returning ranked chunks in <2s.
+### P3 — Link Auditor (NEXT — not planned yet)
 
-**Pass criterion:** Recall@5 ≥ 0.60 on 20-query eval set; p95 latency < 2s.
+First real agent. Uses P2's ingested metadata to detect:
 
-**Five design decisions (pre-made, override only with strong reason):**
+- broken wikilinks (target note does not exist),
+- one-way links (A → B but no B → A),
+- orphan notes (zero inbound links, at least one outbound).
 
-1. **Vector store:** LanceDB (fallback: Chroma)
-2. **Embedding:** BGE-small-en-v1.5 local via sentence-transformers
-3. **Chunking:** heading-aware paragraph grouping, ~400 tokens, 15% overlap
-4. **Agent orchestration:** N/A for P2
-5. **LLM backend:** N/A for P2 (no generation yet)
+No plan written yet. The next session should produce a P3 spec before
+touching code, following the same SDD + HITL gate discipline used in P2.
 
-**15 atomic steps** enumerated in `docs/p2-plan.md`, each with a validation check.
+### P4–P7
 
-### P3–P7
-
-Roadmap in `README.md`. Do not touch until P2 passes.
+Roadmap in `README.md`. Do not touch until P3 ships.
 
 ## Hard constraints (do not violate)
 
@@ -90,18 +95,20 @@ Roadmap in `README.md`. Do not touch until P2 passes.
 In this order:
 
 1. `HANDOFF.md` (this file) — orientation
-2. `docs/p2-plan.md` — current phase plan
-3. `README.md` — project manifesto
-4. `ARCHITECTURE.md` — system sketch
-5. `src/wikilens/cli.py` — current CLI surface
-6. `tests/test_smoke.py` — existing tests
+2. `docs/p2-decisions.md` — what P2 actually shipped
+3. `BENCHMARK.md` — measured numbers
+4. `README.md` — project manifesto
+5. `ARCHITECTURE.md` — system sketch
+6. `src/wikilens/cli.py` — current CLI surface
+7. `gotchas.md` — failure register
 
-## What to do when P2 completes
+## What to do when P3 completes
 
-1. Update this `HANDOFF.md` — bump "Last updated", move P2 to COMPLETE, summarize P3 plan
-2. Tag release `v0.2.0`
-3. Update changelog / phase status
-4. Suggest: "fresh chat for P3?"
+1. Update this `HANDOFF.md` — bump "Last updated", move P3 to COMPLETE,
+   summarize the P4 plan.
+2. Tag release `v0.3.0`.
+3. Append benchmark numbers for the Link Auditor to `BENCHMARK.md`.
+4. Suggest: "fresh chat for P4?"
 
 ## Glossary
 
@@ -110,8 +117,9 @@ In this order:
 - **HITL gate** — Human-in-the-loop approval checkpoint
 - **Gotcha log** — File tracking "what broke + how to avoid next time"
 
-## Open questions for the next session
+## Open questions for the next session (P3 kickoff)
 
-- Use `uv` for package management, or stick with `pip`?
-- Install `sentence-transformers` now (downloads ~130 MB model weights on first run)?
-- Any preference on LanceDB version pin?
+- Should the Link Auditor emit its findings as JSON, markdown, or both?
+- Orphan-detection heuristic: strict (zero inbound) or graded (low inbound)?
+- Is the sample vault's existing broken-link content sufficient for an eval
+  fixture, or should we seed deliberately-broken notes for the test corpus?

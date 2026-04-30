@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Pre-alpha · scaffolding phase (P1). Nothing works yet. [Follow along →](#roadmap)
+**Status:** Pre-alpha · P2 shipped. `wikilens ingest` + `wikilens query` work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
@@ -45,9 +45,9 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 
 | Phase | Goal | Status |
 |---|---|---|
-| P1 — Bootstrap | Repo, scaffold, manifesto | **In progress** |
-| P2 — RAG core | Markdown ingestion + local vector store + `query` CLI | — |
-| P3 — Link Auditor agent | Detect broken wikilinks, orphan notes, one-way links | — |
+| P1 — Bootstrap | Repo, scaffold, manifesto | ✅ shipped |
+| P2 — RAG core | Markdown ingestion + local vector store + `query` CLI | ✅ shipped (`v0.2.0`) |
+| P3 — Link Auditor agent | Detect broken wikilinks, orphan notes, one-way links | Next |
 | P4 — Contradiction Finder agent | Multi-hop retrieval + LLM-judge for semantic conflicts | — |
 | P5 — Eval harness | Public benchmark dataset + per-agent scores | — |
 | P6 — Gap Generator agent | Propose missing sub-topics given a cluster | — |
@@ -62,12 +62,45 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 
 ## Install
 
-Not published yet. When P2 lands:
+Not yet published to PyPI. From a clone:
 
 ```bash
-pip install wikilens
+git clone https://github.com/Universe8888/wikilens.git
+cd wikilens
+pip install -e '.[dev]'
+```
+
+Python 3.12 is required. First run downloads two local models (~270 MB
+total, cached for reuse): `BAAI/bge-small-en-v1.5` for embeddings and
+`BAAI/bge-reranker-base` for reranking.
+
+## Usage
+
+```bash
+# Build the index (full rebuild each run in P2; incremental lands in P3).
 wikilens ingest ./my-vault
-wikilens query "what do I know about X?"
+
+# Query — four retrieval modes are supported.
+wikilens query "how do plants turn light into sugar"            # default: rerank
+wikilens query "..." --mode dense                               # cosine only
+wikilens query "..." --mode bm25                                # FTS / BM25 only
+wikilens query "..." --mode hybrid                              # RRF fusion
+wikilens query "..." --mode rerank -k 10                        # top-k after rerank
+```
+
+Index defaults to `.wikilens/db` inside the current directory; override with
+`--db <path>`.
+
+## Benchmark
+
+On the in-repo synthetic vault (36 notes, 152 chunks, 20 hand-written queries),
+every mode clears the P2 target of hit@5 ≥ 0.60 — most reach 1.00. See
+[`BENCHMARK.md`](./BENCHMARK.md) for the full ablation table including
+latency per mode. Reproduce from a fresh clone:
+
+```bash
+wikilens ingest fixtures/sample_vault --db .wikilens_test/db
+python scripts/eval_p2.py --db .wikilens_test/db
 ```
 
 ## Writing / research

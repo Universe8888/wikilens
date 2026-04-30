@@ -17,7 +17,8 @@ Design decisions:
 
 from __future__ import annotations
 
-import contextlib
+import logging
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,6 +30,14 @@ import pyarrow as pa
 from wikilens.ingest import Chunk
 
 DEFAULT_TABLE = "chunks"
+
+# chunk_id is a deterministic digest (see ingest.chunk_note) — today 16 hex
+# chars, but tests use shorter synthetic ids too. We only need to guarantee
+# the string carries no SQL metacharacters so the delete f-string below can
+# never become an injection sink even if the ID scheme changes upstream.
+_CHUNK_ID_RE = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -129,13 +138,20 @@ class LanceDBStore:
             )
         table = self._get_or_create_table()
 
-        # Delete any rows with the same chunk_ids first (upsert semantics)
+        # Delete any rows with the same chunk_ids first (upsert semantics).
+        # Hard-validate the ID shape so the f-string below cannot become
+        # an injection sink if the ID scheme ever changes upstream.
         ids = [c.chunk_id for c in chunks]
-        # Quote ids for the SQL-ish predicate
+        for i in ids:
+            if not _CHUNK_ID_RE.match(i):
+                raise ValueError(f"invalid chunk_id shape: {i!r}")
         quoted = ",".join(f"'{i}'" for i in ids)
-        # delete on empty may raise on some lancedb builds — safe to ignore.
-        with contextlib.suppress(Exception):
+        try:
             table.delete(f"chunk_id IN ({quoted})")
+        except (ValueError, RuntimeError, OSError) as e:
+            # Some lancedb builds raise on a no-op delete; a fresh table has
+            # no rows to delete, which is fine. Log anything stranger.
+            _log.debug("pre-upsert delete skipped: %s", e)
 
         rows = [self._chunk_to_row(c, v) for c, v in zip(chunks, vectors, strict=True)]
         table.add(rows)
@@ -143,10 +159,8 @@ class LanceDBStore:
         return len(rows)
 
     def count(self) -> int:
-        try:
-            return self._get_or_create_table().count_rows()
-        except Exception:
-            return 0
+        """Row count. Raises on corruption — callers decide how to interpret."""
+        return self._get_or_create_table().count_rows()
 
     def ensure_fts_index(self) -> None:
         """Build (or rebuild) the FTS index. Idempotent; cheap if already built."""
@@ -215,8 +229,11 @@ class LanceDBStore:
             results = (
                 table.search(query_text, query_type="fts").limit(k).to_list()
             )
-        except Exception:
-            # Empty query or tokenizer edge case → return nothing rather than crash.
+        except (ValueError, RuntimeError) as e:
+            # Empty-query / tokenizer edge cases are expected and recoverable.
+            # A broken FTS index or IO error should NOT silently degrade to
+            # dense-only — log loudly so hybrid/rerank callers can see it.
+            _log.warning("FTS search failed on query %r: %s", query_text, e)
             return []
         # FTS _score is BM25; higher is better.
         return [self._row_to_hit(row, "_score", higher_is_better=True) for row in results]

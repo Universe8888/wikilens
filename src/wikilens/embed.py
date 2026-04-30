@@ -21,6 +21,12 @@ import numpy as np
 BGE_QUERY_INSTRUCTION = "Represent this sentence for searching relevant passages: "
 
 DEFAULT_MODEL = "BAAI/bge-small-en-v1.5"
+# Set to a concrete HF revision SHA (from the model card's "Files → main" dropdown)
+# to lock weights against upstream being retagged or the account being compromised.
+# Leaving this as None fetches whatever "main" is at first run — acceptable for
+# dev, risky for reproducibility and supply chain. Callers can override via the
+# `revision` kwarg.
+DEFAULT_REVISION: str | None = None
 DEFAULT_DIM = 384
 
 
@@ -53,9 +59,15 @@ class BGEEmbedder:
     for CLIs that don't actually embed.
     """
 
-    def __init__(self, model_name: str = DEFAULT_MODEL, batch_size: int = 32):
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL,
+        batch_size: int = 32,
+        revision: str | None = DEFAULT_REVISION,
+    ):
         self._model_name = model_name
         self._batch_size = batch_size
+        self._revision = revision
         self._model = None  # lazy
         self.dim = DEFAULT_DIM
 
@@ -65,7 +77,10 @@ class BGEEmbedder:
             # embed don't pay the sentence-transformers import cost.
             from sentence_transformers import SentenceTransformer
 
-            self._model = SentenceTransformer(self._model_name)
+            kwargs: dict[str, str] = {}
+            if self._revision is not None:
+                kwargs["revision"] = self._revision
+            self._model = SentenceTransformer(self._model_name, **kwargs)
             # Sanity-check the declared dim matches the loaded model.
             actual = self._model.get_sentence_embedding_dimension()
             if actual != self.dim:

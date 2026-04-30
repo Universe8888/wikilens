@@ -31,7 +31,12 @@ def _cmd_query(args: argparse.Namespace) -> int:
 
     embedder = BGEEmbedder()
     store = LanceDBStore(db_path=args.db, dim=embedder.dim)
-    if store.count() == 0:
+    try:
+        row_count = store.count()
+    except (RuntimeError, OSError) as e:
+        print(f"Failed to open index at {args.db}: {e}", file=sys.stderr)
+        return 2
+    if row_count == 0:
         print(f"No index at {args.db}. Run `wikilens ingest <vault>` first.", file=sys.stderr)
         return 2
 

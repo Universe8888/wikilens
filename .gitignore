@@ -40,9 +40,14 @@ ENV/
 # Local vector stores & caches
 .cache/
 .wikilens/
+.wikilens_test/
 *.lance/
 *.db
 chroma/
+
+# Local-only ad-hoc scripts (prefix with underscore). Committed scripts
+# should not start with `_`.
+scripts/_*.py
 
 # Local / private fixtures — never commit real vault content
 fixtures/private/

@@ -15,6 +15,8 @@ from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-base"
+# See embed.py — pin a concrete HF revision SHA for supply-chain safety.
+DEFAULT_RERANKER_REVISION: str | None = None
 
 
 @runtime_checkable
@@ -27,15 +29,23 @@ class Reranker(Protocol):
 class BGEReranker:
     """Cross-encoder reranker. Lazy-loaded so import is cheap."""
 
-    def __init__(self, model_name: str = DEFAULT_RERANKER_MODEL):
+    def __init__(
+        self,
+        model_name: str = DEFAULT_RERANKER_MODEL,
+        revision: str | None = DEFAULT_RERANKER_REVISION,
+    ):
         self._model_name = model_name
+        self._revision = revision
         self._model = None
 
     def _ensure_model(self):
         if self._model is None:
             from sentence_transformers import CrossEncoder
 
-            self._model = CrossEncoder(self._model_name)
+            kwargs: dict[str, str] = {}
+            if self._revision is not None:
+                kwargs["revision"] = self._revision
+            self._model = CrossEncoder(self._model_name, **kwargs)
         return self._model
 
     def score(self, query: str, passages: Sequence[str]) -> list[float]:
