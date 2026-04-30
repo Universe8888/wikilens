@@ -92,6 +92,95 @@ def _cmd_audit(args: argparse.Namespace) -> int:
     return 1 if report.total_findings > 0 else 0
 
 
+def _cmd_contradict(args: argparse.Namespace) -> int:
+    from wikilens.contradict import generate_candidate_pairs
+    from wikilens.contradict_format import (
+        ALL_SCOPES,
+        ContradictReport,
+        Finding,
+        format_json,
+        format_markdown,
+    )
+    from wikilens.embed import BGEEmbedder
+    from wikilens.judge import Judge, MockJudge
+    from wikilens.store import LanceDBStore
+
+    only_tuple: tuple[str, ...] | None = None
+    if args.only:
+        requested = [c.strip() for c in args.only.split(",") if c.strip()]
+        invalid = [c for c in requested if c not in ALL_SCOPES]
+        if invalid:
+            print(
+                f"wikilens contradict: unknown scope(s): {', '.join(invalid)}. "
+                f"Valid: {', '.join(ALL_SCOPES)}",
+                file=sys.stderr,
+            )
+            return 2
+        only_tuple = tuple(requested)  # type: ignore[assignment]
+
+    embedder = BGEEmbedder()
+    store = LanceDBStore(db_path=args.db, dim=embedder.dim)
+    try:
+        row_count = store.count()
+    except (RuntimeError, OSError) as e:
+        print(f"Failed to open index at {args.db}: {e}", file=sys.stderr)
+        return 2
+    if row_count == 0:
+        print(f"No index at {args.db}. Run `wikilens ingest <vault>` first.", file=sys.stderr)
+        return 2
+
+    # Resolve judge backend. Phase 4.1 ships only MockJudge; ClaudeJudge
+    # and OllamaJudge are wired in Phase 4.2.
+    judge: Judge
+    if args.judge == "none":
+        judge = MockJudge()
+    elif args.judge == "claude":
+        print(
+            "wikilens contradict: --judge claude is not yet implemented "
+            "(Phase 4.2). Use --judge none for plumbing.",
+            file=sys.stderr,
+        )
+        return 2
+    elif args.judge == "ollama":
+        print(
+            "wikilens contradict: --judge ollama is not yet implemented "
+            "(Phase 4.2+). Use --judge none for plumbing.",
+            file=sys.stderr,
+        )
+        return 2
+    else:
+        print(f"wikilens contradict: unknown judge: {args.judge!r}", file=sys.stderr)
+        return 2
+
+    pairs = generate_candidate_pairs(store, embedder=embedder, top_k=args.top_k)
+    if args.sample is not None and args.sample >= 0:
+        judged_pairs = pairs[: args.sample]
+    else:
+        judged_pairs = pairs
+
+    findings: list[Finding] = []
+    for p in judged_pairs:
+        verdict = judge.score_pair(p.a.text, p.b.text)
+        if verdict.verdict and verdict.score >= args.min_score:
+            findings.append(Finding(pair=p, verdict=verdict))
+
+    report = ContradictReport(
+        vault_root=str(args.vault_path),
+        chunks_scanned=row_count,
+        candidates=len(pairs),
+        judged=len(judged_pairs),
+        judge_name=judge.name,
+        findings=tuple(findings),
+    )
+
+    if args.json:
+        sys.stdout.write(format_json(report, only=only_tuple))  # type: ignore[arg-type]
+    else:
+        sys.stdout.write(format_markdown(report, only=only_tuple))  # type: ignore[arg-type]
+
+    return 1 if report.total_findings > 0 else 0
+
+
 def _cmd_stub(name: str, phase: str):
     def _fn(args: argparse.Namespace) -> int:
         print(f"wikilens: '{name}' is not available yet ({phase}).")
@@ -148,9 +237,48 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_audit.set_defaults(func=_cmd_audit)
 
+    # contradict (P4)
+    p_contradict = sub.add_parser(
+        "contradict",
+        help="Find contradicting chunk pairs in a vault (Phase 4.1 plumbing).",
+    )
+    p_contradict.add_argument("vault_path", type=Path)
+    p_contradict.add_argument(
+        "--db", default=DEFAULT_DB_PATH, help="Store path (default: %(default)s)"
+    )
+    p_contradict.add_argument(
+        "--judge",
+        choices=["none", "claude", "ollama"],
+        default="none",
+        help=(
+            "Judge backend. 'none' uses MockJudge (no LLM calls); "
+            "'claude'/'ollama' land in Phase 4.2."
+        ),
+    )
+    p_contradict.add_argument(
+        "--top-k", dest="top_k", type=int, default=10,
+        help="Retrieval neighbors per chunk (default: %(default)s).",
+    )
+    p_contradict.add_argument(
+        "--min-score", dest="min_score", type=float, default=0.5,
+        help="Drop verdicts with score below this threshold (default: %(default)s).",
+    )
+    p_contradict.add_argument(
+        "--sample", type=int, default=None,
+        help="Cap judge calls to the first N candidate pairs (default: no cap).",
+    )
+    p_contradict.add_argument(
+        "--only", default="",
+        help="Comma-separated scopes to include (factual,temporal). Default: all.",
+    )
+    p_contradict.add_argument(
+        "--json", action="store_true",
+        help="Emit JSON instead of markdown (schema_version: 1).",
+    )
+    p_contradict.set_defaults(func=_cmd_contradict)
+
     # Stubs for later phases (keep the help surface honest)
     for name, phase in [
-        ("contradictions", "P4"),
         ("gaps", "P6"),
         ("benchmark", "P5"),
     ]:

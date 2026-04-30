@@ -42,6 +42,11 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.10",
 ]
+# Optional remote-LLM judge backend for P4 (Contradiction Finder).
+# Only required when running `wikilens contradict --judge claude`.
+judge = [
+    "anthropic>=0.40",
+]
 
 [project.urls]
 Homepage = "https://github.com/Universe8888/wikilens"
