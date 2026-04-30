@@ -33,9 +33,11 @@ def test_gap_missing_index_returns_two(
     assert "No index" in err or "Failed to open" in err
 
 
-def test_gap_claude_not_yet_implemented_returns_two(
-    tmp_path: Path, capsys: pytest.CaptureFixture
+def test_gap_claude_fails_without_api_key(
+    tmp_path: Path, capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
 ):
+    from unittest.mock import patch
+
     from wikilens.pipeline import ingest_vault
 
     (tmp_path / "a.md").write_text("alpha beta gamma", encoding="utf-8")
@@ -43,19 +45,21 @@ def test_gap_claude_not_yet_implemented_returns_two(
     (tmp_path / "c.md").write_text("eta theta iota", encoding="utf-8")
     ingest_vault(vault_root=tmp_path, db_path=str(tmp_path / "db"))
 
-    rc = main(
-        [
-            "gap",
-            str(tmp_path),
-            "--db",
-            str(tmp_path / "db"),
-            "--judge",
-            "claude",
-        ]
-    )
+    with patch("wikilens.generator._load_dotenv_if_present"):
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+        rc = main(
+            [
+                "gap",
+                str(tmp_path),
+                "--db",
+                str(tmp_path / "db"),
+                "--judge",
+                "claude",
+            ]
+        )
     assert rc == 2
     err = capsys.readouterr().err
-    assert "Phase 5.2" in err or "not yet implemented" in err
+    assert "ANTHROPIC_API_KEY" in err
 
 
 def test_gap_mock_generator_end_to_end_json(

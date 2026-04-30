@@ -18,7 +18,10 @@ change and must bump ``schema_version`` in ``p5_ground_truth.json``.
 
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Protocol, runtime_checkable
 
 # Pinned rubric. DO NOT edit without bumping the p5_ground_truth.json
@@ -102,6 +105,141 @@ def _token_set(s: str) -> set[str]:
     # not a semantic engine.
     toks = _normalize(s).replace("?", "").replace(".", "").replace(",", "").split()
     return {t for t in toks if len(t) >= 3 and t not in _STOPWORDS}
+
+
+def _build_rubric_text() -> str:
+    lines = []
+    for score in sorted(RUBRIC_DESCRIPTIONS, reverse=True):
+        lines.append(f"  {score} — {RUBRIC_DESCRIPTIONS[score]}")
+    return "\n".join(lines)
+
+
+_MATCHER_SYSTEM_PROMPT = f"""\
+You are a precise evaluator comparing two gap descriptions from a
+knowledge-base gap-analysis system.
+
+Your task: score how well PROPOSED_GAP matches GOLD_GAP on this pinned rubric:
+
+{_build_rubric_text()}
+
+Rules:
+- Apply the rubric literally. Do not infer intent beyond what is written.
+- Score 4 or 5 only when both gaps refer to the same missing concept, even if
+  phrased differently.
+- Score 3 only when the concepts are related but one is clearly broader/narrower.
+- Score 1 or 2 when the gaps address genuinely different questions.
+- reasoning must be one sentence, no longer.
+- Return ONLY valid JSON, starting with "{{".
+
+JSON schema:
+{{
+  "score": <integer 1-5>,
+  "reasoning": "<one sentence>"
+}}
+"""
+
+_MATCHER_USER_TEMPLATE = """\
+GOLD_GAP: {gold_gap}
+
+PROPOSED_GAP: {proposed_gap}
+"""
+
+_MATCHER_MAX_TOKENS = 128
+_MATCHER_MAX_RETRIES = 2
+DEFAULT_CLAUDE_MODEL_MATCHER = "claude-sonnet-4-6"
+
+
+def _load_dotenv_if_present_matcher() -> None:
+    try:
+        from dotenv import load_dotenv
+
+        env_path = Path(__file__).parent.parent.parent / ".env"
+        if env_path.exists():
+            load_dotenv(env_path, override=False)
+    except ImportError:
+        pass
+
+
+def _parse_match_verdict(raw: str) -> MatchVerdict:
+    try:
+        doc = json.loads(raw)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"matcher response is not valid JSON: {e}") from e
+    required = {"score", "reasoning"}
+    missing = required - doc.keys()
+    if missing:
+        raise ValueError(f"matcher response missing keys: {missing}")
+    return MatchVerdict(score=int(doc["score"]), rationale=str(doc["reasoning"]))
+
+
+class ClaudeMatcher:
+    """Claude-backed gap matcher using the pinned 1–5 rubric.
+
+    Used ONLY by ``scripts/eval_p5.py`` — never by the production CLI.
+    Loads ``ANTHROPIC_API_KEY`` from env, same pattern as ClaudeJudge.
+    """
+
+    name = "claude"
+
+    def __init__(
+        self,
+        model: str = DEFAULT_CLAUDE_MODEL_MATCHER,
+        max_tokens: int = _MATCHER_MAX_TOKENS,
+    ):
+        _load_dotenv_if_present_matcher()
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise OSError(
+                "ANTHROPIC_API_KEY is not set. "
+                "Export it in your shell or add it to .env at the repo root."
+            )
+        try:
+            import anthropic as _anthropic
+        except ImportError as e:
+            raise ImportError(
+                "The 'anthropic' package is required for ClaudeMatcher. "
+                "Install it with: pip install -e '.[judge]'"
+            ) from e
+
+        self._client = _anthropic.Anthropic(api_key=api_key)
+        self._model = model
+        self._max_tokens = max_tokens
+        self.calls: int = 0
+        self.abstentions: int = 0
+
+    def score_pair(self, gold_gap: str, proposed_gap: str) -> MatchVerdict:
+        """Score one (gold, proposed) pair. Retries on malformed JSON."""
+        self.calls += 1
+        user_content = _MATCHER_USER_TEMPLATE.format(
+            gold_gap=gold_gap, proposed_gap=proposed_gap
+        )
+        last_err: Exception | None = None
+
+        for attempt in range(_MATCHER_MAX_RETRIES + 1):
+            system = _MATCHER_SYSTEM_PROMPT
+            if attempt > 0:
+                system += (
+                    "\nCRITICAL: Your previous response was not valid JSON. "
+                    'Output ONLY the JSON object, starting with "{".'
+                )
+            response = self._client.messages.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                system=system,
+                messages=[{"role": "user", "content": user_content}],
+            )
+            raw = response.content[0].text.strip()
+            try:
+                return _parse_match_verdict(raw)
+            except ValueError as e:
+                last_err = e
+                continue
+
+        self.abstentions += 1
+        return MatchVerdict(
+            score=1,
+            rationale=f"matcher abstained after {_MATCHER_MAX_RETRIES + 1} attempts: {last_err}",
+        )
 
 
 class SubstringMatcher:

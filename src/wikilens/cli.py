@@ -207,12 +207,14 @@ def _cmd_gap(args: argparse.Namespace) -> int:
     if args.judge == "none":
         generator = MockGenerator()
     elif args.judge == "claude":
-        print(
-            "wikilens gap: --judge claude is not yet implemented (Phase 5.2). "
-            "Use --judge none for now.",
-            file=sys.stderr,
-        )
-        return 2
+        from wikilens.generator import ClaudeGenerator
+
+        try:
+            model = getattr(args, "model", None) or "claude-sonnet-4-6"
+            generator = ClaudeGenerator(model=model)
+        except (EnvironmentError, ImportError) as e:
+            print(f"wikilens gap: {e}", file=sys.stderr)
+            return 2
     else:
         print(f"wikilens gap: unknown judge: {args.judge!r}", file=sys.stderr)
         return 2
