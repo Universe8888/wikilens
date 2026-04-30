@@ -31,6 +31,9 @@ ENV/
 .env.*
 !.env.example
 
+# Local-only notes (session handoffs, private context)
+.local/
+
 # Local vector stores & caches
 .cache/
 .wikilens/
