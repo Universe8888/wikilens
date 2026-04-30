@@ -1,0 +1,20 @@
+{"id": "q01", "difficulty": "easy", "query": "how do plants turn light into sugar", "expected_titles": ["photosynthesis.md"]}
+{"id": "q02", "difficulty": "easy", "query": "what is the structure of DNA", "expected_titles": ["dna.md"]}
+{"id": "q03", "difficulty": "easy", "query": "why can water dissolve so many substances", "expected_titles": ["water.md"]}
+{"id": "q04", "difficulty": "easy", "query": "what was the Roman Empire at its peak", "expected_titles": ["roman-empire.md"]}
+{"id": "q05", "difficulty": "easy", "query": "rules and steps of the scientific method", "expected_titles": ["scientific-method.md"]}
+{"id": "q06", "difficulty": "medium", "query": "how does a buffer resist pH changes", "expected_titles": ["acids-and-bases.md"]}
+{"id": "q07", "difficulty": "medium", "query": "why is ATP called the energy currency of the cell", "expected_titles": ["mitochondria.md", "cellular-respiration.md"]}
+{"id": "q08", "difficulty": "medium", "query": "how does gluten develop when kneading bread", "expected_titles": ["bread.md"]}
+{"id": "q09", "difficulty": "medium", "query": "what does an emulsifier do in a sauce", "expected_titles": ["emulsions.md"]}
+{"id": "q10", "difficulty": "medium", "query": "wave-particle duality explained with a slit experiment", "expected_titles": ["light.md", "quantum-mechanics.md"]}
+{"id": "q11", "difficulty": "medium", "query": "justified true belief and the definition of knowledge", "expected_titles": ["epistemology.md"]}
+{"id": "q12", "difficulty": "medium", "query": "why cutting with a sharp knife is safer than a dull one", "expected_titles": ["knife-skills.md"]}
+{"id": "q13", "difficulty": "medium", "query": "how the printing press changed book production in Europe", "expected_titles": ["printing-press.md"]}
+{"id": "q14", "difficulty": "medium", "query": "how caravans moved goods across Eurasia", "expected_titles": ["silk-road.md"]}
+{"id": "q15", "difficulty": "hard", "query": "does determinism leave any room for moral responsibility", "expected_titles": ["free-will.md", "ethics.md"]}
+{"id": "q16", "difficulty": "hard", "query": "what are the decisions from the phone verification fraud review meeting", "expected_titles": ["meetings/2026-02-11-fraud-review.md"]}
+{"id": "q17", "difficulty": "hard", "query": "what dropped off rate is project orchid trying to fix", "expected_titles": ["meetings/2026-01-14-kickoff.md", "meetings/2026-01-28-discovery-readout.md"]}
+{"id": "q18", "difficulty": "hard", "query": "second law of thermodynamics and entropy", "expected_titles": ["thermodynamics.md"]}
+{"id": "q19", "difficulty": "hard", "query": "can we reduce something to five screens without losing fraud protection", "expected_titles": ["meetings/2026-02-11-fraud-review.md", "meetings/2026-03-04-v1-launch-planning.md"]}
+{"id": "q20", "difficulty": "hard", "query": "how does a feedback loop create emergent behavior in a system", "expected_titles": ["systems-thinking.md"]}
