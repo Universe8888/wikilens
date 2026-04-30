@@ -55,3 +55,45 @@ if self._table_name in names:
 paginated object in place of a plain collection. Rule of thumb: if the replacement
 for a deprecated API breaks membership checks, inspect the object with `dir()`
 before trusting it as iterable.
+
+---
+
+## G3 — Frontmatter regex catastrophic backtracking on flow-style YAML lists
+
+**Phase:** P2, step 11 (sample vault smoke ingest)
+**Date:** 2026-04-30
+
+**Symptom:** `parse_note()` hung indefinitely on tiny (~1 KB) markdown files
+whose YAML frontmatter contained a flow-style list such as
+`tags: [chemistry]`. `pytest` passed because the test fixtures happened to
+avoid the pathological input shape. The diagnostic log file stayed empty — no
+exception, no output, just a pegged CPU core inside `re.match`.
+
+**Root cause:** The original pattern used a nested lazy quantifier under
+`re.DOTALL`:
+
+```python
+re.compile(
+    r"\A---[ \t]*\r?\n(?P<fm>(?:.*\r?\n)*?)---[ \t]*\r?\n?(?P<body>.*)\Z",
+    re.DOTALL,
+)
+```
+
+The inner `(?:.*\r?\n)*?` is a classic catastrophic-backtracking construct:
+`.*` under DOTALL can match newlines, and the engine retries every way to
+partition the file when the closing fence is not exactly where the lazy
+expansion first lands. Certain body content (square-bracketed tokens like
+`[chemistry]`, `[0 to 14]`) triggered an exponential blow-up.
+
+**Fix:** Replaced the regex with a line-based O(n) scanner in
+`parse_frontmatter()` — check for `---` at position 0, split on lines once,
+walk forward for the next line whose `rstrip()` equals `---`. No regex, no
+backtracking. Two regression tests cover (a) the exact failing input, with a
+100ms wall-clock bound, and (b) the unterminated-fence edge case.
+
+**When this bites again:** Any time a regex uses a nested quantifier where
+both the outer and inner can match the same characters (`(.*\n)*`, `(.+)+`,
+`(a|a)*`). If the pattern must consume lines up to a delimiter, split on
+lines first and scan — it's O(n) by construction. Watch especially for this
+when `re.DOTALL` is in play, because `.` matching newlines removes the usual
+one-line-at-a-time anchor that makes `(.*\n)*` safe in practice.

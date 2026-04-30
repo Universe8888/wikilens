@@ -109,6 +109,14 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # On Windows, stdout defaults to cp1252 and will crash on non-Latin
+    # characters that commonly appear in note content (arrows, em-dashes, etc.).
+    # Force UTF-8 when we can; fall back silently on platforms without .reconfigure.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, OSError):
+        pass
+
     parser = _build_parser()
     args = parser.parse_args(argv)
     if not getattr(args, "command", None):

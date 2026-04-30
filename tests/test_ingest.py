@@ -162,6 +162,45 @@ def test_frontmatter_fence_must_be_at_start():
     assert body == text
 
 
+def test_frontmatter_with_inline_flow_list_no_hang():
+    """Regression: `tags: [chemistry]` inside frontmatter previously triggered
+    catastrophic backtracking in the old regex-based parser (G3). The
+    line-based parser must handle it in milliseconds.
+    """
+    import time
+
+    text = (
+        "---\n"
+        "title: Acids and Bases\n"
+        "tags: [chemistry]\n"
+        "---\n"
+        "\n"
+        "# Acids and Bases\n"
+        "\n"
+        "body text goes here.\n"
+    )
+    t0 = time.perf_counter()
+    fm, body, err = parse_frontmatter(text)
+    dt = time.perf_counter() - t0
+
+    assert err is None
+    assert fm == {"title": "Acids and Bases", "tags": ["chemistry"]}
+    assert body.startswith("\n# Acids and Bases")
+    # Strong upper bound: this pathological-for-regex case must complete
+    # in well under 100ms on any hardware.
+    assert dt < 0.1, f"parse_frontmatter took {dt:.3f}s (expected <0.1s)"
+
+
+def test_frontmatter_unterminated_fence_treated_as_body():
+    """If a file starts with `---` but never closes, we treat it as body,
+    never hang or raise."""
+    text = "---\ntitle: never closed\n# heading in what-should-be-body\n"
+    fm, body, err = parse_frontmatter(text)
+    assert fm == {}
+    assert body == text
+    assert err is None
+
+
 def test_parse_note_utf8_bom(tmp_path: Path):
     p = tmp_path / "bom.md"
     p.write_bytes(b"\xef\xbb\xbf---\ntitle: BOM\n---\nhello\n")

@@ -22,15 +22,6 @@ import yaml
 DEFAULT_INCLUDE: tuple[str, ...] = ("**/*.md",)
 DEFAULT_EXCLUDE: tuple[str, ...] = ()
 
-# Matches a YAML frontmatter block at the very start of a file:
-#   ---\n ... \n---\n
-# Allows CRLF/LF. The block must be the first thing in the file (no BOM-aware
-# handling — caller should pass decoded text).
-_FRONTMATTER_RE = re.compile(
-    r"\A---[ \t]*\r?\n(?P<fm>(?:.*\r?\n)*?)---[ \t]*\r?\n?(?P<body>.*)\Z",
-    re.DOTALL,
-)
-
 
 @dataclass(frozen=True)
 class Note:
@@ -124,6 +115,15 @@ def walk_vault(
     return sorted(matched - excluded)
 
 
+def _is_fence_line(line: str) -> bool:
+    """A frontmatter fence line is `---` optionally followed by spaces/tabs."""
+    stripped = line.rstrip("\r\n")
+    if not stripped.startswith("---"):
+        return False
+    # Everything after the three dashes must be whitespace only.
+    return stripped[3:].strip(" \t") == ""
+
+
 def parse_frontmatter(text: str) -> tuple[dict[str, Any], str, str | None]:
     """Split raw note text into (frontmatter_dict, body, error).
 
@@ -133,13 +133,31 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str, str | None]:
     - Malformed YAML → ({}, body_after_fence, "<yaml error>")
     - Valid YAML but non-mapping (e.g. a scalar or list) → ({}, body_after_fence,
       "frontmatter is not a mapping")
+
+    Implementation: a simple line-scanner (O(n), no backtracking). The prior
+    regex-based version suffered catastrophic backtracking on files whose YAML
+    block contained bracketed structures (G3).
     """
-    match = _FRONTMATTER_RE.match(text)
-    if match is None:
+    if not text.startswith("---"):
         return {}, text, None
 
-    fm_text = match.group("fm")
-    body = match.group("body")
+    lines = text.splitlines(keepends=True)
+    if not lines or not _is_fence_line(lines[0]):
+        return {}, text, None
+
+    # Find the closing fence on its own line.
+    close_idx: int | None = None
+    for i in range(1, len(lines)):
+        if _is_fence_line(lines[i]):
+            close_idx = i
+            break
+
+    if close_idx is None:
+        # Unterminated frontmatter → treat the whole thing as body, no error.
+        return {}, text, None
+
+    fm_text = "".join(lines[1:close_idx])
+    body = "".join(lines[close_idx + 1 :])
 
     if not fm_text.strip():
         return {}, body, None
