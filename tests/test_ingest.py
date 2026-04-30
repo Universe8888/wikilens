@@ -7,7 +7,10 @@ from pathlib import Path
 import pytest
 
 from wikilens.ingest import (
+    DEFAULT_CHUNK_TOKENS,
+    Chunk,
     Note,
+    chunk_note,
     extract_links,
     parse_frontmatter,
     parse_note,
@@ -310,3 +313,154 @@ def test_extract_mixed_realistic_note():
     assert "chem/organic" in links.tags
     assert "not-a-tag" not in links.tags
     assert ("MDN", "https://developer.mozilla.org") in links.markdown_links
+
+
+# --- chunker --------------------------------------------------------------
+
+
+def _note(tmp_path: Path, name: str, body: str, fm: dict | None = None) -> Note:
+    p = _make(tmp_path, name, body)
+    return Note(path=p, frontmatter=fm or {}, body=body)
+
+
+def test_chunk_empty_body_returns_empty_list(tmp_path: Path):
+    n = _note(tmp_path, "empty.md", "")
+    assert chunk_note(n) == []
+
+
+def test_chunk_short_note_produces_single_chunk(tmp_path: Path):
+    n = _note(tmp_path, "short.md", "Just a short note about photosynthesis.\n")
+    chunks = chunk_note(n)
+    assert len(chunks) == 1
+    c = chunks[0]
+    assert isinstance(c, Chunk)
+    assert "photosynthesis" in c.text
+    assert c.chunk_index == 0
+    assert c.heading_path == ()
+    assert c.token_count > 0
+    assert c.char_start == 0
+    assert c.char_end >= c.char_start
+
+
+def test_chunk_heading_path_tracked_through_hierarchy(tmp_path: Path):
+    body = (
+        "# Biology\n\n"
+        "Intro to biology.\n\n"
+        "## Photosynthesis\n\n"
+        "Plants turn light into sugar.\n\n"
+        "### Light Reactions\n\n"
+        "Happens in thylakoids.\n\n"
+        "## Respiration\n\n"
+        "Reverse process.\n"
+    )
+    n = _note(tmp_path, "bio.md", body)
+    chunks = chunk_note(n)
+
+    heading_paths = [c.heading_path for c in chunks]
+    assert ("Biology",) in heading_paths
+    assert ("Biology", "Photosynthesis") in heading_paths
+    assert ("Biology", "Photosynthesis", "Light Reactions") in heading_paths
+    assert ("Biology", "Respiration") in heading_paths
+
+
+def test_chunk_preamble_before_first_heading(tmp_path: Path):
+    body = "Some intro text without a heading.\n\n# Then a heading\n\nBody.\n"
+    n = _note(tmp_path, "preamble.md", body)
+    chunks = chunk_note(n)
+    assert chunks[0].heading_path == ()
+    assert "intro" in chunks[0].text
+    assert chunks[1].heading_path == ("Then a heading",)
+
+
+def test_chunk_no_chunk_exceeds_token_budget(tmp_path: Path):
+    # Build a body with many paragraphs that will force multiple chunks
+    paragraphs = [f"Paragraph {i} " + ("word " * 40) for i in range(30)]
+    body = "\n\n".join(paragraphs)
+    n = _note(tmp_path, "long.md", body)
+    chunks = chunk_note(n, target_tokens=200)
+    assert len(chunks) >= 2
+    # Allow a small slack (<=10%) because sentence-level fallback can slightly
+    # overshoot when a paragraph is atomic and large.
+    for c in chunks:
+        assert c.token_count <= int(DEFAULT_CHUNK_TOKENS * 1.1)
+
+
+def test_chunk_oversize_paragraph_is_sentence_split(tmp_path: Path):
+    # One giant paragraph (no blank lines) — chunker must fall back to sentence split.
+    sentence = "This is one sentence about cats. "
+    body = sentence * 200  # way over budget as a single paragraph
+    n = _note(tmp_path, "oneparagraph.md", body)
+    chunks = chunk_note(n, target_tokens=100)
+    assert len(chunks) >= 2
+    for c in chunks:
+        assert c.token_count <= 150  # 100 budget + carry overhead
+
+
+def test_chunk_ids_are_deterministic(tmp_path: Path):
+    body = "# A\n\npara a.\n\n# B\n\npara b.\n"
+    n = _note(tmp_path, "det.md", body)
+    first = chunk_note(n)
+    second = chunk_note(n)
+    assert [c.chunk_id for c in first] == [c.chunk_id for c in second]
+    # Different files with same chunk index produce different ids
+    n2 = _note(tmp_path, "det2.md", body)
+    alt = chunk_note(n2)
+    assert first[0].chunk_id != alt[0].chunk_id
+
+
+def test_chunk_source_rel_uses_vault_root(tmp_path: Path):
+    subdir = tmp_path / "nested"
+    subdir.mkdir()
+    p = subdir / "note.md"
+    p.write_text("Some body.\n", encoding="utf-8")
+    n = Note(path=p, frontmatter={}, body="Some body.\n")
+    chunks = chunk_note(n, vault_root=tmp_path)
+    assert chunks[0].source_rel == "nested/note.md"
+
+
+def test_chunk_source_rel_falls_back_when_outside_vault(tmp_path: Path):
+    # vault_root=None → fallback to file name only
+    p = tmp_path / "outside.md"
+    p.write_text("Body.\n", encoding="utf-8")
+    n = Note(path=p, frontmatter={}, body="Body.\n")
+    chunks = chunk_note(n)
+    assert chunks[0].source_rel == "outside.md"
+
+
+def test_chunk_frontmatter_attached_to_each_chunk(tmp_path: Path):
+    n = _note(
+        tmp_path,
+        "fm.md",
+        "# One\n\npart one.\n\n# Two\n\npart two.\n",
+        fm={"title": "FM Note", "tags": ["a"]},
+    )
+    chunks = chunk_note(n)
+    assert len(chunks) >= 2
+    for c in chunks:
+        assert c.frontmatter["title"] == "FM Note"
+
+
+def test_chunk_content_hash_changes_with_text(tmp_path: Path):
+    a = _note(tmp_path, "a.md", "Alpha content here.\n")
+    b = _note(tmp_path, "b.md", "Beta content here.\n")
+    ca = chunk_note(a)[0]
+    cb = chunk_note(b)[0]
+    assert ca.content_hash != cb.content_hash
+
+
+def test_chunk_char_offsets_index_into_body(tmp_path: Path):
+    body = "# H\n\nfirst paragraph.\n\nsecond paragraph.\n"
+    n = _note(tmp_path, "offsets.md", body)
+    chunks = chunk_note(n, target_tokens=5)  # force multiple chunks
+    for c in chunks:
+        # offsets should be valid windows in the body
+        assert 0 <= c.char_start <= len(body)
+        assert c.char_start <= c.char_end <= len(body)
+
+
+def test_chunk_empty_sections_are_skipped(tmp_path: Path):
+    body = "# Header 1\n\n## Header 2\n\nActual content here.\n"
+    n = _note(tmp_path, "nested.md", body)
+    chunks = chunk_note(n)
+    # Should not emit a chunk for the empty H1 section
+    assert all("content" in c.text.lower() for c in chunks)
