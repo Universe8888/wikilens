@@ -10,8 +10,25 @@ Honest numbers across the project's eval suites. Every run is reproducible from 
   ```
   python scripts/eval_p3.py
   ```
+- **Contradiction finder** (`fixtures/contradictions_vault/` + `fixtures/eval/p4_ground_truth.json`):
+  ```
+  wikilens ingest fixtures/contradictions_vault --db .wikilens_p4_eval/db
+  python scripts/eval_p4.py --judge claude
+  ```
 
 Each harness **appends** a timestamped section below; prior runs are preserved so regressions are visible side-by-side.
+
+## 2026-04-30 22:51:09 — P4 eval (1c8f318)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/contradictions_vault` (48 chunks, 202 candidate pairs).
+- Judge: `claude`. Labeled pairs judged: 24.
+- Wall clock: 67.7s.
+
+| Class    | TP | FP | FN | Precision | Recall | F1   |
+|----------|----|----|----|-----------|--------|------|
+| factual  |  8 |  2 |  1 |      0.80 |   0.89 | 0.84 |
+| temporal |  1 |  0 |  1 |      1.00 |   0.50 | 0.67 |
+| overall  |  9 |  2 |  2 |      0.82 |   0.82 | 0.82 |
 
 ## 2026-04-30 — P3 eval (cb88311)
 

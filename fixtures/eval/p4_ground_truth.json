@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "description": "Human gold labels for the P4 contradiction-finder eval. Each pair has a canonical pair_id (sha of sorted chunk IDs), the two chunk IDs, a gold label (factual | temporal | none), whether it is a true contradiction, and a one-line rationale.",
+  "pairs": [
+    {
+      "pair_id": "cap-france-factual",
+      "chunk_a_id": "bb7a7ceb8c5dfd27",
+      "chunk_b_id": "e52fdac4ee24b012",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Paris is capital of France. B: Lyon is capital of France. Direct factual conflict."
+    },
+    {
+      "pair_id": "cap-germany-factual",
+      "chunk_a_id": "cd2f4aaf89bc7b46",
+      "chunk_b_id": "faba2480ec8d8e16",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Berlin is capital of Germany. B: Hamburg is capital of Germany. Direct factual conflict."
+    },
+    {
+      "pair_id": "cap-spain-factual",
+      "chunk_a_id": "83a5f10fe287924c",
+      "chunk_b_id": "c030d307486ae906",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Madrid is capital of Spain. B: Barcelona is capital of Spain. Direct factual conflict."
+    },
+    {
+      "pair_id": "astro-planets-temporal",
+      "chunk_a_id": "7070f326268778b1",
+      "chunk_b_id": "400fc4beec22e2fe",
+      "label": "temporal",
+      "gold_verdict": true,
+      "notes": "Old note (2004): 9 planets. New note (2024): 8 planets after 2006 IAU reclassification. Temporal contradiction — older claim superseded."
+    },
+    {
+      "pair_id": "history-duration-factual",
+      "chunk_a_id": "78a940289c886a84",
+      "chunk_b_id": "045df1a8d40881f3",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: WWII lasted 1939-1945 (6 years). B: WWII lasted 1939-1944 (5 years). Incompatible end dates."
+    },
+    {
+      "pair_id": "history-ve-day-factual",
+      "chunk_a_id": "44044c9525352a15",
+      "chunk_b_id": "0a92e75d2dc4cab5",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Germany surrendered May 8 1945 (V-E Day). B: Germany surrendered June 6 1944 (D-Day). Incompatible surrender date."
+    },
+    {
+      "pair_id": "history-pacific-end-factual",
+      "chunk_a_id": "a1acd2a2b2d4cc60",
+      "chunk_b_id": "fb2f9b3487629307",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Pacific war ended with atomic bombs Aug 1945. B: Pacific war ended 1944 with Manila treaty. Incompatible Pacific end event."
+    },
+    {
+      "pair_id": "bio-chromosomes-factual",
+      "chunk_a_id": "da7576301766cb25",
+      "chunk_b_id": "faeef681be923fb4",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Human cells have 46 chromosomes. B: Human cells have 48 chromosomes. Direct numerical conflict."
+    },
+    {
+      "pair_id": "bio-meiosis-factual",
+      "chunk_a_id": "c8dd55fe965cf7d1",
+      "chunk_b_id": "97d83d11da76b0d5",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "A: Meiosis produces four haploid daughter cells. B: Meiosis produces two haploid daughter cells. Incompatible product count."
+    },
+    {
+      "pair_id": "stack-db-temporal",
+      "chunk_a_id": "9d6c2b49a228b75d",
+      "chunk_b_id": "4efb86213d65d0ef",
+      "label": "temporal",
+      "gold_verdict": true,
+      "notes": "Old note (2022): project uses SQLite. New note (2024): project uses PostgreSQL. Temporal stack change."
+    },
+    {
+      "pair_id": "near-miss-astro-earth-position",
+      "chunk_a_id": "281c2d7db5e85dcb",
+      "chunk_b_id": "40f50c4b78855ae6",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Both say Earth is third planet from Sun. Not a contradiction — same fact restated."
+    },
+    {
+      "pair_id": "near-miss-astro-jupiter",
+      "chunk_a_id": "2974b0b22885976e",
+      "chunk_b_id": "4c6ef137003223c8",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Both state Jupiter is the largest planet. Different supporting details but not conflicting."
+    },
+    {
+      "pair_id": "near-miss-bio-mitosis",
+      "chunk_a_id": "167eec8e12a6737c",
+      "chunk_b_id": "f01feb6760d378ea",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Both correctly describe mitosis producing two identical daughter cells. No conflict."
+    },
+    {
+      "pair_id": "near-miss-history-pearl-harbor",
+      "chunk_a_id": "a1acd2a2b2d4cc60",
+      "chunk_b_id": "fb2f9b3487629307",
+      "label": "factual",
+      "gold_verdict": true,
+      "notes": "Already labeled above as factual (Pacific end) — duplicate check: verdict is true."
+    },
+    {
+      "pair_id": "near-miss-stack-backup",
+      "chunk_a_id": "b45b3eaee6be5c19",
+      "chunk_b_id": "b6711a7c80f5f80e",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Both describe backup strategies but for different databases at different times. Different methods (file copy vs pg_dump) but not contradictory — each is correct for its era."
+    },
+    {
+      "pair_id": "near-miss-stack-why-db",
+      "chunk_a_id": "39103101e174a3a2",
+      "chunk_b_id": "08ce7f47a9e62f10",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Both describe rationale for their respective DB choice. Different DBs at different times — complementary, not contradictory."
+    },
+    {
+      "pair_id": "near-miss-caps-italy-unmatched",
+      "chunk_a_id": "436e534879e8196d",
+      "chunk_b_id": "faba2480ec8d8e16",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "A: Rome is capital of Italy. B: Hamburg is capital of Germany. Different countries — no contradiction."
+    },
+    {
+      "pair_id": "unrelated-coffee-knitting",
+      "chunk_a_id": "5265a3f5c35e9d00",
+      "chunk_b_id": "91872713c2c83ae6",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Espresso brewing vs knitting cast-on. Completely unrelated topics."
+    },
+    {
+      "pair_id": "unrelated-bread-logic",
+      "chunk_a_id": "8959c6c68aa7e243",
+      "chunk_b_id": "f09f6fc735403993",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Yeast fermentation vs deductive reasoning. Completely unrelated topics."
+    },
+    {
+      "pair_id": "unrelated-bread-knitting",
+      "chunk_a_id": "9bf8067a528d5203",
+      "chunk_b_id": "3cf73ef7f39b74cf",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Sourdough starter vs yarn weight. Completely unrelated topics."
+    },
+    {
+      "pair_id": "near-miss-bio-dna",
+      "chunk_a_id": "9ab86d6e0e41759c",
+      "chunk_b_id": "f01feb6760d378ea",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "DNA replication (S phase) vs mitosis definition. Related topic, complementary facts — not contradictory."
+    },
+    {
+      "pair_id": "near-miss-philosophy-induction",
+      "chunk_a_id": "f09f6fc735403993",
+      "chunk_b_id": "ca46728386c1d55a",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Deductive reasoning vs inductive reasoning. Contrasting concepts but both correctly described — not contradictory."
+    },
+    {
+      "pair_id": "near-miss-astro-moon",
+      "chunk_a_id": "2454e82bba517739",
+      "chunk_b_id": "281c2d7db5e85dcb",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "Moon orbital distance vs Earth position from Sun. Related astronomical facts but not in conflict."
+    },
+    {
+      "pair_id": "near-miss-history-casualties",
+      "chunk_a_id": "295a6e35185cc79f",
+      "chunk_b_id": "78a940289c886a84",
+      "label": "none",
+      "gold_verdict": false,
+      "notes": "WWII casualty count vs WWII duration. Same event, different attributes — not contradictory."
+    }
+  ]
+}
