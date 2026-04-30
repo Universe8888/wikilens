@@ -65,6 +65,33 @@ def _cmd_query(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_audit(args: argparse.Namespace) -> int:
+    from wikilens.audit import audit_vault
+    from wikilens.audit_format import ALL_CLASSES, format_json, format_markdown
+
+    only_tuple: tuple[str, ...] | None = None
+    if args.only:
+        requested = [c.strip() for c in args.only.split(",") if c.strip()]
+        invalid = [c for c in requested if c not in ALL_CLASSES]
+        if invalid:
+            print(
+                f"wikilens audit: unknown class(es): {', '.join(invalid)}. "
+                f"Valid: {', '.join(ALL_CLASSES)}",
+                file=sys.stderr,
+            )
+            return 2
+        only_tuple = tuple(requested)  # type: ignore[assignment]
+
+    report = audit_vault(args.vault_path)
+
+    if args.json:
+        sys.stdout.write(format_json(report, only=only_tuple))  # type: ignore[arg-type]
+    else:
+        sys.stdout.write(format_markdown(report, only=only_tuple))  # type: ignore[arg-type]
+
+    return 1 if report.total_findings > 0 else 0
+
+
 def _cmd_stub(name: str, phase: str):
     def _fn(args: argparse.Namespace) -> int:
         print(f"wikilens: '{name}' is not available yet ({phase}).")
@@ -100,9 +127,29 @@ def _build_parser() -> argparse.ArgumentParser:
     p_query.add_argument("-k", type=int, default=5, help="Number of results (default: %(default)s)")
     p_query.set_defaults(func=_cmd_query)
 
+    # audit (P3)
+    p_audit = sub.add_parser(
+        "audit",
+        help="Find broken, one-way, orphan, and shadowed wikilinks in a vault.",
+    )
+    p_audit.add_argument("vault_path", type=Path)
+    p_audit.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit JSON instead of markdown (schema is stable; see audit_format.py).",
+    )
+    p_audit.add_argument(
+        "--only",
+        default="",
+        help=(
+            "Comma-separated defect classes to include "
+            "(broken,one-way,orphan,shadowed). Default: all."
+        ),
+    )
+    p_audit.set_defaults(func=_cmd_audit)
+
     # Stubs for later phases (keep the help surface honest)
     for name, phase in [
-        ("audit", "P3"),
         ("contradictions", "P4"),
         ("gaps", "P6"),
         ("benchmark", "P5"),
