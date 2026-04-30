@@ -9,7 +9,6 @@ import sys
 
 from wikilens import __version__
 
-
 USAGE = """\
 wikilens {version}
 
