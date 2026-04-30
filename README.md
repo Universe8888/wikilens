@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Pre-alpha · P2 shipped. `wikilens ingest` + `wikilens query` work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Pre-alpha · P3 shipped. `ingest`, `query`, and `audit` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
@@ -47,7 +47,7 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 |---|---|---|
 | P1 — Bootstrap | Repo, scaffold, manifesto | ✅ shipped |
 | P2 — RAG core | Markdown ingestion + local vector store + `query` CLI | ✅ shipped (`v0.2.0`) |
-| P3 — Link Auditor agent | Detect broken wikilinks, orphan notes, one-way links | Next |
+| P3 — Link Auditor agent | Detect broken wikilinks, orphan notes, one-way links | ✅ shipped (`v0.3.0`) |
 | P4 — Contradiction Finder agent | Multi-hop retrieval + LLM-judge for semantic conflicts | — |
 | P5 — Eval harness | Public benchmark dataset + per-agent scores | — |
 | P6 — Gap Generator agent | Propose missing sub-topics given a cluster | — |
@@ -77,7 +77,7 @@ total, cached for reuse): `BAAI/bge-small-en-v1.5` for embeddings and
 ## Usage
 
 ```bash
-# Build the index (full rebuild each run in P2; incremental lands in P3).
+# Build the index (full rebuild each run; incremental is deferred).
 wikilens ingest ./my-vault
 
 # Query — four retrieval modes are supported.
@@ -86,21 +86,31 @@ wikilens query "..." --mode dense                               # cosine only
 wikilens query "..." --mode bm25                                # FTS / BM25 only
 wikilens query "..." --mode hybrid                              # RRF fusion
 wikilens query "..." --mode rerank -k 10                        # top-k after rerank
+
+# Audit — find broken, one-way, orphan, and shadowed wikilinks.
+wikilens audit ./my-vault                                       # markdown report
+wikilens audit ./my-vault --json                                # machine-readable
+wikilens audit ./my-vault --only broken,orphan                  # filter classes
 ```
 
-Index defaults to `.wikilens/db` inside the current directory; override with
-`--db <path>`.
+`audit` exits 0 when clean, 1 when any finding is reported — so it doubles as
+a pre-commit / CI gate. Index defaults to `.wikilens/db` inside the current
+directory; override with `--db <path>`.
 
 ## Benchmark
 
-On the in-repo synthetic vault (36 notes, 152 chunks, 20 hand-written queries),
-every mode clears the P2 target of hit@5 ≥ 0.60 — most reach 1.00. See
-[`BENCHMARK.md`](./BENCHMARK.md) for the full ablation table including
-latency per mode. Reproduce from a fresh clone:
+Two eval suites, both reproducible from a fresh clone.
+
+**Retrieval** (P2): on the 36-note synthetic vault, every mode clears the hit@5 ≥ 0.60 target — most reach 1.00. Latency p95 ranges from 37 ms (dense) to 1846 ms (rerank).
+
+**Link audit** (P3): on the 16-note audit fixture with a hand-labeled ground truth, all four detector classes report precision = recall = F1 = 1.00.
+
+See [`BENCHMARK.md`](./BENCHMARK.md) for the full tables. Reproduce:
 
 ```bash
 wikilens ingest fixtures/sample_vault --db .wikilens_test/db
 python scripts/eval_p2.py --db .wikilens_test/db
+python scripts/eval_p3.py
 ```
 
 ## Writing / research

@@ -200,10 +200,20 @@ def write_benchmark_md(
 ) -> None:
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     header = (
-        f"# Benchmark\n\n"
-        f"Honest numbers on the synthetic `fixtures/sample_vault/` corpus. "
-        f"Every run is reproducible from a fresh clone: `wikilens ingest "
-        f"fixtures/sample_vault && python scripts/eval_p2.py`.\n"
+        "# Benchmark\n\n"
+        "Honest numbers across the project's eval suites. Every run is "
+        "reproducible from a fresh clone.\n\n"
+        "- **Retrieval** (`fixtures/sample_vault/` + `fixtures/eval/p2_queries.jsonl`):\n"
+        "  ```\n"
+        "  wikilens ingest fixtures/sample_vault && python scripts/eval_p2.py\n"
+        "  ```\n"
+        "- **Link audit** (`fixtures/audit_vault/` + "
+        "`fixtures/eval/p3_ground_truth.json`):\n"
+        "  ```\n"
+        "  python scripts/eval_p3.py\n"
+        "  ```\n\n"
+        "Each harness **appends** a timestamped section below; prior runs are "
+        "preserved so regressions are visible side-by-side.\n"
     )
     section = (
         f"\n## {timestamp} — P2 eval ({_git_rev()})\n\n"
@@ -221,10 +231,14 @@ def write_benchmark_md(
         )
     if path.exists():
         prior = path.read_text(encoding="utf-8")
-        # Preserve the prior header + prior runs; prepend the new section.
         if prior.startswith("# Benchmark"):
-            body = prior[len("# Benchmark") :]
-            path.write_text(f"# Benchmark{section}\n{body}", encoding="utf-8")
+            # Replace the existing header prose with the canonical one, then
+            # prepend the new section above the prior dated sections. The
+            # first `\n## ` is the boundary between header and dated body.
+            marker = "\n## "
+            idx = prior.find(marker)
+            body = prior[idx:] if idx >= 0 else ""
+            path.write_text(header + section + body, encoding="utf-8")
         else:
             path.write_text(header + section + "\n" + prior, encoding="utf-8")
     else:

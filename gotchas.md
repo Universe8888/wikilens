@@ -97,3 +97,34 @@ both the outer and inner can match the same characters (`(.*\n)*`, `(.+)+`,
 lines first and scan — it's O(n) by construction. Watch especially for this
 when `re.DOTALL` is in play, because `.` matching newlines removes the usual
 one-line-at-a-time anchor that makes `(.*\n)*` safe in practice.
+
+---
+
+## G4 — Reciprocity check on a directed graph was always-true
+
+**Phase:** P3, step 3.2 (detectors)
+**Date:** 2026-04-30
+
+**Symptom:** `find_one_way_links()` returned an empty list on a fixture
+that clearly had one-way edges. The bug would have silently shipped if not
+for a pair of unit tests (`test_find_one_way_links`,
+`test_audit_vault_composes_everything`) that hard-coded an expected count.
+
+**Root cause:** The inbound map is built from outbound edges: if A links to
+B, `inbound[B]` includes A. So checking "is source in `inbound[target]`?"
+is trivially true *for every resolved link* and can never surface a
+one-way. The correct reciprocity check asks the symmetric question —
+"is target in `inbound[source]`?" — i.e., does the target also link back
+to the source.
+
+**Fix:** One-line swap in `find_one_way_links` from
+`source not in graph.inbound.get(target, ())` to
+`target not in graph.inbound.get(source, ())`. The tests flipped green on
+the next run.
+
+**When this bites again:** Any time you write a reciprocity / symmetry
+check over a directed graph. The `inbound[x]` map by construction lists
+every node that links *to* x, so querying it with the source side of the
+edge you just added is a tautology. Before writing the check, say the
+requirement in plain English: "does the target link back to the source?"
+— then encode that literal sentence, not the mirror of it.
