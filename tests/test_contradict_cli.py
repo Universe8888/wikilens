@@ -33,32 +33,34 @@ def test_contradict_missing_index_returns_two(
     assert "No index" in err or "Failed to open" in err
 
 
-def test_contradict_claude_not_implemented_yet(
-    tmp_path: Path, capsys: pytest.CaptureFixture
+def test_contradict_claude_fails_without_api_key(
+    tmp_path: Path, capsys: pytest.CaptureFixture, monkeypatch: pytest.MonkeyPatch
 ):
-    # Even with no index, --judge claude should fail fast with a clear
-    # "not yet implemented" message before touching the store.
-    # Need an ingested store to get past the empty-index guard; use
-    # a canned small vault for that.
+    # Patch out dotenv so it can't load .env, then strip the key from env.
+    # --judge claude should exit 2 with a clear ANTHROPIC_API_KEY message.
+    from unittest.mock import patch
+
     from wikilens.pipeline import ingest_vault
 
     (tmp_path / "n1.md").write_text("alpha beta", encoding="utf-8")
     (tmp_path / "n2.md").write_text("gamma delta", encoding="utf-8")
     ingest_vault(vault_root=tmp_path, db_path=str(tmp_path / "db"))
 
-    rc = main(
-        [
-            "contradict",
-            str(tmp_path),
-            "--db",
-            str(tmp_path / "db"),
-            "--judge",
-            "claude",
-        ]
-    )
+    with patch("wikilens.judge._load_dotenv_if_present"):
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+        rc = main(
+            [
+                "contradict",
+                str(tmp_path),
+                "--db",
+                str(tmp_path / "db"),
+                "--judge",
+                "claude",
+            ]
+        )
     assert rc == 2
     err = capsys.readouterr().err
-    assert "not yet implemented" in err
+    assert "ANTHROPIC_API_KEY" in err
 
 
 def test_contradict_unknown_only_returns_two(

@@ -135,16 +135,18 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
     if args.judge == "none":
         judge = MockJudge()
     elif args.judge == "claude":
-        print(
-            "wikilens contradict: --judge claude is not yet implemented "
-            "(Phase 4.2). Use --judge none for plumbing.",
-            file=sys.stderr,
-        )
-        return 2
+        from wikilens.judge import ClaudeJudge
+
+        try:
+            model = getattr(args, "model", None) or "claude-sonnet-4-6"
+            judge = ClaudeJudge(model=model)
+        except (EnvironmentError, ImportError) as e:
+            print(f"wikilens contradict: {e}", file=sys.stderr)
+            return 2
     elif args.judge == "ollama":
         print(
-            "wikilens contradict: --judge ollama is not yet implemented "
-            "(Phase 4.2+). Use --judge none for plumbing.",
+            "wikilens contradict: --judge ollama is not yet implemented. "
+            "Use --judge none or --judge claude.",
             file=sys.stderr,
         )
         return 2
@@ -254,6 +256,11 @@ def _build_parser() -> argparse.ArgumentParser:
             "Judge backend. 'none' uses MockJudge (no LLM calls); "
             "'claude'/'ollama' land in Phase 4.2."
         ),
+    )
+    p_contradict.add_argument(
+        "--model",
+        default="claude-sonnet-4-6",
+        help="Model for --judge claude (default: %(default)s).",
     )
     p_contradict.add_argument(
         "--top-k", dest="top_k", type=int, default=10,

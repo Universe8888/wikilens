@@ -46,6 +46,7 @@ dev = [
 # Only required when running `wikilens contradict --judge claude`.
 judge = [
     "anthropic>=0.40",
+    "python-dotenv>=1.0",
 ]
 
 [project.urls]
