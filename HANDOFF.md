@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-04-30 (P4 complete, tagged `v0.4.0`)
+**Last updated:** 2026-05-01 (P5 complete, tagged `v0.5.0`)
 
 ---
 
@@ -82,15 +82,29 @@ under the MIT license.
 - Known improvement for P4.5: pass frontmatter date in judge prompt to fix
   temporal type misclassification and stack near-miss FPs (all trace to same root cause).
 
-### P5 — Gap Generator (NEXT — not planned yet)
+### P5 — Gap Generator (COMPLETE, 2026-05-01, tag `v0.5.0`)
 
-Identifies topics or questions the vault *should* answer but doesn't — the
-inverse of contradiction. Uses retrieval + LLM to ask "what's missing?" per
-cluster of related chunks. Plan from scratch with SDD + HITL gate discipline.
+- `wikilens gap <vault> --judge claude` clusters vault chunks via k-means on
+  BGE embeddings, then calls ClaudeGenerator per cluster to surface unanswered
+  questions implied by the vault's own content.
+- `MockGenerator` + `SubstringMatcher` for `--judge none` dry-runs (no API).
+- Budgeted autonomy caps: `--min-cluster-size`, `--max-clusters`, `--sample`.
+- `ClaudeMatcher` with pinned 1–5 rubric for eval; borderline decisions logged
+  to `docs/p5-matcher-notes.md` for human review.
+- **Cluster-stage recall = 1.00** (10/10 gold gaps surfaced). **F1 = 0.65**
+  (target ≥ 0.60). Generation stage: 56.6s on 12-note vault.
+- **224/224 tests pass.** +71 new tests since P4.
+- Decisions log: `docs/p5-decisions.md`. Benchmark: `BENCHMARK.md`.
 
-### P6–P7
+### P6 — Answer Generator (NEXT — not planned yet)
 
-Roadmap in `README.md`. Do not touch until P5 ships.
+Close the gap loop: given `wikilens gap` findings, retrieve supporting chunks
+and draft note stubs that actually answer the identified questions. SDD + HITL
+gate discipline as always.
+
+### P7
+
+Roadmap in `README.md`. Do not touch until P6 ships.
 
 ## Hard constraints (do not violate)
 
@@ -130,13 +144,13 @@ In this order:
 8. `src/wikilens/cli.py` — current CLI surface
 9. `gotchas.md` — failure register (G1–G5)
 
-## What to do when P5 completes
+## What to do when P6 completes
 
-1. Update this `HANDOFF.md` — bump "Last updated", move P5 to COMPLETE,
-   summarize the P6 plan.
-2. Tag release `v0.5.0`.
-3. Append benchmark numbers for the Gap Generator to `BENCHMARK.md`.
-4. Suggest: "fresh chat for P6?"
+1. Update this `HANDOFF.md` — bump "Last updated", move P6 to COMPLETE,
+   summarize the P7 plan.
+2. Tag release `v0.6.0`.
+3. Append benchmark numbers for the Answer Generator to `BENCHMARK.md`.
+4. Suggest: "fresh chat for P7?"
 
 ## Glossary
 

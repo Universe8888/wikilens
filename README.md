@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Pre-alpha · P3 shipped. `ingest`, `query`, and `audit` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Pre-alpha · P5 shipped (`v0.5.0`). `ingest`, `query`, `audit`, `contradict`, and `gap` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
@@ -48,9 +48,9 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 | P1 — Bootstrap | Repo, scaffold, manifesto | ✅ shipped |
 | P2 — RAG core | Markdown ingestion + local vector store + `query` CLI | ✅ shipped (`v0.2.0`) |
 | P3 — Link Auditor agent | Detect broken wikilinks, orphan notes, one-way links | ✅ shipped (`v0.3.0`) |
-| P4 — Contradiction Finder agent | Multi-hop retrieval + LLM-judge for semantic conflicts | — |
-| P5 — Eval harness | Public benchmark dataset + per-agent scores | — |
-| P6 — Gap Generator agent | Propose missing sub-topics given a cluster | — |
+| P4 — Contradiction Finder agent | Multi-hop retrieval + LLM-judge for semantic conflicts | ✅ shipped (`v0.4.0`) |
+| P5 — Gap Generator agent | K-means clustering + LLM to surface unanswered questions | ✅ shipped (`v0.5.0`) |
+| P6 — Answer Generator | Close gaps by drafting note stubs from retrieved evidence | — |
 | P7 — Polish + launch | Docs site, install guide, launch thread | — |
 
 ## Design principles
@@ -97,20 +97,43 @@ wikilens audit ./my-vault --only broken,orphan                  # filter classes
 a pre-commit / CI gate. Index defaults to `.wikilens/db` inside the current
 directory; override with `--db <path>`.
 
+```bash
+# Contradict — find conflicting chunk pairs (requires ANTHROPIC_API_KEY).
+pip install -e '.[judge]'
+wikilens contradict ./my-vault --judge claude                    # full run
+wikilens contradict ./my-vault --judge none                      # dry-run (no API)
+wikilens contradict ./my-vault --judge claude --sample 20        # cap API calls
+
+# Gap — find unanswered questions the vault implies but doesn't answer.
+wikilens gap ./my-vault --judge claude                           # full run
+wikilens gap ./my-vault --judge none                             # dry-run (no API)
+wikilens gap ./my-vault --judge claude --max-clusters 10         # budget cap
+wikilens gap ./my-vault --judge claude --top-gaps-per-cluster 2  # fewer per cluster
+```
+
+`contradict` and `gap` both exit 0 when nothing found, 1 when findings are
+reported. Set `ANTHROPIC_API_KEY` in your shell or in a `.env` file at the
+repo root before running `--judge claude`.
+
 ## Benchmark
 
-Two eval suites, both reproducible from a fresh clone.
+Four eval suites, all reproducible from a fresh clone.
 
-**Retrieval** (P2): on the 36-note synthetic vault, every mode clears the hit@5 ≥ 0.60 target — most reach 1.00. Latency p95 ranges from 37 ms (dense) to 1846 ms (rerank).
+**Retrieval** (P2): Hit@5 = 1.00 in all four modes on the 36-note synthetic vault. Latency p95: 37 ms (dense) to 1846 ms (rerank).
 
-**Link audit** (P3): on the 16-note audit fixture with a hand-labeled ground truth, all four detector classes report precision = recall = F1 = 1.00.
+**Link audit** (P3): Precision = Recall = F1 = 1.00 on all four detector classes (16-note fixture, 19 planted defects).
 
-See [`BENCHMARK.md`](./BENCHMARK.md) for the full tables. Reproduce:
+**Contradiction finder** (P4): F1 = 0.82, retrieval recall = 0.90 on the 24-pair hand-labeled fixture. Wall clock 67.7s.
+
+**Gap generator** (P5): Cluster-stage recall = 1.00, matcher-stage F1 = 0.65 on 10 gold gaps. All 10 gold gaps surfaced by some cluster.
+
+See [`BENCHMARK.md`](./BENCHMARK.md) for full tables. Reproduce any suite:
 
 ```bash
-wikilens ingest fixtures/sample_vault --db .wikilens_test/db
-python scripts/eval_p2.py --db .wikilens_test/db
-python scripts/eval_p3.py
+# P5 gap generator
+pip install -e '.[dev,judge]'
+wikilens ingest fixtures/gaps_vault --db .wikilens_p5_eval/db
+python scripts/eval_p5.py --judge claude
 ```
 
 ## Writing / research

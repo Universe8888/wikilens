@@ -16,7 +16,52 @@ Honest numbers across the project's eval suites. Every run is reproducible from 
   python scripts/eval_p4.py --judge claude
   ```
 
+- **Gap generator** (`fixtures/gaps_vault/` + `fixtures/eval/p5_ground_truth.json`):
+  ```
+  wikilens ingest fixtures/gaps_vault --db .wikilens_p5_eval/db
+  python scripts/eval_p5.py --judge claude
+  ```
+
 Each harness **appends** a timestamped section below; prior runs are preserved so regressions are visible side-by-side.
+
+## 2026-05-01 00:20:50 — P5 eval (77148c2)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (57 chunks, 7 clusters).
+- Generator: `claude`. Gap proposals: 21. Gold gaps: 10.
+- Matcher: `claude` (threshold ≥ 4/5).
+- Wall clock: 453.5s.
+
+Cluster-stage recall: 10/10 = 1.00
+
+| Stage        | TP | FP | FN | Precision | Recall | F1   |
+|--------------|----|----|----|-----------|--------|------|
+| matcher      | 10 | 11 |  0 |      0.48 |   1.00 | 0.65 |
+
+## 2026-05-01 00:03:13 — P5 eval (77148c2)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (57 chunks, 7 clusters).
+- Generator: `claude`. Gap proposals: 21. Gold gaps: 4.
+- Matcher: `claude` (threshold ≥ 4/5).
+- Wall clock: 217.9s.
+
+Cluster-stage recall: 4/4 = 1.00
+
+| Stage        | TP | FP | FN | Precision | Recall | F1   |
+|--------------|----|----|----|-----------|--------|------|
+| matcher      |  4 | 17 |  0 |      0.19 |   1.00 | 0.32 |
+
+## 2026-04-30 23:59:15 — P5 eval (77148c2)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (57 chunks, 7 clusters).
+- Generator: `mock`. Gap proposals: 7. Gold gaps: 4.
+- Matcher: `substring` (threshold ≥ 4/5).
+- Wall clock: 2.0s.
+
+Cluster-stage recall: 0/4 = 0.00
+
+| Stage        | TP | FP | FN | Precision | Recall | F1   |
+|--------------|----|----|----|-----------|--------|------|
+| matcher      |  0 |  7 |  4 |      0.00 |   0.00 | 0.00 |
 
 ## 2026-04-30 22:51:09 — P4 eval (1c8f318)
 
