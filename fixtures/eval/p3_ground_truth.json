@@ -1,0 +1,30 @@
+{
+  "_comment": "Hand-labeled ground truth for fixtures/audit_vault/. Authoritative for scripts/eval_p3.py. Each defect class lists the identifying tuples the detector is expected to emit.",
+  "broken": [
+    {"source": "jupiter",    "target_raw": "great-red-spot"},
+    {"source": "mars",       "target_raw": "pluto"},
+    {"source": "solo-comet", "target_raw": "nonexistent-meteor"},
+    {"source": "telescopes", "target_raw": "hubble"}
+  ],
+  "one_way": [
+    {"source": "asteroids",      "target": "mars"},
+    {"source": "drifter",        "target": "mars"},
+    {"source": "ideas-overview", "target": "journal/ideas"},
+    {"source": "ideas-overview", "target": "notes/ideas"},
+    {"source": "lonely-rock",    "target": "asteroids"},
+    {"source": "mercury",        "target": "venus"},
+    {"source": "telescopes",     "target": "jupiter"},
+    {"source": "venus",          "target": "mars"}
+  ],
+  "orphans": [
+    {"node": "drifter"},
+    {"node": "ideas-overview"},
+    {"node": "lonely-rock"},
+    {"node": "mercury"},
+    {"node": "solo-comet"},
+    {"node": "telescopes"}
+  ],
+  "shadowed": [
+    {"source": "ideas-overview", "target_raw": "ideas", "candidates": ["journal/ideas", "notes/ideas"]}
+  ]
+}
