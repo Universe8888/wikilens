@@ -128,3 +128,36 @@ every node that links *to* x, so querying it with the source side of the
 edge you just added is a tautology. Before writing the check, say the
 requirement in plain English: "does the target link back to the source?"
 — then encode that literal sentence, not the mirror of it.
+
+---
+
+## G5 — `LanceTable.to_list()` doesn't exist; use `to_arrow().to_pylist()`
+
+**Phase:** P4, step 4 (candidate pair generation)
+**Date:** 2026-04-30
+
+**Symptom:** `generate_candidate_pairs` raised
+`AttributeError: 'LanceTable' object has no attribute 'to_list'` the
+first time the CLI end-to-end test hit a real ingested store. The
+`to_list()` method works on the query-result builder returned by
+`table.search(...).limit(k)`, so the name looked plausible on
+`Table` too — it isn't.
+
+**Root cause:** In `lancedb==0.30.2`, `Table` has no `to_list()`
+method. `to_list()` lives on the query-result object, not the table.
+For an unfiltered full-table scan the canonical materialization is
+`table.to_arrow().to_pylist()` (Arrow table → list of dicts). This
+matters because existing P2 code touches tables almost exclusively
+through `.search(...)` paths, so the full-scan primitive never came
+up until P4 needed to walk every chunk to generate pairs.
+
+**Fix:** In `src/wikilens/contradict.py::_iter_all_chunks`,
+`table.to_list()` → `table.to_arrow().to_pylist()`. Unit and CLI
+end-to-end tests both flipped green on the next run.
+
+**When this bites again:** Any time you need a full scan of a
+LanceDB table and reach for a `.to_list()`-style shortcut. The
+Arrow detour (`to_arrow().to_pylist()`) is the stable path. If a
+future version adds `Table.to_list()` directly, treat that as a
+nice-to-have simplification, not a bug fix — the Arrow form keeps
+working regardless.
