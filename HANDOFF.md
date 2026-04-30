@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-04-30 (P2 complete, tagged `v0.2.0`)
+**Last updated:** 2026-04-30 (P4 complete, tagged `v0.4.0`)
 
 ---
 
@@ -11,9 +11,9 @@ where the previous session left off, without re-litigating decisions already mad
 
 Start a new chat. Tell the agent:
 
-> We're continuing the `wikilens` project. Read `HANDOFF.md` for orientation, then
-> `docs/p2-decisions.md` for what P2 shipped. P3 (Link Auditor agent) is next —
-> plan it from scratch before writing code.
+> We're continuing the `wikilens` project. Read `HANDOFF.md` for orientation,
+> then `docs/p4-decisions.md` for what P4 shipped. P5 (Gap Generator) is next
+> — plan it from scratch before writing code.
 
 That's it.
 
@@ -51,20 +51,46 @@ under the MIT license.
 - Gotchas: G1 (torchcodec on Windows), G2 (LanceDB paginated response),
   G3 (regex catastrophic backtracking on YAML flow lists).
 
-### P3 — Link Auditor (NEXT — not planned yet)
+### P3 — Link Auditor (COMPLETE, 2026-04-30, tag `v0.3.0`)
 
-First real agent. Uses P2's ingested metadata to detect:
+- `wikilens audit <vault>` detects broken wikilinks, one-way links,
+  orphan notes, and shadowed basenames.
+- Markdown by default, `--json` flag, `--only` class filter.
+  Exit 0 clean / 1 findings / 2 bad input — usable as a pre-commit or CI gate.
+- On the hand-labeled `fixtures/audit_vault/` (16 notes, 19 planted
+  defects), every class scores precision = recall = F1 = 1.00.
+- 115 tests pass.
+- Decisions log: `docs/p3-decisions.md`. Benchmark: `BENCHMARK.md`.
+- Gotcha: G4 (reciprocity check on directed graph always-true by construction).
 
-- broken wikilinks (target note does not exist),
-- one-way links (A → B but no B → A),
-- orphan notes (zero inbound links, at least one outbound).
+### P4 — Contradiction Finder (COMPLETE, 2026-04-30, tag `v0.4.0`)
 
-No plan written yet. The next session should produce a P3 spec before
-touching code, following the same SDD + HITL gate discipline used in P2.
+- `wikilens contradict <vault> --judge claude` surfaces contradicting chunk pairs,
+  scored and typed (factual / temporal), with reasoning.
+- Retrieval-based pair generation (P2 hybrid, O(n·k)). Three filters: same-note
+  drop, canonical ordering, cosine > 0.95 near-duplicate drop.
+- `ClaudeJudge` via Anthropic SDK (`claude-sonnet-4-6`). `MockJudge` for
+  `--judge none` dry-runs. `--sample`, `--min-score`, `--only`, `--json` flags.
+- Exit 0 clean / 1 findings / 2 bad input. API key via `ANTHROPIC_API_KEY` env
+  var (auto-loaded from `.env` via python-dotenv).
+- On the hand-labeled `fixtures/contradictions_vault/` (12 notes, 24 labeled
+  pairs): **overall F1 = 0.82** (target ≥ 0.75 ✓), retrieval recall = 0.90
+  (target ≥ 0.90 ✓), wall clock 67.7s (target < 2 min ✓).
+- 153 tests pass.
+- Decisions log: `docs/p4-decisions.md`. Benchmark: `BENCHMARK.md`.
+- Gotcha: G5 (`LanceTable.to_list()` doesn't exist — use `to_arrow().to_pylist()`).
+- Known improvement for P4.5: pass frontmatter date in judge prompt to fix
+  temporal type misclassification and stack near-miss FPs (all trace to same root cause).
 
-### P4–P7
+### P5 — Gap Generator (NEXT — not planned yet)
 
-Roadmap in `README.md`. Do not touch until P3 ships.
+Identifies topics or questions the vault *should* answer but doesn't — the
+inverse of contradiction. Uses retrieval + LLM to ask "what's missing?" per
+cluster of related chunks. Plan from scratch with SDD + HITL gate discipline.
+
+### P6–P7
+
+Roadmap in `README.md`. Do not touch until P5 ships.
 
 ## Hard constraints (do not violate)
 
@@ -87,7 +113,7 @@ Roadmap in `README.md`. Do not touch until P3 ships.
 
 - **OS:** Windows 11, bash shell
 - **Python:** 3.12
-- **Node.js:** installed; not needed for P2
+- **Node.js:** installed; not needed for P2–P4
 - **Docker:** not required
 
 ## Files to read first
@@ -95,20 +121,22 @@ Roadmap in `README.md`. Do not touch until P3 ships.
 In this order:
 
 1. `HANDOFF.md` (this file) — orientation
-2. `docs/p2-decisions.md` — what P2 actually shipped
-3. `BENCHMARK.md` — measured numbers
-4. `README.md` — project manifesto
-5. `ARCHITECTURE.md` — system sketch
-6. `src/wikilens/cli.py` — current CLI surface
-7. `gotchas.md` — failure register
+2. `docs/p4-decisions.md` — what P4 shipped (contradiction finder)
+3. `docs/p3-decisions.md` — what P3 shipped (link auditor)
+4. `docs/p2-decisions.md` — what P2 shipped (retrieval foundation)
+5. `BENCHMARK.md` — measured numbers for all eval suites
+6. `README.md` — project manifesto
+7. `ARCHITECTURE.md` — system sketch
+8. `src/wikilens/cli.py` — current CLI surface
+9. `gotchas.md` — failure register (G1–G5)
 
-## What to do when P3 completes
+## What to do when P5 completes
 
-1. Update this `HANDOFF.md` — bump "Last updated", move P3 to COMPLETE,
-   summarize the P4 plan.
-2. Tag release `v0.3.0`.
-3. Append benchmark numbers for the Link Auditor to `BENCHMARK.md`.
-4. Suggest: "fresh chat for P4?"
+1. Update this `HANDOFF.md` — bump "Last updated", move P5 to COMPLETE,
+   summarize the P6 plan.
+2. Tag release `v0.5.0`.
+3. Append benchmark numbers for the Gap Generator to `BENCHMARK.md`.
+4. Suggest: "fresh chat for P6?"
 
 ## Glossary
 
@@ -116,10 +144,3 @@ In this order:
 - **PIV loop** — Plan → Implement → Validate (Phase 2 execution rhythm)
 - **HITL gate** — Human-in-the-loop approval checkpoint
 - **Gotcha log** — File tracking "what broke + how to avoid next time"
-
-## Open questions for the next session (P3 kickoff)
-
-- Should the Link Auditor emit its findings as JSON, markdown, or both?
-- Orphan-detection heuristic: strict (zero inbound) or graded (low inbound)?
-- Is the sample vault's existing broken-link content sufficient for an eval
-  fixture, or should we seed deliberately-broken notes for the test corpus?
