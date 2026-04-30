@@ -2,8 +2,8 @@
 
 Grows across P2 steps 2-5:
   - step 2: vault walker
-  - step 3: frontmatter parser (this commit)
-  - step 4: wikilink / tag / embed extractor
+  - step 3: frontmatter parser
+  - step 4: wikilink / tag / embed extractor (this commit)
   - step 5: heading-aware chunker
 """
 
@@ -43,6 +43,26 @@ class Note:
     frontmatter: dict[str, Any]
     body: str
     frontmatter_error: str | None = None
+
+
+@dataclass(frozen=True)
+class Wikilink:
+    """A parsed `[[target]]` or `[[target|alias]]` or `[[target#heading]]` link."""
+
+    target: str  # page name, e.g. "Photosynthesis"
+    heading: str | None  # after '#', None if absent
+    alias: str | None  # after '|', None if absent
+    is_embed: bool  # True if the source was `![[...]]`
+    raw: str  # the raw matched text, for debugging
+
+
+@dataclass(frozen=True)
+class NoteLinks:
+    """Extraction result for a single note body."""
+
+    wikilinks: tuple[Wikilink, ...]
+    tags: tuple[str, ...]  # without the leading '#'
+    markdown_links: tuple[tuple[str, str], ...]  # (display_text, url_or_path)
 
 
 def walk_vault(
@@ -123,3 +143,99 @@ def parse_note(path: str | Path) -> Note:
     text = p.read_text(encoding="utf-8-sig")
     fm, body, err = parse_frontmatter(text)
     return Note(path=p, frontmatter=fm, body=body, frontmatter_error=err)
+
+
+# --- link extraction ------------------------------------------------------
+
+# Strip fenced code blocks (```...``` or ~~~...~~~) and inline code (`...`)
+# before running link regexes — otherwise `#` in code or `[[` in examples
+# produces false positives.
+_FENCED_CODE_RE = re.compile(
+    r"^([`~]{3,})[^\n]*\n.*?^\1[ \t]*$",
+    re.MULTILINE | re.DOTALL,
+)
+_INLINE_CODE_RE = re.compile(r"`[^`\n]+`")
+
+# [[target]], [[target|alias]], [[target#heading]], [[target#heading|alias]]
+# Optional leading '!' means embed. Target cannot contain ] [ | or newline.
+_WIKILINK_RE = re.compile(
+    r"(?P<embed>!)?\[\["
+    r"(?P<target>[^\[\]\|\#\n]+?)"
+    r"(?:#(?P<heading>[^\[\]\|\n]+?))?"
+    r"(?:\|(?P<alias>[^\[\]\n]+?))?"
+    r"\]\]"
+)
+
+# Tags: #word or #nested/path. Cannot be preceded by alphanumeric or '_'
+# (to skip color codes, URL fragments, issue refs). Allows letters, digits,
+# underscore, hyphen, forward slash for nesting.
+_TAG_RE = re.compile(
+    r"(?<![0-9A-Za-z_/])#(?P<tag>[A-Za-z_][\w\-/]*)"
+)
+
+# Markdown inline links [text](url). Not reference-style ([text][ref]).
+# Allows parens inside the URL via a simple balanced-ish pattern.
+_MD_LINK_RE = re.compile(
+    r"(?<!!)\[(?P<text>[^\[\]\n]+)\]\((?P<url>[^\s\)]+(?:\s+\"[^\"]*\")?)\)"
+)
+
+
+def _strip_code(text: str) -> str:
+    """Remove fenced and inline code — they should not contribute links."""
+    text = _FENCED_CODE_RE.sub("", text)
+    text = _INLINE_CODE_RE.sub("", text)
+    return text
+
+
+def extract_links(body: str) -> NoteLinks:
+    """Extract wikilinks, tags, and markdown links from note body text.
+
+    Code blocks and inline code are stripped before extraction. Order is
+    preserved on first occurrence; duplicates are removed.
+    """
+    stripped = _strip_code(body)
+
+    seen_wl: set[str] = set()
+    wikilinks: list[Wikilink] = []
+    for m in _WIKILINK_RE.finditer(stripped):
+        target = m.group("target").strip()
+        heading = (m.group("heading") or "").strip() or None
+        alias = (m.group("alias") or "").strip() or None
+        is_embed = m.group("embed") == "!"
+        key = f"{int(is_embed)}|{target}|{heading or ''}|{alias or ''}"
+        if key in seen_wl:
+            continue
+        seen_wl.add(key)
+        wikilinks.append(
+            Wikilink(
+                target=target,
+                heading=heading,
+                alias=alias,
+                is_embed=is_embed,
+                raw=m.group(0),
+            )
+        )
+
+    seen_tags: set[str] = set()
+    tags: list[str] = []
+    for m in _TAG_RE.finditer(stripped):
+        t = m.group("tag")
+        if t in seen_tags:
+            continue
+        seen_tags.add(t)
+        tags.append(t)
+
+    seen_md: set[tuple[str, str]] = set()
+    md_links: list[tuple[str, str]] = []
+    for m in _MD_LINK_RE.finditer(stripped):
+        pair = (m.group("text").strip(), m.group("url").strip())
+        if pair in seen_md:
+            continue
+        seen_md.add(pair)
+        md_links.append(pair)
+
+    return NoteLinks(
+        wikilinks=tuple(wikilinks),
+        tags=tuple(tags),
+        markdown_links=tuple(md_links),
+    )

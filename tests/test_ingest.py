@@ -6,7 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from wikilens.ingest import Note, parse_frontmatter, parse_note, walk_vault
+from wikilens.ingest import (
+    Note,
+    extract_links,
+    parse_frontmatter,
+    parse_note,
+    walk_vault,
+)
 
 
 def _make(root: Path, rel: str, body: str = "x") -> Path:
@@ -169,3 +175,138 @@ def test_parse_note_no_frontmatter(tmp_path: Path):
     assert note.frontmatter == {}
     assert note.body == "# Just markdown\n\ncontent\n"
     assert note.frontmatter_error is None
+
+
+# --- link extractor -------------------------------------------------------
+
+
+def test_extract_plain_wikilink():
+    links = extract_links("See [[Photosynthesis]] for details.")
+    assert len(links.wikilinks) == 1
+    wl = links.wikilinks[0]
+    assert wl.target == "Photosynthesis"
+    assert wl.heading is None
+    assert wl.alias is None
+    assert wl.is_embed is False
+
+
+def test_extract_wikilink_with_alias():
+    links = extract_links("[[Photosynthesis|how plants eat]]")
+    wl = links.wikilinks[0]
+    assert wl.target == "Photosynthesis"
+    assert wl.alias == "how plants eat"
+    assert wl.heading is None
+
+
+def test_extract_wikilink_with_heading():
+    links = extract_links("[[Photosynthesis#Light Reactions]]")
+    wl = links.wikilinks[0]
+    assert wl.target == "Photosynthesis"
+    assert wl.heading == "Light Reactions"
+    assert wl.alias is None
+
+
+def test_extract_wikilink_with_heading_and_alias():
+    links = extract_links("[[Page#Section|Display]]")
+    wl = links.wikilinks[0]
+    assert wl.target == "Page"
+    assert wl.heading == "Section"
+    assert wl.alias == "Display"
+
+
+def test_extract_embed_wikilink():
+    links = extract_links("Here it is: ![[Diagram]]")
+    wl = links.wikilinks[0]
+    assert wl.target == "Diagram"
+    assert wl.is_embed is True
+
+
+def test_extract_tags_basic():
+    links = extract_links("Tagged #concept and #nested/sub here.")
+    assert links.tags == ("concept", "nested/sub")
+
+
+def test_extract_tags_rejects_mid_word_hashes():
+    # URL fragments (#section after a slash) and mid-identifier hashes
+    # (abc#123) must NOT be tagged. Color codes like #ffcc00 that start a
+    # token are tags by Obsidian's own rules — acceptable noise for RAG.
+    text = "url: https://example.com/page#section id: abc#123 rev: v1#2"
+    links = extract_links(text)
+    assert links.tags == ()
+
+
+def test_extract_tags_accept_leading_digit_rejected():
+    # Obsidian convention: tags must start with a letter or underscore,
+    # not a digit (to avoid confusion with issue numbers like #123).
+    links = extract_links("See #123 issue and #real-tag.")
+    assert links.tags == ("real-tag",)
+
+
+def test_extract_ignores_content_in_code_fences():
+    text = (
+        "Before [[real-link]].\n"
+        "```python\n"
+        "# this is a comment, not a tag\n"
+        "x = '[[not-a-link]]'\n"
+        "```\n"
+        "After #actual-tag."
+    )
+    links = extract_links(text)
+    assert [wl.target for wl in links.wikilinks] == ["real-link"]
+    assert links.tags == ("actual-tag",)
+
+
+def test_extract_ignores_inline_code():
+    text = "Use `[[example]]` syntax to create `#tags`. Real: [[actual]] and #real."
+    links = extract_links(text)
+    assert [wl.target for wl in links.wikilinks] == ["actual"]
+    assert links.tags == ("real",)
+
+
+def test_extract_markdown_links():
+    text = "See [the docs](https://example.com/x) and [local](./foo.md)."
+    links = extract_links(text)
+    assert links.markdown_links == (
+        ("the docs", "https://example.com/x"),
+        ("local", "./foo.md"),
+    )
+
+
+def test_extract_markdown_link_ignores_image():
+    text = "![alt](img.png) and [real](page.md)"
+    links = extract_links(text)
+    # ![alt](img.png) is an image, not a regular link — we only want the second.
+    assert links.markdown_links == (("real", "page.md"),)
+
+
+def test_extract_dedupes_preserving_first_occurrence():
+    text = "[[A]] then [[B]] then [[A]] again. #t #t #x"
+    links = extract_links(text)
+    assert [wl.target for wl in links.wikilinks] == ["A", "B"]
+    assert links.tags == ("t", "x")
+
+
+def test_extract_mixed_realistic_note():
+    text = (
+        "---\ntitle: notes\n---\n"
+        "# Topic\n\n"
+        "Linked to [[Photosynthesis|plant eating]] and "
+        "[[Calvin Cycle#Dark Reactions]].\n"
+        "Embedded: ![[diagram.png]]\n"
+        "Tagged #biology and #chem/organic.\n"
+        "External: [MDN](https://developer.mozilla.org).\n"
+        "```\n#not-a-tag and [[not-a-link]]\n```\n"
+    )
+    # We pass the whole file — links ignore frontmatter fences as literal text.
+    # In practice callers pass body only (parse_note splits), but this proves
+    # the extractor is robust even if fed the whole file.
+    links = extract_links(text)
+    targets = [wl.target for wl in links.wikilinks]
+    assert "Photosynthesis" in targets
+    assert "Calvin Cycle" in targets
+    assert "diagram.png" in targets
+    assert "not-a-link" not in targets
+    assert "biology" in links.tags
+    assert "chem/organic" in links.tags
+    assert "not-a-tag" not in links.tags
+    assert ("MDN", "https://developer.mozilla.org") in links.markdown_links
