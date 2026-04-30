@@ -42,11 +42,14 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.10",
 ]
-# Optional remote-LLM judge backend for P4 (Contradiction Finder).
-# Only required when running `wikilens contradict --judge claude`.
+# Optional remote-LLM + ML dependencies for P4 (Contradiction Finder) and
+# P5 (Gap Generator). Only required when running `wikilens contradict
+# --judge claude` or `wikilens gap --judge claude`. scikit-learn is used
+# by the P5 clustering stage even in `--judge none` dry-runs.
 judge = [
     "anthropic>=0.40",
     "python-dotenv>=1.0",
+    "scikit-learn>=1.4",
 ]
 
 [project.urls]

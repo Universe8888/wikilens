@@ -183,6 +183,73 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
     return 1 if report.total_findings > 0 else 0
 
 
+def _cmd_gap(args: argparse.Namespace) -> int:
+    from wikilens.embed import BGEEmbedder
+    from wikilens.gap import generate_gaps
+    from wikilens.gap_format import GapReport, format_json, format_markdown
+    from wikilens.generator import Generator, MockGenerator
+    from wikilens.store import LanceDBStore
+
+    embedder = BGEEmbedder()
+    store = LanceDBStore(db_path=args.db, dim=embedder.dim)
+    try:
+        row_count = store.count()
+    except (RuntimeError, OSError) as e:
+        print(f"Failed to open index at {args.db}: {e}", file=sys.stderr)
+        return 2
+    if row_count == 0:
+        print(f"No index at {args.db}. Run `wikilens ingest <vault>` first.", file=sys.stderr)
+        return 2
+
+    # Resolve generator backend. Phase 5.1 ships only MockGenerator;
+    # ClaudeGenerator lands in Phase 5.2.
+    generator: Generator
+    if args.judge == "none":
+        generator = MockGenerator()
+    elif args.judge == "claude":
+        print(
+            "wikilens gap: --judge claude is not yet implemented (Phase 5.2). "
+            "Use --judge none for now.",
+            file=sys.stderr,
+        )
+        return 2
+    else:
+        print(f"wikilens gap: unknown judge: {args.judge!r}", file=sys.stderr)
+        return 2
+
+    clusters, findings = generate_gaps(
+        store,
+        generator,
+        k=args.k,
+        seed=args.seed,
+        min_cluster_size=args.min_cluster_size,
+        max_clusters=args.max_clusters,
+        top_gaps_per_cluster=args.top_gaps_per_cluster,
+        sample=args.sample,
+    )
+    clusters_processed = (
+        min(args.sample, len(clusters))
+        if (args.sample is not None and args.sample >= 0)
+        else len(clusters)
+    )
+
+    report = GapReport(
+        vault_root=str(args.vault_path),
+        chunks_scanned=row_count,
+        clusters=tuple(clusters),
+        clusters_processed=clusters_processed,
+        findings=tuple(findings),
+        generator_name=generator.name,
+    )
+
+    if args.json:
+        sys.stdout.write(format_json(report))
+    else:
+        sys.stdout.write(format_markdown(report))
+
+    return 1 if report.total_findings > 0 else 0
+
+
 def _cmd_stub(name: str, phase: str):
     def _fn(args: argparse.Namespace) -> int:
         print(f"wikilens: '{name}' is not available yet ({phase}).")
@@ -284,10 +351,63 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_contradict.set_defaults(func=_cmd_contradict)
 
+    # gap (P5)
+    p_gap = sub.add_parser(
+        "gap",
+        help="Find unanswered questions the vault implies but doesn't answer "
+             "(Phase 5.1 plumbing).",
+    )
+    p_gap.add_argument("vault_path", type=Path)
+    p_gap.add_argument(
+        "--db", default=DEFAULT_DB_PATH, help="Store path (default: %(default)s)"
+    )
+    p_gap.add_argument(
+        "--judge",
+        choices=["none", "claude"],
+        default="none",
+        help=(
+            "Generator backend. 'none' uses MockGenerator (no LLM calls); "
+            "'claude' lands in Phase 5.2."
+        ),
+    )
+    p_gap.add_argument(
+        "--model",
+        default="claude-sonnet-4-6",
+        help="Model for --judge claude (default: %(default)s).",
+    )
+    p_gap.add_argument(
+        "--k", type=int, default=None,
+        help="K-means cluster count (default: round(sqrt(n_chunks))).",
+    )
+    p_gap.add_argument(
+        "--min-cluster-size", dest="min_cluster_size", type=int, default=3,
+        help="Drop clusters with fewer than N chunks (default: %(default)s).",
+    )
+    p_gap.add_argument(
+        "--max-clusters", dest="max_clusters", type=int, default=30,
+        help="Cap clusters processed (default: %(default)s).",
+    )
+    p_gap.add_argument(
+        "--top-gaps-per-cluster", dest="top_gaps_per_cluster", type=int, default=3,
+        help="Max gap candidates per cluster (default: %(default)s).",
+    )
+    p_gap.add_argument(
+        "--sample", type=int, default=None,
+        help="Cap generator calls to the first N clusters (default: no cap).",
+    )
+    p_gap.add_argument(
+        "--seed", type=int, default=42,
+        help="K-means random_state for deterministic clusters (default: %(default)s).",
+    )
+    p_gap.add_argument(
+        "--json", action="store_true",
+        help="Emit JSON instead of markdown (schema_version: 1).",
+    )
+    p_gap.set_defaults(func=_cmd_gap)
+
     # Stubs for later phases (keep the help surface honest)
     for name, phase in [
-        ("gaps", "P6"),
-        ("benchmark", "P5"),
+        ("benchmark", "P6"),
     ]:
         p = sub.add_parser(name, help=f"({phase} — not implemented)")
         p.set_defaults(func=_cmd_stub(name, phase))
