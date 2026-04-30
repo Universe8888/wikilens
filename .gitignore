@@ -34,6 +34,9 @@ ENV/
 # Local-only notes (session handoffs, private context)
 .local/
 
+# Claude Code harness local settings
+.claude/
+
 # Local vector stores & caches
 .cache/
 .wikilens/
