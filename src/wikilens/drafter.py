@@ -84,9 +84,15 @@ If the vault has no relevant content (is_external_research = true), write one
 sentence: "The vault has no relevant coverage for this question."
 
 ## Evidence gaps
-List (as bullet points) the specific sub-questions or facts that the vault does
-NOT cover but that a complete answer would need. Be concrete. For
-external-research stubs, suggest external source types (no fabricated URLs).
+List (as bullet points) the specific concepts, mechanisms, or facts that the
+vault does NOT cover but that a complete answer would need.
+IMPORTANT: Use your own domain knowledge to name the SPECIFIC missing concepts
+— do NOT write vague phrases like "the mechanism is not described" or "more
+detail is needed". Name the actual concepts: e.g., "RuBisCO catalysis and
+the three phases (carboxylation, reduction, regeneration)" or "the Z-scheme
+electron flow from PSII to PSI". This section is the gap-closing work; be
+precise enough that a human reader knows exactly what to research.
+For external-research stubs, suggest external source types (no fabricated URLs).
 
 ## Related notes
 Leave this section COMPLETELY BLANK (no text, no placeholder, no "EMPTY").
@@ -108,6 +114,14 @@ Rules:
 - The section headers must be exactly as shown (## What the vault says, etc.).
 - Chunk IDs in Citations MUST be wrapped in backticks: `chunk_id`.
 - Only cite chunk IDs that appear in the SUPPORTING CHUNKS input.
+- STRICT: Every claim in "What the vault says" must be a DIRECT quote or very
+  close paraphrase of what the cited chunk actually says. Do NOT synthesize or
+  infer beyond the chunk's explicit text. If you are not certain a chunk supports
+  a sentence, move that claim to "Evidence gaps" instead.
+- If the vault has no relevant content for the gap question, write the single
+  sentence "The vault has no relevant coverage for this question." with NO
+  footnote citations, and leave the Citations section empty with just
+  "_No citations — external research required._"
 - Start your response with "## What the vault says".
 """
 

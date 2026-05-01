@@ -30,6 +30,110 @@ Honest numbers across the project's eval suites. Every run is reproducible from 
 
 Each harness **appends** a timestamped section below; prior runs are preserved so regressions are visible side-by-side.
 
+## 2026-05-01 18:27:23 — P6 eval (0eab57a)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).
+- Drafter: `openai`. Judge: `openai`.
+- Judged: 10. Skipped: 0.
+- Wall clock: 90.3s.
+
+Pass rate (all 4 axes >= 4): 8/10 = 0.80
+Skip / external-research rate: 0/10 = 0.00
+Attribution rate (automated): 1.00  (target >= 0.9)
+
+| gap_id | faith | cov | attr_q | struct | pass |
+|--------|-------|-----|--------|--------|------|
+| calvin-cycle                        | 4 | 4 | 4 | 5 | ✓ |
+| async-await-python-web              | 4 | 4 | 5 | 5 | ✓ |
+| peace-of-westphalia-terms           | 5 | 4 | 5 | 5 | ✓ |
+| photosystem-mechanisms              | 5 | 4 | 5 | 5 | ✓ |
+| spanish-dutch-1648                  | 5 | 3 | 4 | 5 | ✗ |
+| cast-iron-seasoning                 | 4 | 2 | 4 | 5 | ✗ |
+| reducing-sugars-definition          | 5 | 4 | 5 | 5 | ✓ |
+| django-database-migrations          | 5 | 5 | 5 | 5 | ✓ |
+| wsgi-vs-asgi                        | 4 | 4 | 4 | 5 | ✓ |
+| fond-and-deglazing                  | 5 | 4 | 5 | 5 | ✓ |
+
+| **mean** | 4.6 | 3.8 | 4.6 | 5.0 | — |
+
+## 2026-05-01 16:53:42 — P6 eval (0eab57a)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).
+- Drafter: `openai`. Judge: `openai`.
+- Judged: 10. Skipped: 0.
+- Wall clock: 93.1s.
+
+Pass rate (all 4 axes >= 4): 4/10 = 0.40
+Skip / external-research rate: 0/10 = 0.00
+Attribution rate (automated): 0.90  (target >= 0.9)
+
+| gap_id | faith | cov | attr_q | struct | pass |
+|--------|-------|-----|--------|--------|------|
+| calvin-cycle                        | 5 | 4 | 5 | 5 | ✓ |
+| async-await-python-web              | 4 | 5 | 4 | 5 | ✓ |
+| peace-of-westphalia-terms           | 4 | 3 | 4 | 5 | ✗ |
+| photosystem-mechanisms              | 5 | 5 | 5 | 5 | ✓ |
+| spanish-dutch-1648                  | 5 | 3 | 5 | 5 | ✗ |
+| cast-iron-seasoning                 | 2 | 3 | 3 | 5 | ✗ |
+| reducing-sugars-definition          | 5 | 4 | 5 | 5 | ✓ |
+| django-database-migrations          | 5 | 4 | 1 | 5 | ✗ |
+| wsgi-vs-asgi                        | 3 | 4 | 3 | 5 | ✗ |
+| fond-and-deglazing                  | 4 | 4 | 3 | 5 | ✗ |
+
+| **mean** | 4.2 | 3.9 | 3.8 | 5.0 | — |
+
+## 2026-05-01 16:50:52 — P6 eval (0eab57a)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).
+- Drafter: `openai`. Judge: `openai`.
+- Judged: 10. Skipped: 0.
+- Wall clock: 105.7s.
+
+Pass rate (all 4 axes >= 4): 4/10 = 0.40
+Skip / external-research rate: 0/10 = 0.00
+Attribution rate (automated): 0.90  (target >= 0.9)
+
+| gap_id | faith | cov | attr_q | struct | pass |
+|--------|-------|-----|--------|--------|------|
+| calvin-cycle                        | 4 | 3 | 4 | 5 | ✗ |
+| async-await-python-web              | 4 | 3 | 4 | 5 | ✗ |
+| peace-of-westphalia-terms           | 5 | 4 | 5 | 5 | ✓ |
+| photosystem-mechanisms              | 3 | 3 | 3 | 5 | ✗ |
+| spanish-dutch-1648                  | 4 | 5 | 4 | 5 | ✓ |
+| cast-iron-seasoning                 | 3 | 1 | 3 | 5 | ✗ |
+| reducing-sugars-definition          | 5 | 4 | 5 | 5 | ✓ |
+| django-database-migrations          | 5 | 3 | 3 | 5 | ✗ |
+| wsgi-vs-asgi                        | 4 | 4 | 3 | 5 | ✗ |
+| fond-and-deglazing                  | 4 | 5 | 5 | 5 | ✓ |
+
+| **mean** | 4.1 | 3.5 | 3.9 | 5.0 | — |
+
+## 2026-05-01 16:31:30 — P6 eval (0eab57a)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).
+- Drafter: `openai`. Judge: `openai`.
+- Judged: 10. Skipped: 0.
+- Wall clock: 168.4s.
+
+Pass rate (all 4 axes >= 4): 1/10 = 0.10
+Skip / external-research rate: 0/10 = 0.00
+Attribution rate (automated): 0.90  (target >= 0.9)
+
+| gap_id | faith | cov | attr_q | struct | pass |
+|--------|-------|-----|--------|--------|------|
+| calvin-cycle                        | 5 | 3 | 4 | 5 | ✗ |
+| async-await-python-web              | 4 | 4 | 4 | 5 | ✓ |
+| peace-of-westphalia-terms           | 4 | 2 | 3 | 5 | ✗ |
+| photosystem-mechanisms              | 3 | 3 | 3 | 5 | ✗ |
+| spanish-dutch-1648                  | 5 | 2 | 4 | 5 | ✗ |
+| cast-iron-seasoning                 | 2 | 2 | 3 | 5 | ✗ |
+| reducing-sugars-definition          | 5 | 3 | 5 | 5 | ✗ |
+| django-database-migrations          | 1 | 1 | 1 | 5 | ✗ |
+| wsgi-vs-asgi                        | 4 | 4 | 3 | 5 | ✗ |
+| fond-and-deglazing                  | 4 | 4 | 3 | 5 | ✗ |
+
+| **mean** | 3.7 | 2.8 | 3.3 | 5.0 | — |
+
 ## 2026-05-01 16:22:40 — P6 eval (f27fee4)
 
 - Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).

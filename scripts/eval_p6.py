@@ -91,11 +91,16 @@ FAITHFULNESS (1-5):
   1 = majority of cited sentences are not supported by their citations.
 
 COVERAGE (1-5):
-  5 = all gold key claims are addressed (paraphrase counts).
-  4 = most key claims addressed; one minor claim missing or only implied.
-  3 = several key claims partially addressed or omitted.
-  2 = most key claims missing.
-  1 = stub does not address the gap at all.
+  A claim is covered if it appears in EITHER "What the vault says" (synthesized
+  from chunks) OR "Evidence gaps" (explicitly listed as needing research).
+  A stub that correctly identifies a claim as missing from the vault and lists
+  it in Evidence gaps is COVERING that claim — documenting what's needed IS the
+  answer-skeleton work.
+  5 = all gold key claims appear in What the vault says OR Evidence gaps.
+  4 = most key claims covered; one minor claim absent from both sections.
+  3 = several key claims absent from both sections.
+  2 = most key claims absent from both sections.
+  1 = stub addresses neither What the vault says nor Evidence gaps meaningfully.
 
 ATTRIBUTION_QUALITY (1-5):
   5 = every citation points to the strongest available evidence in the chunk set.
@@ -565,7 +570,10 @@ def main() -> int:
             gap_question=g["gold_question"],
             suggested_note_title=g["gap_id"],
             rationale=g.get("notes", ""),
-            supporting_chunk_ids=tuple(g.get("supporting_chunks", [])),
+            # Drop p5 supporting_chunk_ids — those were generated under the
+            # old 16-char ID scheme.  Retrieval alone produces correct results
+            # with the current 32-char SHA-256 IDs.
+            supporting_chunk_ids=(),
         ))
     print(f"[truth] {len(eval_gaps)} gold gaps loaded from {truth_path.name}")
 
