@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-01 (P5 complete, tagged `v0.5.0`)
+**Last updated:** 2026-05-01 (P6.1 + P6.2 complete, in progress)
 
 ---
 
@@ -96,11 +96,21 @@ under the MIT license.
 - **224/224 tests pass.** +71 new tests since P4.
 - Decisions log: `docs/p5-decisions.md`. Benchmark: `BENCHMARK.md`.
 
-### P6 — Answer Generator (NEXT — not planned yet)
+### P6 — Answer Generator (IN PROGRESS — P6.1 + P6.2 complete)
 
-Close the gap loop: given `wikilens gap` findings, retrieve supporting chunks
-and draft note stubs that actually answer the identified questions. SDD + HITL
-gate discipline as always.
+- `wikilens answer <vault> --gaps <gap-json>` consumes `gap --json` output,
+  retrieves supporting chunks per gap, drafts structured note stubs.
+- Stubs: YAML frontmatter + "What the vault says" (cited) + "Evidence gaps" +
+  "Related notes" (`[[wikilinks]]`) + "Citations". Print-only by default;
+  `--write --out <dir>` materialises `.md` files (no-overwrite policy).
+- `MockDrafter` / `OpenAIDrafter` / `ClaudeDrafter` — default `openai/gpt-4o`.
+- `check_attribution` — automated parser verifying every `[^N]` resolves to a
+  retrieved chunk ID. No LLM.
+- **313/313 tests pass** as of P6.2 (`b124935`).
+- SDD: `docs/p6-plan.md`. Locked eval input: `fixtures/eval/p6_input_gaps.json`.
+- **Next step: P6.3** — hand-write `fixtures/eval/p6_answer_sketches.json`
+  (10 gold answer sketches, 3–5 key claims per gap from `p5_ground_truth.json`).
+  Then P6.4 (eval harness), P6.5 (ship).
 
 ### P7
 
