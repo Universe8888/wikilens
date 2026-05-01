@@ -183,7 +183,7 @@ def test_claude_judge_missing_key_raises_env_error_without_key():
     from wikilens.judge import ClaudeJudge
 
     # Patch out dotenv so it can't reload the key from .env, then clear env.
-    with patch("wikilens.judge._load_dotenv_if_present"):
+    with patch("wikilens.judge.load_dotenv_if_present"):
         with patch.dict("os.environ", {}, clear=True):
             with pytest.raises(EnvironmentError, match="ANTHROPIC_API_KEY"):
                 ClaudeJudge()

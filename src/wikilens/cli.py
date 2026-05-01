@@ -270,6 +270,139 @@ def _cmd_gap(args: argparse.Namespace) -> int:
     return 1 if report.total_findings > 0 else 0
 
 
+def _cmd_answer(args: argparse.Namespace) -> int:
+    from wikilens.answer import AnswerReport, draft_answers, load_gaps
+    from wikilens.answer_format import (
+        CollisionError,
+        format_json,
+        format_markdown,
+        write_stubs,
+    )
+    from wikilens.drafter import Drafter, MockDrafter
+    from wikilens.embed import BGEEmbedder
+    from wikilens.store import LanceDBStore
+
+    # Validate --write / --out combination.
+    if args.write and not args.out:
+        print(
+            "wikilens answer: --write requires --out <dir>",
+            file=sys.stderr,
+        )
+        return 2
+
+    # Load gaps file.
+    try:
+        gaps = load_gaps(args.gaps)
+    except ValueError as e:
+        print(f"wikilens answer: {e}", file=sys.stderr)
+        return 2
+
+    if not gaps:
+        print("wikilens answer: gaps file contains no findings.", file=sys.stderr)
+        return 2
+
+    # Open the vector store.
+    embedder = BGEEmbedder()
+    store = LanceDBStore(db_path=args.db, dim=embedder.dim)
+    try:
+        row_count = store.count()
+    except (RuntimeError, OSError) as e:
+        print(f"Failed to open index at {args.db}: {e}", file=sys.stderr)
+        return 2
+    if row_count == 0:
+        print(
+            f"No index at {args.db}. Run `wikilens ingest <vault>` first.",
+            file=sys.stderr,
+        )
+        return 2
+
+    # Resolve drafter backend.
+    drafter: Drafter
+    drafter_model: str
+    if args.judge == "none":
+        drafter = MockDrafter()
+        drafter_model = "mock"
+    elif args.judge == "openai":
+        from wikilens.drafter import OpenAIDrafter
+
+        try:
+            model = getattr(args, "model", None) or "gpt-4o"
+            drafter = OpenAIDrafter(model=model)
+            drafter_model = model
+        except (EnvironmentError, ImportError) as e:
+            print(f"wikilens answer: {e}", file=sys.stderr)
+            return 2
+    elif args.judge == "claude":
+        from wikilens.drafter import ClaudeDrafter
+
+        try:
+            model = getattr(args, "model", None) or "claude-sonnet-4-6"
+            drafter = ClaudeDrafter(model=model)
+            drafter_model = model
+        except (EnvironmentError, ImportError) as e:
+            print(f"wikilens answer: {e}", file=sys.stderr)
+            return 2
+    else:
+        print(f"wikilens answer: unknown judge: {args.judge!r}", file=sys.stderr)
+        return 2
+
+    # Reranker only for rerank mode.
+    reranker = None
+    if args.retrieval_mode == "rerank":
+        from wikilens.rerank import BGEReranker
+
+        reranker = BGEReranker()
+
+    # Run the pipeline.
+    drafts = draft_answers(
+        gaps,
+        store,
+        embedder,
+        drafter,
+        top_k=args.top_k,
+        mode=args.retrieval_mode,
+        reranker=reranker,
+        min_supporting=args.min_supporting,
+        sample=args.sample,
+        drafter_model=drafter_model,
+    )
+
+    report = AnswerReport(
+        vault_root=str(args.vault_path),
+        gaps_path=str(args.gaps),
+        drafter_name=drafter.name,
+        model=drafter_model,
+        retrieval_mode=args.retrieval_mode,
+        top_k=args.top_k,
+        min_supporting=args.min_supporting,
+        drafts=tuple(drafts),
+    )
+
+    # Output.
+    if args.json:
+        sys.stdout.write(format_json(report))
+    else:
+        sys.stdout.write(format_markdown(report))
+
+    # Optional file write.
+    if args.write:
+        out_dir = Path(args.out)
+        try:
+            written = write_stubs(report, out_dir)
+        except CollisionError as e:
+            print(f"wikilens answer: {e}", file=sys.stderr)
+            return 2
+        print(
+            f"Wrote {len(written)} stub(s) to {out_dir}",
+            file=sys.stderr,
+        )
+
+    # Exit code: 0 = all strong/thin, 1 = any external-research or skipped.
+    if report.total_skipped > 0 or report.total_external_research > 0:
+        return 1
+    return 0
+
+
 def _cmd_stub(name: str, phase: str):
     def _fn(args: argparse.Namespace) -> int:
         print(f"wikilens: '{name}' is not available yet ({phase}).")
@@ -425,9 +558,70 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_gap.set_defaults(func=_cmd_gap)
 
+    # answer (P6)
+    p_answer = sub.add_parser(
+        "answer",
+        help="Draft stub notes that answer the gaps found by `wikilens gap`.",
+    )
+    p_answer.add_argument("vault_path", type=Path)
+    p_answer.add_argument(
+        "--gaps",
+        required=True,
+        type=Path,
+        help="Path to a `wikilens gap --json` output file (required).",
+    )
+    p_answer.add_argument(
+        "--db", default=DEFAULT_DB_PATH, help="Store path (default: %(default)s)"
+    )
+    p_answer.add_argument(
+        "--judge",
+        choices=["none", "openai", "claude"],
+        default="openai",
+        help=(
+            "Drafter backend. 'openai' uses OpenAIDrafter (default); "
+            "'claude' uses ClaudeDrafter; 'none' uses MockDrafter (no LLM calls)."
+        ),
+    )
+    p_answer.add_argument(
+        "--model",
+        default="gpt-4o",
+        help="Model for --judge openai/claude (default: %(default)s).",
+    )
+    p_answer.add_argument(
+        "--top-k", dest="top_k", type=int, default=8,
+        help="Retrieval neighbors per gap (default: %(default)s).",
+    )
+    p_answer.add_argument(
+        "--retrieval-mode", dest="retrieval_mode",
+        choices=["dense", "bm25", "hybrid", "rerank"],
+        default="rerank",
+        help="Retrieval strategy (default: %(default)s).",
+    )
+    p_answer.add_argument(
+        "--min-supporting", dest="min_supporting", type=int, default=2,
+        help="Skip gap if retrieved chunks < N; emit external-research stub (default: %(default)s).",
+    )
+    p_answer.add_argument(
+        "--sample", type=int, default=None,
+        help="Cap total drafts produced (smoke mode).",
+    )
+    p_answer.add_argument(
+        "--write", action="store_true",
+        help="Write stubs to disk. Requires --out.",
+    )
+    p_answer.add_argument(
+        "--out", default=None,
+        help="Output directory for --write (required when --write is set).",
+    )
+    p_answer.add_argument(
+        "--json", action="store_true",
+        help="Emit JSON report instead of markdown (schema_version: 1).",
+    )
+    p_answer.set_defaults(func=_cmd_answer)
+
     # Stubs for later phases (keep the help surface honest)
     for name, phase in [
-        ("benchmark", "P6"),
+        ("benchmark", "P7"),
     ]:
         p = sub.add_parser(name, help=f"({phase} — not implemented)")
         p.set_defaults(func=_cmd_stub(name, phase))

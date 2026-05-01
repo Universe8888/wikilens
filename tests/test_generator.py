@@ -276,7 +276,7 @@ def test_claude_generator_missing_key_raises_without_api_key():
     from wikilens.generator import ClaudeGenerator
 
     with (
-        patch("wikilens.generator._load_dotenv_if_present"),
+        patch("wikilens.generator.load_dotenv_if_present"),
         patch.dict("os.environ", {}, clear=True),
         pytest.raises(EnvironmentError, match="ANTHROPIC_API_KEY"),
     ):

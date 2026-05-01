@@ -45,7 +45,7 @@ def test_gap_claude_fails_without_api_key(
     (tmp_path / "c.md").write_text("eta theta iota", encoding="utf-8")
     ingest_vault(vault_root=tmp_path, db_path=str(tmp_path / "db"))
 
-    with patch("wikilens.generator._load_dotenv_if_present"):
+    with patch("wikilens.generator.load_dotenv_if_present"):
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         rc = main(
             [

@@ -208,7 +208,7 @@ def test_claude_matcher_missing_key_raises_without_api_key():
     from wikilens.matcher import ClaudeMatcher
 
     with (
-        patch("wikilens.matcher._load_dotenv_if_present_matcher"),
+        patch("wikilens.matcher.load_dotenv_if_present"),
         patch.dict("os.environ", {}, clear=True),
         pytest.raises(OSError, match="ANTHROPIC_API_KEY"),
     ):

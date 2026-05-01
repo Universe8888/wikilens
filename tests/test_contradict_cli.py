@@ -46,7 +46,7 @@ def test_contradict_claude_fails_without_api_key(
     (tmp_path / "n2.md").write_text("gamma delta", encoding="utf-8")
     ingest_vault(vault_root=tmp_path, db_path=str(tmp_path / "db"))
 
-    with patch("wikilens.judge._load_dotenv_if_present"):
+    with patch("wikilens.judge.load_dotenv_if_present"):
         monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
         rc = main(
             [
