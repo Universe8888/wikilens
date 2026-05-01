@@ -22,7 +22,48 @@ Honest numbers across the project's eval suites. Every run is reproducible from 
   python scripts/eval_p5.py --judge claude
   ```
 
+- **Answer generator** (`fixtures/gaps_vault/` + `fixtures/eval/p6_answer_sketches.json`):
+  ```
+  wikilens ingest fixtures/gaps_vault --db .wikilens_p5_eval/db
+  python scripts/eval_p6.py --judge openai
+  ```
+
 Each harness **appends** a timestamped section below; prior runs are preserved so regressions are visible side-by-side.
+
+## 2026-05-01 16:22:40 — P6 eval (f27fee4)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).
+- Drafter: `mock`. Judge: `mock`.
+- Judged: 10. Skipped: 0.
+- Wall clock: 17.6s.
+
+Pass rate (all 4 axes >= 4): 10/10 = 1.00
+Skip / external-research rate: 0/10 = 0.00
+Attribution rate (automated): 1.00  (target >= 0.9)
+
+| gap_id | faith | cov | attr_q | struct | pass |
+|--------|-------|-----|--------|--------|------|
+| calvin-cycle                        | 4 | 4 | 4 | 4 | ✓ |
+| async-await-python-web              | 4 | 4 | 4 | 4 | ✓ |
+| peace-of-westphalia-terms           | 4 | 4 | 4 | 4 | ✓ |
+| photosystem-mechanisms              | 4 | 4 | 4 | 4 | ✓ |
+| spanish-dutch-1648                  | 4 | 4 | 4 | 4 | ✓ |
+| cast-iron-seasoning                 | 4 | 4 | 4 | 4 | ✓ |
+| reducing-sugars-definition          | 4 | 4 | 4 | 4 | ✓ |
+| django-database-migrations          | 4 | 4 | 4 | 4 | ✓ |
+| wsgi-vs-asgi                        | 4 | 4 | 4 | 4 | ✓ |
+| fond-and-deglazing                  | 4 | 4 | 4 | 4 | ✓ |
+
+| **mean** | 4.0 | 4.0 | 4.0 | 4.0 | — |
+
+## 2026-05-01 16:21:00 — P6 eval (f27fee4)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (16 gaps evaluated).
+- Drafter: `mock`. Judge: `mock`.
+- Judged: 0. Skipped: 16.
+- Wall clock: 25.8s.
+
+No drafts judged.
 
 ## 2026-05-01 00:20:50 — P5 eval (77148c2)
 
