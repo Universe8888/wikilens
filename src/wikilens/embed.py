@@ -11,10 +11,14 @@ Research-backed defaults (BGE model card + MTEB leaderboard 2024):
 
 from __future__ import annotations
 
+import logging
+import warnings
 from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 import numpy as np
+
+_log = logging.getLogger(__name__)
 
 # BGE-family query instruction — from the BAAI/bge-small-en-v1.5 model card.
 # Applied to queries only; passages are encoded raw.
@@ -77,6 +81,13 @@ class BGEEmbedder:
             # embed don't pay the sentence-transformers import cost.
             from sentence_transformers import SentenceTransformer
 
+            if self._revision is None:
+                warnings.warn(
+                    f"BGEEmbedder: no revision SHA pinned for {self._model_name!r}. "
+                    "Fetching whatever 'main' is — set DEFAULT_REVISION to a commit SHA "
+                    "for reproducibility and supply-chain safety.",
+                    stacklevel=3,
+                )
             kwargs: dict[str, str] = {}
             if self._revision is not None:
                 kwargs["revision"] = self._revision

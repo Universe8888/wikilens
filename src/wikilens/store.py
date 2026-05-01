@@ -31,10 +31,10 @@ from wikilens.ingest import Chunk
 
 DEFAULT_TABLE = "chunks"
 
-# chunk_id is a deterministic digest (see ingest.chunk_note) — today 16 hex
+# chunk_id is a deterministic SHA-256 digest (see ingest.chunk_note) — 32 hex
 # chars, but tests use shorter synthetic ids too. We only need to guarantee
 # the string carries no SQL metacharacters so the delete f-string below can
-# never become an injection sink even if the ID scheme changes upstream.
+# never become an injection sink if the ID scheme changes upstream.
 _CHUNK_ID_RE = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
 
 _log = logging.getLogger(__name__)

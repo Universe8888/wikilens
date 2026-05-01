@@ -506,12 +506,12 @@ def chunk_note(
             target_tokens,
             overlap_ratio,
         ):
-            content_hash = hashlib.sha1(
-                text.encode("utf-8"), usedforsecurity=False
-            ).hexdigest()[:16]
-            chunk_id = hashlib.sha1(
-                f"{rel}::{idx}".encode(), usedforsecurity=False
-            ).hexdigest()[:16]
+            content_hash = hashlib.sha256(
+                text.encode("utf-8")
+            ).hexdigest()[:32]
+            chunk_id = hashlib.sha256(
+                f"{rel}::{idx}".encode()
+            ).hexdigest()[:32]
             chunks.append(
                 Chunk(
                     chunk_id=chunk_id,

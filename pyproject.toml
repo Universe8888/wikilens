@@ -47,6 +47,7 @@ dev = [
 # --judge claude` or `wikilens gap --judge claude`. scikit-learn is used
 # by the P5 clustering stage even in `--judge none` dry-runs.
 judge = [
+    "openai>=1.0",
     "anthropic>=0.40",
     "python-dotenv>=1.0",
     "scikit-learn>=1.4",

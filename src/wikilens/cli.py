@@ -134,6 +134,15 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
     judge: Judge
     if args.judge == "none":
         judge = MockJudge()
+    elif args.judge == "openai":
+        from wikilens.judge import OpenAIJudge
+
+        try:
+            model = getattr(args, "model", None) or "gpt-4o"
+            judge = OpenAIJudge(model=model)
+        except (EnvironmentError, ImportError) as e:
+            print(f"wikilens contradict: {e}", file=sys.stderr)
+            return 2
     elif args.judge == "claude":
         from wikilens.judge import ClaudeJudge
 
@@ -146,7 +155,7 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
     elif args.judge == "ollama":
         print(
             "wikilens contradict: --judge ollama is not yet implemented. "
-            "Use --judge none or --judge claude.",
+            "Use --judge none, --judge openai, or --judge claude.",
             file=sys.stderr,
         )
         return 2
@@ -206,6 +215,15 @@ def _cmd_gap(args: argparse.Namespace) -> int:
     generator: Generator
     if args.judge == "none":
         generator = MockGenerator()
+    elif args.judge == "openai":
+        from wikilens.generator import OpenAIGenerator
+
+        try:
+            model = getattr(args, "model", None) or "gpt-4o"
+            generator = OpenAIGenerator(model=model)
+        except (EnvironmentError, ImportError) as e:
+            print(f"wikilens gap: {e}", file=sys.stderr)
+            return 2
     elif args.judge == "claude":
         from wikilens.generator import ClaudeGenerator
 
@@ -319,17 +337,17 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_contradict.add_argument(
         "--judge",
-        choices=["none", "claude", "ollama"],
-        default="none",
+        choices=["none", "openai", "claude", "ollama"],
+        default="openai",
         help=(
-            "Judge backend. 'none' uses MockJudge (no LLM calls); "
-            "'claude'/'ollama' land in Phase 4.2."
+            "Judge backend. 'openai' uses OpenAIJudge (default); "
+            "'claude' uses ClaudeJudge; 'none' uses MockJudge (no LLM calls)."
         ),
     )
     p_contradict.add_argument(
         "--model",
-        default="claude-sonnet-4-6",
-        help="Model for --judge claude (default: %(default)s).",
+        default="gpt-4o",
+        help="Model for --judge openai/claude (default: %(default)s).",
     )
     p_contradict.add_argument(
         "--top-k", dest="top_k", type=int, default=10,
@@ -365,17 +383,17 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_gap.add_argument(
         "--judge",
-        choices=["none", "claude"],
-        default="none",
+        choices=["none", "openai", "claude"],
+        default="openai",
         help=(
-            "Generator backend. 'none' uses MockGenerator (no LLM calls); "
-            "'claude' lands in Phase 5.2."
+            "Generator backend. 'openai' uses OpenAIGenerator (default); "
+            "'claude' uses ClaudeGenerator; 'none' uses MockGenerator (no LLM calls)."
         ),
     )
     p_gap.add_argument(
         "--model",
-        default="claude-sonnet-4-6",
-        help="Model for --judge claude (default: %(default)s).",
+        default="gpt-4o",
+        help="Model for --judge openai/claude (default: %(default)s).",
     )
     p_gap.add_argument(
         "--k", type=int, default=None,

@@ -11,6 +11,7 @@ within the 2s p95 budget on a CPU for K=20 passages.
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
@@ -42,6 +43,13 @@ class BGEReranker:
         if self._model is None:
             from sentence_transformers import CrossEncoder
 
+            if self._revision is None:
+                warnings.warn(
+                    f"BGEReranker: no revision SHA pinned for {self._model_name!r}. "
+                    "Fetching whatever 'main' is — set DEFAULT_RERANKER_REVISION to a "
+                    "commit SHA for reproducibility and supply-chain safety.",
+                    stacklevel=3,
+                )
             kwargs: dict[str, str] = {}
             if self._revision is not None:
                 kwargs["revision"] = self._revision

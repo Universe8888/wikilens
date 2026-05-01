@@ -21,8 +21,9 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Protocol, runtime_checkable
+
+from wikilens._env import load_dotenv_if_present
 
 # Pinned rubric. DO NOT edit without bumping the p5_ground_truth.json
 # schema_version — the threshold is baked into the eval, and shifting
@@ -139,25 +140,18 @@ JSON schema:
 """
 
 _MATCHER_USER_TEMPLATE = """\
-GOLD_GAP: {gold_gap}
+<gold_gap>
+{gold_gap}
+</gold_gap>
 
-PROPOSED_GAP: {proposed_gap}
+<proposed_gap>
+{proposed_gap}
+</proposed_gap>
 """
 
 _MATCHER_MAX_TOKENS = 128
 _MATCHER_MAX_RETRIES = 2
 DEFAULT_CLAUDE_MODEL_MATCHER = "claude-sonnet-4-6"
-
-
-def _load_dotenv_if_present_matcher() -> None:
-    try:
-        from dotenv import load_dotenv
-
-        env_path = Path(__file__).parent.parent.parent / ".env"
-        if env_path.exists():
-            load_dotenv(env_path, override=False)
-    except ImportError:
-        pass
 
 
 def _parse_match_verdict(raw: str) -> MatchVerdict:
@@ -186,7 +180,7 @@ class ClaudeMatcher:
         model: str = DEFAULT_CLAUDE_MODEL_MATCHER,
         max_tokens: int = _MATCHER_MAX_TOKENS,
     ):
-        _load_dotenv_if_present_matcher()
+        load_dotenv_if_present()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             raise OSError(

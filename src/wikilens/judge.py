@@ -14,8 +14,9 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Literal, Protocol, runtime_checkable
+
+from wikilens._env import load_dotenv_if_present
 
 ContradictionType = Literal["factual", "temporal", "none"]
 ALL_TYPES: tuple[ContradictionType, ...] = ("factual", "temporal", "none")
@@ -114,28 +115,18 @@ Rules:
 """
 
 _JUDGE_USER_TEMPLATE = """\
-Passage A:
+<passage_a>
 {text_a}
+</passage_a>
 
-Passage B:
+<passage_b>
 {text_b}
+</passage_b>
 """
 
 DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-6"
+DEFAULT_OPENAI_MODEL = "gpt-4o"
 _MAX_RETRIES = 2
-
-
-def _load_dotenv_if_present() -> None:
-    """Load .env from the repo root if python-dotenv is installed."""
-    try:
-        from dotenv import load_dotenv
-
-        # Walk up from this file to the repo root (src/wikilens → src → repo).
-        env_path = Path(__file__).parent.parent.parent / ".env"
-        if env_path.exists():
-            load_dotenv(env_path, override=False)
-    except ImportError:
-        pass
 
 
 def _parse_verdict(raw: str) -> JudgeVerdict:
@@ -180,7 +171,7 @@ class ClaudeJudge:
         model: str = DEFAULT_CLAUDE_MODEL,
         max_tokens: int = 256,
     ):
-        _load_dotenv_if_present()
+        load_dotenv_if_present()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             raise EnvironmentError(
@@ -232,6 +223,79 @@ class ClaudeJudge:
                 continue
 
         # All retries exhausted — count as abstention (no contradiction).
+        self.abstentions += 1
+        return JudgeVerdict(
+            verdict=False,
+            type="none",
+            score=0.0,
+            reasoning=f"judge abstained after {_MAX_RETRIES + 1} attempts: {last_err}",
+        )
+
+
+class OpenAIJudge:
+    """OpenAI-backed contradiction judge using the Chat Completions API.
+
+    Loads ``OPENAI_API_KEY`` from env (auto-loads ``.env`` at repo root
+    via python-dotenv if present). Uses a structured JSON system prompt —
+    no tool use, no streaming, one synchronous call per pair.
+    """
+
+    name = "openai"
+
+    def __init__(
+        self,
+        model: str = DEFAULT_OPENAI_MODEL,
+        max_tokens: int = 256,
+    ):
+        load_dotenv_if_present()
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise EnvironmentError(
+                "OPENAI_API_KEY is not set. "
+                "Export it in your shell or add it to .env at the repo root."
+            )
+        try:
+            import openai as _openai
+        except ImportError as e:
+            raise ImportError(
+                "The 'openai' package is required for OpenAIJudge. "
+                "Install it with: pip install -e '.[judge]'"
+            ) from e
+
+        self._client = _openai.OpenAI(api_key=api_key)
+        self._model = model
+        self._max_tokens = max_tokens
+        self.calls: int = 0
+        self.abstentions: int = 0
+
+    def score_pair(self, text_a: str, text_b: str) -> JudgeVerdict:
+        """Call OpenAI once per pair. Retries on malformed JSON up to _MAX_RETRIES."""
+        self.calls += 1
+        user_content = _JUDGE_USER_TEMPLATE.format(text_a=text_a, text_b=text_b)
+        last_err: Exception | None = None
+
+        for attempt in range(_MAX_RETRIES + 1):
+            system = _JUDGE_SYSTEM_PROMPT + (
+                "\nCRITICAL: Your previous response was not valid JSON. "
+                "Output ONLY the JSON object, nothing else."
+                if attempt > 0
+                else ""
+            )
+            response = self._client.chat.completions.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_content},
+                ],
+            )
+            raw = response.choices[0].message.content.strip()
+            try:
+                return _parse_verdict(raw)
+            except ValueError as e:
+                last_err = e
+                continue
+
         self.abstentions += 1
         return JudgeVerdict(
             verdict=False,

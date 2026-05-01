@@ -15,8 +15,9 @@ import json
 import os
 import re
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Protocol, runtime_checkable
+
+from wikilens._env import load_dotenv_if_present
 
 
 @dataclass(frozen=True)
@@ -131,23 +132,15 @@ JSON schema (array of up to {top_k} items):
 _GENERATOR_USER_TEMPLATE = """\
 Cluster of {n} related notes. Identify up to {top_k} unanswered questions.
 
+<passages>
 {passages}
+</passages>
 """
 
 DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-6"
+DEFAULT_OPENAI_MODEL = "gpt-4o"
 _MAX_RETRIES = 2
 _MAX_TOKENS_PER_CLUSTER = 1024
-
-
-def _load_dotenv_if_present() -> None:
-    try:
-        from dotenv import load_dotenv
-
-        env_path = Path(__file__).parent.parent.parent / ".env"
-        if env_path.exists():
-            load_dotenv(env_path, override=False)
-    except ImportError:
-        pass
 
 
 def _format_passages(cluster_chunks: list[tuple[str, str]]) -> str:
@@ -210,7 +203,7 @@ class ClaudeGenerator:
         model: str = DEFAULT_CLAUDE_MODEL,
         max_tokens: int = _MAX_TOKENS_PER_CLUSTER,
     ):
-        _load_dotenv_if_present()
+        load_dotenv_if_present()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
             raise OSError(
@@ -272,6 +265,87 @@ class ClaudeGenerator:
         # All retries exhausted — count as abstention (no candidates for this cluster).
         self.abstentions += 1
         _ = last_err  # consumed: available in debugger but not surfaced in output
+        return []
+
+
+class OpenAIGenerator:
+    """OpenAI-backed gap generator using the Chat Completions API.
+
+    Loads ``OPENAI_API_KEY`` from env (auto-loads ``.env`` via
+    python-dotenv). Uses a structured JSON prompt — no tool use, no
+    streaming, one synchronous call per cluster.
+    """
+
+    name = "openai"
+
+    def __init__(
+        self,
+        model: str = DEFAULT_OPENAI_MODEL,
+        max_tokens: int = _MAX_TOKENS_PER_CLUSTER,
+    ):
+        load_dotenv_if_present()
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            raise OSError(
+                "OPENAI_API_KEY is not set. "
+                "Export it in your shell or add it to .env at the repo root."
+            )
+        try:
+            import openai as _openai
+        except ImportError as e:
+            raise ImportError(
+                "The 'openai' package is required for OpenAIGenerator. "
+                "Install it with: pip install -e '.[judge]'"
+            ) from e
+
+        self._client = _openai.OpenAI(api_key=api_key)
+        self._model = model
+        self._max_tokens = max_tokens
+        self.calls: int = 0
+        self.abstentions: int = 0
+
+    def propose_gaps(
+        self,
+        cluster_chunks: list[tuple[str, str]],
+        *,
+        top_k: int,
+    ) -> list[GapCandidate]:
+        """Call OpenAI once per cluster. Retries on malformed JSON up to _MAX_RETRIES."""
+        self.calls += 1
+        valid_ids = {cid for cid, _ in cluster_chunks}
+        passages = _format_passages(cluster_chunks)
+        system = _GENERATOR_SYSTEM_PROMPT.format(top_k=top_k)
+        user_content = _GENERATOR_USER_TEMPLATE.format(
+            n=len(cluster_chunks),
+            top_k=top_k,
+            passages=passages,
+        )
+        last_err: Exception | None = None
+
+        for attempt in range(_MAX_RETRIES + 1):
+            if attempt > 0:
+                system += (
+                    "\nCRITICAL: Your previous response was not a valid JSON array. "
+                    'Output ONLY the JSON array, starting with "[".'
+                )
+            response = self._client.chat.completions.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_content},
+                ],
+            )
+            raw = response.choices[0].message.content.strip()
+            try:
+                candidates = _parse_candidates(raw, valid_ids)
+                return candidates[:top_k]
+            except (ValueError, KeyError) as e:
+                last_err = e
+                continue
+
+        self.abstentions += 1
+        _ = last_err
         return []
 
 
