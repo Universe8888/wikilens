@@ -1,8 +1,8 @@
-"""Tests for the Drafter protocol and MockDrafter (P6.1 step 2).
+"""Tests for the Drafter protocol, MockDrafter, OpenAIDrafter, ClaudeDrafter.
 
-OpenAIDrafter and ClaudeDrafter are tested in Phase 6.2 with mocked SDK
-clients. This file covers the protocol contract, MockDrafter behaviour,
-and the structural validator so Phase 6.2 tests can reuse those helpers.
+Phase 6.1 covered the protocol contract, MockDrafter, and _validate_body.
+Phase 6.2 adds OpenAIDrafter and ClaudeDrafter with mocked SDK clients:
+prompt structure, footnote enforcement, retry-on-bad-structure, abstention.
 """
 
 from __future__ import annotations
@@ -174,3 +174,177 @@ def test_claude_drafter_missing_key_raises():
         pytest.raises(OSError, match="ANTHROPIC_API_KEY"),
     ):
         ClaudeDrafter()
+
+
+# ─── OpenAIDrafter (mocked openai client) ─────────────────────────────────────
+
+
+def _make_openai_response(body: str) -> MagicMock:
+    msg = MagicMock()
+    msg.content = body
+    choice = MagicMock()
+    choice.message = msg
+    resp = MagicMock()
+    resp.choices = [choice]
+    return resp
+
+
+def _make_openai_drafter(responses: list[str]) -> "OpenAIDrafter":
+    from wikilens.drafter import OpenAIDrafter
+
+    drafter = OpenAIDrafter.__new__(OpenAIDrafter)
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.side_effect = [
+        _make_openai_response(r) for r in responses
+    ]
+    drafter._client = mock_client
+    drafter._model = "gpt-4o"
+    drafter._max_tokens = 1536
+    drafter.calls = 0
+    drafter.abstentions = 0
+    return drafter
+
+
+def _make_claude_drafter(responses: list[str]) -> "ClaudeDrafter":
+    from wikilens.drafter import ClaudeDrafter
+
+    drafter = ClaudeDrafter.__new__(ClaudeDrafter)
+    mock_client = MagicMock()
+    content_blocks = []
+    for r in responses:
+        block = MagicMock()
+        block.text = r
+        content_blocks.append(block)
+    # Each call pops the next response.
+    mock_client.messages.create.side_effect = [
+        MagicMock(content=[block]) for block in content_blocks
+    ]
+    drafter._client = mock_client
+    drafter._model = "claude-sonnet-4-6"
+    drafter._max_tokens = 1536
+    drafter.calls = 0
+    drafter.abstentions = 0
+    return drafter
+
+
+# Shared valid body that passes _validate_body.
+_VALID_BODY = (
+    "## What the vault says\n\n"
+    "Light reactions produce ATP and NADPH.[^1]\n\n"
+    "## Evidence gaps\n\n"
+    "- The Calvin cycle mechanism is not described.\n\n"
+    "## Related notes\n\n"
+    "## Citations\n\n"
+    '[^1]: `c1` — "Light reactions produce ATP..."\n'
+)
+
+_INVALID_BODY = "Some text without the required sections."
+
+
+def test_openai_drafter_returns_valid_body():
+    drafter = _make_openai_drafter([_VALID_BODY])
+    body = drafter.draft_stub(_mk_input())
+    assert _validate_body(body)
+    assert drafter.calls == 1
+    assert drafter.abstentions == 0
+
+
+def test_openai_drafter_retries_on_invalid_structure():
+    drafter = _make_openai_drafter([_INVALID_BODY, _VALID_BODY])
+    body = drafter.draft_stub(_mk_input())
+    assert _validate_body(body)
+    assert drafter._client.chat.completions.create.call_count == 2
+
+
+def test_openai_drafter_abstains_when_all_retries_fail():
+    # 3 invalid responses (_MAX_RETRIES=2 means 3 attempts total)
+    drafter = _make_openai_drafter([_INVALID_BODY, _INVALID_BODY, _INVALID_BODY])
+    body = drafter.draft_stub(_mk_input())
+    # Fallback stub still has all four sections.
+    assert _validate_body(body)
+    assert "DRAFT FAILED" in body
+    assert drafter.abstentions == 1
+
+
+def test_openai_drafter_external_research_uses_different_template():
+    drafter = _make_openai_drafter([_VALID_BODY])
+    inp = _mk_input(is_external_research=True)
+    drafter.draft_stub(inp)
+    call_kwargs = drafter._client.chat.completions.create.call_args
+    messages = call_kwargs[1]["messages"] if call_kwargs[1] else call_kwargs[0][0]
+    # Find user message content.
+    user_msg = next(m for m in messages if m["role"] == "user")
+    assert "insufficient coverage" in user_msg["content"].lower() or \
+           "external" in user_msg["content"].lower()
+
+
+def test_openai_drafter_system_prompt_contains_four_sections():
+    drafter = _make_openai_drafter([_VALID_BODY])
+    drafter.draft_stub(_mk_input())
+    call_kwargs = drafter._client.chat.completions.create.call_args
+    messages = call_kwargs[1]["messages"] if call_kwargs[1] else call_kwargs[0][0]
+    system_msg = next(m for m in messages if m["role"] == "system")
+    for section in [
+        "## What the vault says",
+        "## Evidence gaps",
+        "## Related notes",
+        "## Citations",
+    ]:
+        assert section in system_msg["content"]
+
+
+def test_openai_drafter_conforms_to_drafter_protocol():
+    from wikilens.drafter import Drafter, OpenAIDrafter
+    drafter = _make_openai_drafter([_VALID_BODY])
+    assert isinstance(drafter, Drafter)
+    assert drafter.name == "openai"
+
+
+# ─── ClaudeDrafter (mocked anthropic client) ──────────────────────────────────
+
+
+def test_claude_drafter_returns_valid_body():
+    drafter = _make_claude_drafter([_VALID_BODY])
+    body = drafter.draft_stub(_mk_input())
+    assert _validate_body(body)
+    assert drafter.calls == 1
+    assert drafter.abstentions == 0
+
+
+def test_claude_drafter_retries_on_invalid_structure():
+    drafter = _make_claude_drafter([_INVALID_BODY, _VALID_BODY])
+    body = drafter.draft_stub(_mk_input())
+    assert _validate_body(body)
+    assert drafter._client.messages.create.call_count == 2
+
+
+def test_claude_drafter_abstains_when_all_retries_fail():
+    drafter = _make_claude_drafter([_INVALID_BODY, _INVALID_BODY, _INVALID_BODY])
+    body = drafter.draft_stub(_mk_input())
+    assert _validate_body(body)
+    assert "DRAFT FAILED" in body
+    assert drafter.abstentions == 1
+
+
+def test_claude_drafter_system_prompt_enforces_citation_discipline():
+    drafter = _make_claude_drafter([_VALID_BODY])
+    drafter.draft_stub(_mk_input())
+    system = drafter._client.messages.create.call_args.kwargs["system"]
+    assert "[^N]" in system or "footnote" in system.lower()
+
+
+def test_claude_drafter_conforms_to_drafter_protocol():
+    from wikilens.drafter import ClaudeDrafter, Drafter
+    drafter = _make_claude_drafter([_VALID_BODY])
+    assert isinstance(drafter, Drafter)
+    assert drafter.name == "claude"
+
+
+def test_claude_drafter_retry_adds_critical_instruction():
+    """Second-attempt system prompt must include the CRITICAL retry instruction."""
+    drafter = _make_claude_drafter([_INVALID_BODY, _VALID_BODY])
+    drafter.draft_stub(_mk_input())
+    calls = drafter._client.messages.create.call_args_list
+    assert len(calls) == 2
+    second_system = calls[1][1].get("system", "")
+    assert "CRITICAL" in second_system

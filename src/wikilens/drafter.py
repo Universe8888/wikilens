@@ -89,18 +89,24 @@ NOT cover but that a complete answer would need. Be concrete. For
 external-research stubs, suggest external source types (no fabricated URLs).
 
 ## Related notes
-Leave this section EMPTY — it will be filled in by the pipeline with
-[[wikilinks]] derived from the supporting chunks.
+Leave this section COMPLETELY BLANK (no text, no placeholder, no "EMPTY").
+The pipeline will insert [[wikilinks]] automatically.
 
 ## Citations
-For each [^N] reference used above, write one entry:
+For each [^N] reference used above, write one entry using EXACTLY this format
+(backticks around the chunk ID are required):
 [^N]: `<chunk_id>` — "<first 15 words of the chunk text>..."
+
+Example:
+[^1]: `abc123def456` — "Light reactions produce ATP and NADPH in the thylakoid..."
 
 Rules:
 - Do NOT emit YAML frontmatter (the pipeline adds it).
 - Do NOT emit a level-1 heading (the pipeline adds it from the note title).
 - Do NOT add any text outside the four sections above.
+- Do NOT write anything in the Related notes section — leave it completely empty.
 - The section headers must be exactly as shown (## What the vault says, etc.).
+- Chunk IDs in Citations MUST be wrapped in backticks: `chunk_id`.
 - Only cite chunk IDs that appear in the SUPPORTING CHUNKS input.
 - Start your response with "## What the vault says".
 """

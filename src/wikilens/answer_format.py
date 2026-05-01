@@ -15,6 +15,7 @@ changes.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -46,18 +47,25 @@ def _wikilinks_from_draft(draft: AnswerDraft) -> list[str]:
 
 
 def _inject_related_notes(body: str, wikilinks: list[str]) -> str:
-    """Replace the empty '## Related notes' section with populated wikilinks.
+    """Replace the '## Related notes' section content with populated wikilinks.
 
     The drafter is instructed to leave this section empty; the pipeline
-    fills it here from the verified citation set (D10).
+    fills it here from the verified citation set (D10). The model sometimes
+    writes filler text ("EMPTY", "_none_", etc.) — we replace whatever
+    is between the header and the next ## section (or end-of-string).
     """
     if not wikilinks:
         return body
-    wikilink_lines = "\n".join(f"- [[{wl}]]" for wl in wikilinks)
-    return body.replace(
-        "## Related notes\n",
-        f"## Related notes\n\n{wikilink_lines}\n",
-        1,
+    wikilink_block = "\n".join(f"- [[{wl}]]" for wl in wikilinks)
+    # Match: the header line, any blank/filler lines, stopping before the
+    # next ## header.  We use a two-group capture so the replacement can
+    # reattach the next-section separator correctly.
+    return re.sub(
+        r"(## Related notes\n)(?:.*?)(\n##\s)",
+        rf"\g<1>\n{wikilink_block}\n\g<2>",
+        body,
+        count=1,
+        flags=re.DOTALL,
     )
 
 

@@ -340,7 +340,8 @@ def retrieve_support(
 # Sentence-ending pattern: period / ? / ! followed by space or end-of-string,
 # but not inside a code span or footnote definition line.
 _FOOTNOTE_REF_RE = re.compile(r"\[\^(\d+)\]")
-_FOOTNOTE_DEF_RE = re.compile(r"^\[\^(\d+)\]:\s*`([^`]+)`", re.MULTILINE)
+# Accept chunk_id with or without backtick-quoting — model sometimes omits them.
+_FOOTNOTE_DEF_RE = re.compile(r"^\[\^(\d+)\]:\s*`?([^`\s\—–-][^`\s]*)`?", re.MULTILINE)
 
 
 def _extract_what_vault_says(body: str) -> str:

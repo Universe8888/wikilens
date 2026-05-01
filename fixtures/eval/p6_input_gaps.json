@@ -1,0 +1,279 @@
+{
+  "clusters": [
+    {
+      "chunk_ids": [
+        "270c2ffdc00f1f4f",
+        "3d8e16949b1fdfc8",
+        "54681b5d50820214",
+        "589c181710ce4ac9",
+        "5ec12f6dc1ebbc35",
+        "68e120331499d3b9",
+        "70f9ad646bd19a4a",
+        "8ffc8f331897fcf9",
+        "aed93b2f8df3eff6",
+        "b10df32f40a5577f",
+        "f1eea5b0dcb83a8b",
+        "fd493e4924c363e7",
+        "ff28a7f679485759"
+      ],
+      "cluster_id": 1,
+      "size": 13
+    },
+    {
+      "chunk_ids": [
+        "08c2a3ce12d3d9ea",
+        "1087770319aebfb7",
+        "1c0a4f7096f1f2bd",
+        "395ed63ec2b2e6a1",
+        "41f7b4dbfc2857cb",
+        "673af28b684ef73f",
+        "7d71cf1d34afe98b",
+        "909b423838298fb7",
+        "950219ceef5fe7d3",
+        "ab13de9833f8e0fd",
+        "ab3cb686b20ae8da",
+        "bf340fc1d8fa22ff",
+        "e38c5dea3fa7462a"
+      ],
+      "cluster_id": 2,
+      "size": 13
+    },
+    {
+      "chunk_ids": [
+        "0253c5422e87fb2f",
+        "1128a6c4292ac5e9",
+        "4704e78bf830c27b",
+        "6b824d081494aa1b",
+        "6e7e6a92fa5ca5e5",
+        "a50090bc2680f77a",
+        "bc946726a339b6f1",
+        "d734923d4822c794",
+        "ec7700d940cb3c20"
+      ],
+      "cluster_id": 5,
+      "size": 9
+    },
+    {
+      "chunk_ids": [
+        "32074a32e48c5d31",
+        "814867b177f6a275",
+        "af2f666572141485",
+        "b85ecda56c69c17b",
+        "c5fd94c02a5c3013",
+        "fd7326bf5cafdc0e"
+      ],
+      "cluster_id": 3,
+      "size": 6
+    },
+    {
+      "chunk_ids": [
+        "0c8b08b8675af4e2",
+        "365fde74b02a0edf",
+        "3801245da62fde63",
+        "a9e149b7206c4b09",
+        "c139f44bf674612a"
+      ],
+      "cluster_id": 4,
+      "size": 5
+    },
+    {
+      "chunk_ids": [
+        "24beeb90ba27068d",
+        "6b6fc1cdd281f48d",
+        "6b86dcfe593270ed",
+        "9f9675e0733f82a9",
+        "c94a5806606c4177"
+      ],
+      "cluster_id": 6,
+      "size": 5
+    },
+    {
+      "chunk_ids": [
+        "2e53ab4e8c5a4a82",
+        "4e558948bbc372a1",
+        "ae48d12a2eac4b7b",
+        "af8a9dcf257ea4a7"
+      ],
+      "cluster_id": 0,
+      "size": 4
+    }
+  ],
+  "findings": [
+    {
+      "cluster_id": 2,
+      "cluster_size": 13,
+      "gap_question": "What was the role of Calvinism in the events leading up to the Thirty Years War?",
+      "rationale": "The note mentioning the Peace of Augsburg implies unresolved tensions, including Calvinism, which was spreading by the early seventeenth century, but doesn't explain Calvinism's impact on the events leading to the war.",
+      "suggested_note_title": "calvinism-and-thirty-years-war",
+      "supporting_chunk_ids": [
+        "08c2a3ce12d3d9ea"
+      ]
+    },
+    {
+      "cluster_id": 2,
+      "cluster_size": 13,
+      "gap_question": "What were the specific terms of the 1648 settlement that recognized Dutch independence and detailed territorial arrangements?",
+      "rationale": "The note on Dutch-Spanish negotiations states the terms of Dutch independence and territorial arrangements in 1648 remain unspecified.",
+      "suggested_note_title": "1648-dutch-independence-terms",
+      "supporting_chunk_ids": [
+        "395ed63ec2b2e6a1"
+      ]
+    },
+    {
+      "cluster_id": 2,
+      "cluster_size": 13,
+      "gap_question": "How were the territorial and religious terms of the Peace of Westphalia specifically decided?",
+      "rationale": "The note on the Peace of Westphalia refers to territorial and religious terms that defined Europe's political map, but doesn't detail how these were specifically decided.",
+      "suggested_note_title": "territorial-terms-peace-of-westphalia",
+      "supporting_chunk_ids": [
+        "7d71cf1d34afe98b"
+      ]
+    },
+    {
+      "cluster_id": 5,
+      "cluster_size": 9,
+      "gap_question": "What is the process of seasoning a pan, and why is it necessary for certain types like cast iron and carbon steel?",
+      "rationale": "The note on carbon steel mentions it requires seasoning, but does not explain what seasoning involves or its purpose.",
+      "suggested_note_title": "seasoning-cast-iron-carbon-steel",
+      "supporting_chunk_ids": [
+        "6e7e6a92fa5ca5e5"
+      ]
+    },
+    {
+      "cluster_id": 5,
+      "cluster_size": 9,
+      "gap_question": "What are the specific advantages and disadvantages of different pan materials for heat retention and distribution?",
+      "rationale": "The notes mention the importance of pan material in cooking, but do not provide a detailed comparison of the heat retention and distribution properties of various materials.",
+      "suggested_note_title": "pan-material-heat-properties",
+      "supporting_chunk_ids": [
+        "1128a6c4292ac5e9",
+        "6b824d081494aa1b",
+        "6e7e6a92fa5ca5e5",
+        "a50090bc2680f77a",
+        "bc946726a339b6f1"
+      ]
+    },
+    {
+      "cluster_id": 5,
+      "cluster_size": 9,
+      "gap_question": "How does the technique of using browned deposits or 'fond' in cooking enhance flavor?",
+      "rationale": "The note on conduction mentions browned deposits and using them in a sauce is a distinct topic, but it does not explain how this technique enhances flavor.",
+      "suggested_note_title": "using-fond-for-flavor",
+      "supporting_chunk_ids": [
+        "1128a6c4292ac5e9"
+      ]
+    },
+    {
+      "cluster_id": 3,
+      "cluster_size": 6,
+      "gap_question": "Who was Louis-Camille Maillard and what was his contribution to chemistry?",
+      "rationale": "The Maillard reaction is named after Louis-Camille Maillard, but his background and contributions are not explained.",
+      "suggested_note_title": "louis-camille-maillard-biography",
+      "supporting_chunk_ids": [
+        "af2f666572141485"
+      ]
+    },
+    {
+      "cluster_id": 3,
+      "cluster_size": 6,
+      "gap_question": "What is the specific technique for incorporating browned bits from a pan into a sauce?",
+      "rationale": "The note mentions the technique of incorporating browned bits into a sauce but does not detail the process.",
+      "suggested_note_title": "deglazing-techniques",
+      "supporting_chunk_ids": [
+        "b85ecda56c69c17b"
+      ]
+    },
+    {
+      "cluster_id": 4,
+      "cluster_size": 5,
+      "gap_question": "What are the specific benefits and trade-offs of using Django's default synchronous ORM compared to the new async ORM introduced in Django 4.1?",
+      "rationale": "The note titled 'a9e149b7206c4b09' mentions that Django 4.1 introduced async ORM support and hints at different handling methods by modern Python web frameworks, suggesting a trade-off discussion is needed.",
+      "suggested_note_title": "django-async-vs-sync-orm",
+      "supporting_chunk_ids": [
+        "a9e149b7206c4b09"
+      ]
+    },
+    {
+      "cluster_id": 4,
+      "cluster_size": 5,
+      "gap_question": "How does `select_related()` differ from `prefetch_related()` in terms of performance and use cases?",
+      "rationale": "The note titled '365fde74b02a0edf' describes the basic operation of `select_related()` and `prefetch_related()` but does not elaborate on detailed performance implications or when to use each.",
+      "suggested_note_title": "select-related-vs-prefetch-related",
+      "supporting_chunk_ids": [
+        "365fde74b02a0edf"
+      ]
+    },
+    {
+      "cluster_id": 6,
+      "cluster_size": 5,
+      "gap_question": "What is a WSGI server and how does it interact with Flask?",
+      "rationale": "The note [9f9675e0733f82a9] references a production WSGI server like Gunicorn, but does not define what a WSGI server is or how it interacts with Flask.",
+      "suggested_note_title": "wsgi-server-flask",
+      "supporting_chunk_ids": [
+        "9f9675e0733f82a9"
+      ]
+    },
+    {
+      "cluster_id": 6,
+      "cluster_size": 5,
+      "gap_question": "How do signed cookies work in Flask sessions?",
+      "rationale": "The note [6b6fc1cdd281f48d] mentions that Flask uses signed cookies for the `session` object, but does not explain how they work.",
+      "suggested_note_title": "flask-signed-cookies",
+      "supporting_chunk_ids": [
+        "6b6fc1cdd281f48d"
+      ]
+    },
+    {
+      "cluster_id": 6,
+      "cluster_size": 5,
+      "gap_question": "What is the difference between multi-threaded and multi-process deployment in Flask?",
+      "rationale": "The note [9f9675e0733f82a9] suggests the need for either a multi-threaded or multi-process deployment for high-traffic applications, but does not explain the difference between these deployments.",
+      "suggested_note_title": "flask-thread-vs-process",
+      "supporting_chunk_ids": [
+        "9f9675e0733f82a9"
+      ]
+    },
+    {
+      "cluster_id": 0,
+      "cluster_size": 4,
+      "gap_question": "What is the ASGI foundation in FastAPI and how does it differ from WSGI?",
+      "rationale": "The note mentions 'ASGI foundation' but does not explain what ASGI is or how it differs from WSGI.",
+      "suggested_note_title": "asgi-vs-wsgi-in-fastapi",
+      "supporting_chunk_ids": [
+        "2e53ab4e8c5a4a82",
+        "af8a9dcf257ea4a7"
+      ]
+    },
+    {
+      "cluster_id": 0,
+      "cluster_size": 4,
+      "gap_question": "How does FastAPI use Pydantic for data validation and serialization?",
+      "rationale": "The notes reference Pydantic for data validation but do not detail how it is implemented in FastAPI.",
+      "suggested_note_title": "pydantic-in-fastapi",
+      "supporting_chunk_ids": [
+        "4e558948bbc372a1",
+        "af8a9dcf257ea4a7"
+      ]
+    },
+    {
+      "cluster_id": 0,
+      "cluster_size": 4,
+      "gap_question": "What are the advantages of using FastAPI's automatic OpenAPI documentation?",
+      "rationale": "While the notes mention automatic OpenAPI documentation, they do not discuss the benefits of this feature.",
+      "suggested_note_title": "fastapi-openapi-docs",
+      "supporting_chunk_ids": [
+        "4e558948bbc372a1",
+        "af8a9dcf257ea4a7"
+      ]
+    }
+  ],
+  "generator": "openai",
+  "schema_version": 1,
+  "stats": {
+    "chunks": 57,
+    "clusters": 7,
+    "clusters_processed": 7,
+    "findings": 16
+  },
+  "vault_root": "fixtures\\gaps_vault"
+}
