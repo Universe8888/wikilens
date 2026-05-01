@@ -112,9 +112,18 @@ under the MIT license.
   (10 gold answer sketches, 3–5 key claims per gap from `p5_ground_truth.json`).
   Then P6.4 (eval harness), P6.5 (ship).
 
-### P7
+### P7 – P12
 
-Roadmap in `README.md`. Do not touch until P6 ships.
+Full phase list with launch hooks and eval targets: [`ROADMAP.md`](./ROADMAP.md).
+
+- **P7** — PyPI + installer polish (`v0.7.0`). Gate for any public launch.
+- **P8** — Temporal Drift Detector. Walks vault `git log` for belief changes over time.
+- **P9** — Unnamed Concept Detector. Finds clusters paraphrasing the same unnamed idea.
+- **P10** — Epistemic Confidence Mapper. Classifies claims on hypothesis → verified fact.
+- **P11** — Obsidian Plugin. Thin wrapper over the CLI; marketplace discovery.
+- **P12** — v1.0 launch. Product Hunt + Show HN + `r/ObsidianMD`.
+
+Do not touch P7+ until P6 ships.
 
 ## Hard constraints (do not violate)
 
@@ -157,10 +166,11 @@ In this order:
 ## What to do when P6 completes
 
 1. Update this `HANDOFF.md` — bump "Last updated", move P6 to COMPLETE,
-   summarize the P7 plan.
+   summarize the P7 plan (PyPI + installer polish, per `ROADMAP.md`).
 2. Tag release `v0.6.0`.
 3. Append benchmark numbers for the Answer Generator to `BENCHMARK.md`.
-4. Suggest: "fresh chat for P7?"
+4. Suggest: "fresh chat for P7?" — P7 is the public-launch gate; P6 is
+   the last agent before the distribution layer.
 
 ## Glossary
 

@@ -43,15 +43,13 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 
 ## Roadmap
 
-| Phase | Goal | Status |
-|---|---|---|
-| P1 — Bootstrap | Repo, scaffold, manifesto | ✅ shipped |
-| P2 — RAG core | Markdown ingestion + local vector store + `query` CLI | ✅ shipped (`v0.2.0`) |
-| P3 — Link Auditor agent | Detect broken wikilinks, orphan notes, one-way links | ✅ shipped (`v0.3.0`) |
-| P4 — Contradiction Finder agent | Multi-hop retrieval + LLM-judge for semantic conflicts | ✅ shipped (`v0.4.0`) |
-| P5 — Gap Generator agent | K-means clustering + LLM to surface unanswered questions | ✅ shipped (`v0.5.0`) |
-| P6 — Answer Generator | Close gaps by drafting note stubs from retrieved evidence | — |
-| P7 — Polish + launch | Docs site, install guide, launch thread | — |
+Shipped: **P1 – P5** (RAG core, Link Auditor, Contradiction Finder, Gap Generator, all with hand-labeled evals).
+
+In progress: **P6 — Answer Generator** (`v0.6.0`).
+
+Next: **P7 — PyPI + installer polish**, then **P8 — Temporal Drift Detector**, **P9 — Unnamed Concept Detector**, **P10 — Epistemic Confidence Mapper**, **P11 — Obsidian plugin**, **P12 — v1.0 launch**.
+
+Full phase list, launch hooks, and eval targets in [`ROADMAP.md`](./ROADMAP.md).
 
 ## Design principles
 
