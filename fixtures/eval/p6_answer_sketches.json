@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "description": "Gold answer sketches for the 10 P5 gold gaps. Each sketch lists 3-5 key claims a competent stub should cover + a required_chunks hint (SHA-256 chunk IDs matching fixtures/gaps_vault/ ingestion). Used by scripts/eval_p6.py to judge coverage. Claims are semantic — the LLM judge matches on meaning, not literal wording. Claims combine what the vault implies with public-domain knowledge the stub should legitimately supply (this is the gap-closing work).",
+  "faithfulness_threshold": 4,
+  "coverage_threshold": 4,
+  "attribution_threshold": 4,
+  "structure_threshold": 4,
+  "attribution_rate_threshold": 0.90,
+  "sketches": [
+    {
+      "gap_id": "calvin-cycle",
+      "gold_question": "What is the Calvin cycle and how does it use the ATP and NADPH produced by the light reactions to fix carbon dioxide into organic molecules?",
+      "key_claims": [
+        "The Calvin cycle is the carbon-fixation (dark-reaction) stage of photosynthesis and occurs in the stroma of the chloroplast.",
+        "It consumes the ATP and NADPH produced by the light reactions in the thylakoid membranes.",
+        "The enzyme RuBisCO catalyzes the fixation of CO₂ onto ribulose-1,5-bisphosphate (RuBP).",
+        "The cycle proceeds in three phases: carboxylation, reduction, and regeneration of RuBP.",
+        "Net output is a three-carbon sugar (G3P) used to build glucose and other organic molecules."
+      ],
+      "required_chunks": [
+        "ff28a7f679485759",
+        "270c2ffdc00f1f4f",
+        "fd493e4924c363e7",
+        "5ec12f6dc1ebbc35",
+        "f1eea5b0dcb83a8b",
+        "589c181710ce4ac9"
+      ],
+      "notes": "Vault names the inputs (ATP/NADPH) and location (stroma) and attributes the cycle to Calvin/Benson/Bassham but defers the mechanism. A competent stub must supply RuBisCO, the three-phase structure, and the G3P output from general knowledge while citing vault chunks for the inputs and location."
+    },
+    {
+      "gap_id": "async-await-python-web",
+      "gold_question": "How does Python's async/await mechanism work, and why does it improve performance for I/O-bound web requests compared to synchronous WSGI frameworks?",
+      "key_claims": [
+        "async/await is Python's syntax for writing coroutines that cooperatively yield control to an event loop while awaiting I/O.",
+        "An event loop multiplexes many concurrent coroutines on a single thread, resuming each when its awaited I/O completes.",
+        "For I/O-bound workloads (DB queries, external API calls) this avoids blocking a thread per request, unlike synchronous WSGI where each request occupies a worker until it returns.",
+        "async does not speed up CPU-bound work because coroutines share one thread; event-loop benefits apply only when tasks spend most of their time waiting.",
+        "Synchronous code called from async handlers must be dispatched to a thread pool to avoid stalling the event loop."
+      ],
+      "required_chunks": [
+        "c94a5806606c4177",
+        "9f9675e0733f82a9",
+        "d755e9860109143b",
+        "a9e149b7206c4b09",
+        "ae48d12a2eac4b7b",
+        "2e53ab4e8c5a4a82"
+      ],
+      "notes": "Vault contrasts WSGI (Flask/Django) with ASGI (FastAPI) and explicitly defers the async/await mechanism. Stub must explain the event loop + cooperative-yield model + the I/O-bound vs CPU-bound distinction."
+    },
+    {
+      "gap_id": "peace-of-westphalia-terms",
+      "gold_question": "What were the specific territorial and religious terms of the Peace of Westphalia, and how did they redraw the map of Europe in 1648?",
+      "key_claims": [
+        "The Peace of Westphalia extended the Peace of Augsburg's religious toleration to include Calvinism alongside Lutheranism and Catholicism.",
+        "France gained territory in Alsace; Sweden gained Western Pomerania and other Baltic territories plus war indemnities.",
+        "The Dutch Republic and the Swiss Confederation were formally recognized as independent of the Holy Roman Empire.",
+        "The settlement confirmed the territorial sovereignty of the ~300 German princes within the Holy Roman Empire, weakening imperial central authority.",
+        "The treaties established the principle of state sovereignty and non-interference that underpins the modern Westphalian system of international relations."
+      ],
+      "required_chunks": [
+        "950219ceef5fe7d3",
+        "bf340fc1d8fa22ff",
+        "909b423838298fb7",
+        "7d71cf1d34afe98b",
+        "395ed63ec2b2e6a1"
+      ],
+      "notes": "Vault names the two treaties (Osnabrück and Münster), the cities, and the 1643-1648 timeline but explicitly defers the specific terms. Stub must supply the Alsace/Pomerania territorial changes, Calvinism recognition, Dutch/Swiss independence, and the sovereignty principle."
+    },
+    {
+      "gap_id": "photosystem-mechanisms",
+      "gold_question": "What are the specific roles of Photosystem I and Photosystem II in the light reactions, and how do they work together to transfer electrons and produce ATP and NADPH?",
+      "key_claims": [
+        "PSII absorbs light at ~680 nm (P680) and uses the energy to split water (photolysis), releasing O₂ and supplying electrons to the chain.",
+        "Electrons from PSII flow through an electron transport chain (including plastoquinone and cytochrome b6f) that pumps protons into the thylakoid lumen, driving ATP synthesis.",
+        "PSI absorbs light at ~700 nm (P700) and re-energizes the electrons, which then reduce NADP+ to NADPH via ferredoxin and NADP+ reductase.",
+        "The two photosystems operate in series (the 'Z-scheme'): PSII feeds electrons to PSI, and PSI feeds them to NADP+.",
+        "This linear (non-cyclic) electron flow produces both ATP and NADPH; cyclic flow around PSI alone produces only ATP."
+      ],
+      "required_chunks": [
+        "fd493e4924c363e7",
+        "b10df32f40a5577f",
+        "8ffc8f331897fcf9",
+        "ff28a7f679485759",
+        "270c2ffdc00f1f4f"
+      ],
+      "notes": "Vault names PSI and PSII and mentions reaction-center chlorophyll a and the electron transport chain but never describes their distinct roles. Stub must explain the Z-scheme, photolysis at PSII, and NADPH generation at PSI."
+    },
+    {
+      "gap_id": "spanish-dutch-1648",
+      "gold_question": "What were the specific terms of the 1648 treaty between Spain and the Dutch Republic, and how did Spain formally recognize Dutch independence?",
+      "key_claims": [
+        "The Treaty of Münster (signed January 30, 1648) between Spain and the Dutch Republic formally ended the Eighty Years War.",
+        "Spain formally recognized the independence and sovereignty of the United Provinces (the Dutch Republic), abandoning its claim to the northern Netherlands.",
+        "The treaty confirmed Dutch control over the territories they held at the time of signing, including a closed Scheldt estuary that commercially strangled Antwerp to Amsterdam's benefit.",
+        "The Dutch retained their overseas colonial conquests from the Portuguese/Spanish empire (e.g., parts of the East Indies and Brazil), recognized by Spain.",
+        "The Spanish-Dutch treaty was negotiated separately from the Holy Roman Empire / Sweden / France settlements but signed as part of the same Westphalia package."
+      ],
+      "required_chunks": [
+        "395ed63ec2b2e6a1",
+        "950219ceef5fe7d3",
+        "bf340fc1d8fa22ff",
+        "909b423838298fb7"
+      ],
+      "notes": "Vault lists the Treaty of Münster as one of the two Westphalia treaties and notes Dutch independence was recognized in 1648 but defers specific terms. Stub must supply the January 1648 date, sovereignty recognition, the Scheldt closure, and the colonial territorial outcomes."
+    },
+    {
+      "gap_id": "cast-iron-seasoning",
+      "gold_question": "What is the seasoning process for cast iron pans, why is it necessary, and how should it be maintained?",
+      "key_claims": [
+        "Seasoning is a polymerized layer of oil bonded to the iron surface, created by heating a thin coat of fat past its smoke point.",
+        "The polymerized layer fills the pores in the cast iron, producing a naturally non-stick surface and protecting the bare iron from rust.",
+        "Initial seasoning is built by applying a very thin layer of high-smoke-point oil and baking the pan upside-down at ~230–260°C (450–500°F) for about an hour, repeated several times.",
+        "Maintenance: cook with fat, avoid long soaks in water or harsh detergents, dry immediately after washing, and periodically re-oil; acidic foods and scrubbing can strip the layer.",
+        "Carbon steel pans are seasoned and maintained by essentially the same process."
+      ],
+      "required_chunks": [
+        "6b824d081494aa1b",
+        "c5fd94c02a5c3013",
+        "bc946726a339b6f1"
+      ],
+      "notes": "Vault states cast iron (and carbon steel) 'requires regular seasoning' and that seasoning provides a non-stick surface but never explains the polymerization mechanism or the procedure. Stub must supply the oil-polymerization chemistry, the bake-at-high-heat procedure, and maintenance rules."
+    },
+    {
+      "gap_id": "reducing-sugars-definition",
+      "gold_question": "What are reducing sugars, which common sugars qualify as reducing sugars, and why are they specifically involved in the Maillard reaction?",
+      "key_claims": [
+        "A reducing sugar is a sugar whose open-chain form has a free aldehyde or ketone group (an anomeric carbon not locked in a glycosidic bond), allowing it to act as a reducing agent.",
+        "All monosaccharides (glucose, fructose, galactose) are reducing sugars; disaccharides like lactose and maltose are reducing, but sucrose is not (both anomeric carbons are glycosidically bonded).",
+        "In the Maillard reaction the free carbonyl group of the reducing sugar attacks the amine nitrogen of an amino acid, forming an N-glycosylamine — the opening step that leads to the Amadori rearrangement and downstream browning products.",
+        "Non-reducing sugars such as sucrose cannot initiate the Maillard reaction directly; they must first hydrolyze into their reducing monosaccharide components.",
+        "This is why sucrose-rich foods brown differently from foods with free glucose/fructose/lactose at the same temperature."
+      ],
+      "required_chunks": [
+        "af2f666572141485",
+        "814867b177f6a275",
+        "fd7326bf5cafdc0e"
+      ],
+      "notes": "Vault names 'reducing sugars' and examples (glucose, fructose, lactose) but never defines the functional-group basis or the mechanistic role. Stub must supply the free-carbonyl definition, the sucrose exclusion, and the carbonyl-amine condensation step."
+    },
+    {
+      "gap_id": "django-database-migrations",
+      "gold_question": "What are Django database migrations, how are they created and applied, and how do they keep the database schema synchronized with model changes?",
+      "key_claims": [
+        "Django migrations are Python files that describe incremental, versioned changes to the database schema derived from the ORM model definitions.",
+        "`python manage.py makemigrations` inspects model changes and auto-generates a migration file in each app's `migrations/` directory.",
+        "`python manage.py migrate` applies pending migrations in dependency order and records them in the `django_migrations` table so each is applied exactly once.",
+        "Migrations are committed to version control so every deployment replays the same schema history deterministically.",
+        "Data migrations (as opposed to schema migrations) can be written with `RunPython` to transform existing rows alongside schema changes."
+      ],
+      "required_chunks": [
+        "0c8b08b8675af4e2",
+        "c139f44bf674612a",
+        "3801245da62fde63"
+      ],
+      "notes": "Vault describes Django models (CharField, TextField, DateTimeField) but never mentions migrations — the mechanism that translates model changes into schema changes. Stub must supply makemigrations / migrate commands, the django_migrations ledger, and VCS-based replay semantics."
+    },
+    {
+      "gap_id": "wsgi-vs-asgi",
+      "gold_question": "What is the difference between WSGI and ASGI, and why does the ASGI architecture enable asynchronous request handling while WSGI does not?",
+      "key_claims": [
+        "WSGI (PEP 3333) is a synchronous interface: the server calls a single `application(environ, start_response)` callable, which must return the full response before the worker can handle another request.",
+        "ASGI is an asynchronous, event-driven interface: the server calls an `async` callable with `scope`, `receive`, and `send` channels, letting the application yield control while awaiting I/O.",
+        "Because WSGI workers are blocking, concurrency requires multiple threads or processes (e.g., Gunicorn workers); a single WSGI worker cannot handle overlapping I/O-bound requests.",
+        "An ASGI worker runs an event loop and can multiplex thousands of concurrent connections on one thread whenever they spend most of their time waiting on I/O.",
+        "ASGI also supports long-lived protocols (WebSockets, server-sent events) that WSGI's one-shot request/response model cannot express."
+      ],
+      "required_chunks": [
+        "c94a5806606c4177",
+        "9f9675e0733f82a9",
+        "4e558948bbc372a1",
+        "af8a9dcf257ea4a7"
+      ],
+      "notes": "Vault describes Flask as WSGI and FastAPI as ASGI but never explains the architectural difference. Stub must supply the sync-callable vs async-channels contract, the worker-per-request vs event-loop concurrency model, and the WebSocket capability."
+    },
+    {
+      "gap_id": "fond-and-deglazing",
+      "gold_question": "What is fond (the browned deposits left in a pan after searing), and how is the deglazing technique used to incorporate it into a sauce?",
+      "key_claims": [
+        "Fond is the layer of browned, caramelized protein and sugar residue that sticks to the pan after searing meat or vegetables at high heat — the concentrated product of the Maillard reaction on the pan surface.",
+        "Deglazing is the technique of adding liquid (typically wine, stock, or water) to a hot pan to dissolve the fond into the liquid.",
+        "Scraping the pan with a wooden spoon while the liquid simmers lifts the fond and releases its flavor compounds into the developing sauce.",
+        "The resulting deglazed liquid is the flavor base for classic pan sauces; it is usually reduced and finished with fat or aromatics.",
+        "Fond-forming pans are those that encourage sticking at high heat — cast iron, carbon steel, and stainless steel; non-stick coatings inhibit fond formation and therefore deglazing."
+      ],
+      "required_chunks": [
+        "af2f666572141485",
+        "b85ecda56c69c17b",
+        "d734923d4822c794",
+        "ec7700d940cb3c20",
+        "6b824d081494aa1b",
+        "bc946726a339b6f1",
+        "a50090bc2680f77a"
+      ],
+      "notes": "Vault calls browned deposits 'a key element of many classic cooking methods' and mentions 'adding liquid to dissolve' them — strongly implying deglazing without naming it. Stub must name fond, name deglazing, describe the scrape-and-reduce procedure, and tie pan choice (stick-forming materials) to the technique."
+    }
+  ]
+}
