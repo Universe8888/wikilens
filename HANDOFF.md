@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-01 (P6.1 + P6.2 complete, in progress)
+**Last updated:** 2026-05-01 (P6 complete, tag `v0.6.0`)
 
 ---
 
@@ -96,7 +96,7 @@ under the MIT license.
 - **224/224 tests pass.** +71 new tests since P4.
 - Decisions log: `docs/p5-decisions.md`. Benchmark: `BENCHMARK.md`.
 
-### P6 — Answer Generator (IN PROGRESS — P6.1 + P6.2 complete)
+### P6 — Answer Generator (COMPLETE, 2026-05-01, tag `v0.6.0`)
 
 - `wikilens answer <vault> --gaps <gap-json>` consumes `gap --json` output,
   retrieves supporting chunks per gap, drafts structured note stubs.
@@ -106,11 +106,11 @@ under the MIT license.
 - `MockDrafter` / `OpenAIDrafter` / `ClaudeDrafter` — default `openai/gpt-4o`.
 - `check_attribution` — automated parser verifying every `[^N]` resolves to a
   retrieved chunk ID. No LLM.
-- **313/313 tests pass** as of P6.2 (`b124935`).
-- SDD: `docs/p6-plan.md`. Locked eval input: `fixtures/eval/p6_input_gaps.json`.
-- **Next step: P6.3** — hand-write `fixtures/eval/p6_answer_sketches.json`
-  (10 gold answer sketches, 3–5 key claims per gap from `p5_ground_truth.json`).
-  Then P6.4 (eval harness), P6.5 (ship).
+- **Pass rate = 0.80** (8/10 gold gaps, all 4 axes ≥ 4). Attribution rate = 1.00.
+  Wall clock 90s for 10 gaps. **313/313 tests pass.**
+- Decisions log: `docs/p6-decisions.md`. Benchmark: `BENCHMARK.md`.
+- Gold eval fixture: `fixtures/eval/p6_answer_sketches.json` (10 sketches).
+  Eval harness: `scripts/eval_p6.py`.
 
 ### P7 – P12
 
@@ -163,14 +163,14 @@ In this order:
 8. `src/wikilens/cli.py` — current CLI surface
 9. `gotchas.md` — failure register (G1–G5)
 
-## What to do when P6 completes
+## What to do when P7 starts
 
-1. Update this `HANDOFF.md` — bump "Last updated", move P6 to COMPLETE,
-   summarize the P7 plan (PyPI + installer polish, per `ROADMAP.md`).
-2. Tag release `v0.6.0`.
-3. Append benchmark numbers for the Answer Generator to `BENCHMARK.md`.
-4. Suggest: "fresh chat for P7?" — P7 is the public-launch gate; P6 is
-   the last agent before the distribution layer.
+P7 — **PyPI + installer polish** (per `ROADMAP.md`). This is the public-launch gate:
+`pip install wikilens` from PyPI, clean first-run UX, CI/CD pipeline.
+
+1. Read `ROADMAP.md` for P7 scope.
+2. Start a fresh chat with updated HANDOFF prompt.
+3. Tag `v0.7.0` locally when P7 ships.
 
 ## Glossary
 

@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Pre-alpha · P5 shipped (`v0.5.0`). `ingest`, `query`, `audit`, `contradict`, and `gap` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Pre-alpha · P6 shipped (`v0.6.0`). `ingest`, `query`, `audit`, `contradict`, `gap`, and `answer` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
@@ -43,9 +43,7 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 
 ## Roadmap
 
-Shipped: **P1 – P5** (RAG core, Link Auditor, Contradiction Finder, Gap Generator, all with hand-labeled evals).
-
-In progress: **P6 — Answer Generator** (`v0.6.0`).
+Shipped: **P1 – P6** (RAG core, Link Auditor, Contradiction Finder, Gap Generator, Answer Generator, all with hand-labeled evals).
 
 Next: **P7 — PyPI + installer polish**, then **P8 — Temporal Drift Detector**, **P9 — Unnamed Concept Detector**, **P10 — Epistemic Confidence Mapper**, **P11 — Obsidian plugin**, **P12 — v1.0 launch**.
 
@@ -96,7 +94,7 @@ a pre-commit / CI gate. Index defaults to `.wikilens/db` inside the current
 directory; override with `--db <path>`.
 
 ```bash
-# Contradict — find conflicting chunk pairs (requires ANTHROPIC_API_KEY).
+# Contradict — find conflicting chunk pairs.
 pip install -e '.[judge]'
 wikilens contradict ./my-vault --judge claude                    # full run
 wikilens contradict ./my-vault --judge none                      # dry-run (no API)
@@ -107,11 +105,19 @@ wikilens gap ./my-vault --judge claude                           # full run
 wikilens gap ./my-vault --judge none                             # dry-run (no API)
 wikilens gap ./my-vault --judge claude --max-clusters 10         # budget cap
 wikilens gap ./my-vault --judge claude --top-gaps-per-cluster 2  # fewer per cluster
+
+# Answer — for each gap, retrieve vault evidence and draft a note stub.
+wikilens gap ./my-vault --judge openai --json > gaps.json        # generate gaps first
+wikilens answer ./my-vault --gaps gaps.json --judge openai       # draft stubs to stdout
+wikilens answer ./my-vault --gaps gaps.json --judge openai \
+    --write --out ./stubs/                                       # write .md files
+wikilens answer ./my-vault --gaps gaps.json --judge none         # dry-run (no API)
 ```
 
-`contradict` and `gap` both exit 0 when nothing found, 1 when findings are
-reported. Set `ANTHROPIC_API_KEY` in your shell or in a `.env` file at the
-repo root before running `--judge claude`.
+`contradict`, `gap`, and `answer` exit 0 when clean, 1 when findings / partial
+coverage reported. `answer` exits 2 on bad input or file collisions when
+`--write` is set. Set `OPENAI_API_KEY` (or `ANTHROPIC_API_KEY` for
+`--judge claude`) in your shell or in a `.env` file at the repo root.
 
 ## Benchmark
 
@@ -125,13 +131,16 @@ Four eval suites, all reproducible from a fresh clone.
 
 **Gap generator** (P5): Cluster-stage recall = 1.00, matcher-stage F1 = 0.65 on 10 gold gaps. All 10 gold gaps surfaced by some cluster.
 
+**Answer generator** (P6): Pass rate = 0.80 (8/10 drafts pass all 4 axes: faithfulness, coverage, attribution quality, stub structure). Attribution rate = 1.00 (automated). Wall clock 90s for 10 gaps.
+
 See [`BENCHMARK.md`](./BENCHMARK.md) for full tables. Reproduce any suite:
 
 ```bash
-# P5 gap generator
+# P6 answer generator
 pip install -e '.[dev,judge]'
+rm -rf .wikilens_p5_eval
 wikilens ingest fixtures/gaps_vault --db .wikilens_p5_eval/db
-python scripts/eval_p5.py --judge claude
+python scripts/eval_p6.py --judge openai
 ```
 
 ## Writing / research
