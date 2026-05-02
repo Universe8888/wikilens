@@ -112,6 +112,28 @@ def test_ingest_picks_up_new_file_on_rerun(tmp_path: Path, embedder: BGEEmbedder
     assert store.count() == r2.chunks_emitted
 
 
+def test_ingest_full_rebuild_removes_deleted_file_chunks(tmp_path: Path, embedder: BGEEmbedder):
+    vault = tmp_path / "vault"
+    vault.mkdir()
+    deleted = _make_note(vault, "delete-me.md", "# Delete Me\n\nold content that should vanish\n")
+    _make_note(vault, "keep-me.md", "# Keep Me\n\ncontent that should remain\n")
+
+    db = tmp_path / "db"
+    first = ingest_vault(vault, db_path=db, embedder=embedder)
+    assert first.chunks_emitted >= 2
+
+    deleted.unlink()
+    second = ingest_vault(vault, db_path=db, embedder=embedder)
+
+    store = LanceDBStore(db_path=db, dim=embedder.dim)
+    rows = store._get_or_create_table().to_arrow().to_pylist()  # type: ignore[attr-defined]
+    source_rels = {row["source_rel"] for row in rows}
+
+    assert store.count() == second.chunks_emitted
+    assert "keep-me.md" in source_rels
+    assert "delete-me.md" not in source_rels
+
+
 def test_ingest_flags_frontmatter_errors(tmp_path: Path, embedder: BGEEmbedder):
     vault = tmp_path / "vault"
     vault.mkdir()

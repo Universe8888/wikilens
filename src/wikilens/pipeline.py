@@ -90,6 +90,9 @@ def ingest_vault(
     if store is None:
         store = LanceDBStore(db_path=db_path, dim=embedder.dim)
 
+    if isinstance(store, LanceDBStore):
+        store.reset()
+
     indexed = 0
     if chunks:
         # Batched embedding so we don't blow memory on large vaults.

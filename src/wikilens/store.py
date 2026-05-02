@@ -162,6 +162,16 @@ class LanceDBStore:
         """Row count. Raises on corruption — callers decide how to interpret."""
         return self._get_or_create_table().count_rows()
 
+    def reset(self) -> None:
+        """Drop and recreate the backing table for documented full rebuild semantics."""
+        raw = self._db.list_tables()
+        names = getattr(raw, "tables", raw)
+        if self._table_name in names:
+            self._db.drop_table(self._table_name)
+        self._table = None
+        self._fts_dirty = True
+        self._get_or_create_table()
+
     def ensure_fts_index(self) -> None:
         """Build (or rebuild) the FTS index. Idempotent; cheap if already built."""
         if not self._fts_dirty:
