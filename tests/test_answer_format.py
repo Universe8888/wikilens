@@ -17,6 +17,7 @@ from wikilens.answer import (
 from wikilens.answer_format import (
     JSON_SCHEMA_VERSION,
     CollisionError,
+    UnsafeStubTitleError,
     format_json,
     format_markdown,
     render_stub,
@@ -257,6 +258,33 @@ def test_write_stubs_no_partial_write_on_collision(tmp_path: Path):
     with pytest.raises(CollisionError):
         write_stubs(report, tmp_path, generated_at=_FIXED_TS)
     assert not (tmp_path / "gap-a.md").exists()
+
+
+def test_write_stubs_rejects_parent_directory_title(tmp_path: Path):
+    report = _mk_report(_mk_draft("../escape"))
+
+    with pytest.raises(UnsafeStubTitleError, match="unsafe stub title"):
+        write_stubs(report, tmp_path, generated_at=_FIXED_TS)
+
+    assert not (tmp_path.parent / "escape.md").exists()
+
+
+def test_write_stubs_rejects_nested_path_title(tmp_path: Path):
+    report = _mk_report(_mk_draft("nested/escape"))
+
+    with pytest.raises(UnsafeStubTitleError, match="unsafe stub title"):
+        write_stubs(report, tmp_path, generated_at=_FIXED_TS)
+
+    assert not (tmp_path / "nested" / "escape.md").exists()
+
+
+def test_write_stubs_slugifies_plain_title(tmp_path: Path):
+    report = _mk_report(_mk_draft("Calvin Cycle?"))
+
+    written = write_stubs(report, tmp_path, generated_at=_FIXED_TS)
+
+    assert written == [tmp_path / "calvin-cycle.md"]
+    assert (tmp_path / "calvin-cycle.md").exists()
 
 
 def test_write_stubs_content_is_valid_stub(tmp_path: Path):

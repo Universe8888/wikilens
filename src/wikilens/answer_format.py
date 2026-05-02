@@ -228,6 +228,35 @@ class CollisionError(Exception):
         )
 
 
+class UnsafeStubTitleError(ValueError):
+    """Raised when a generated note title cannot be safely used as a filename."""
+
+
+_UNSAFE_PATH_CHARS_RE = re.compile(r"[\\/:\0]")
+_SLUG_RE = re.compile(r"[^A-Za-z0-9._-]+")
+
+
+def _safe_stub_filename(title: str) -> str:
+    raw = title.strip()
+    if not raw or raw in {".", ".."}:
+        raise UnsafeStubTitleError(f"unsafe stub title: {title!r}")
+    if _UNSAFE_PATH_CHARS_RE.search(raw):
+        raise UnsafeStubTitleError(f"unsafe stub title: {title!r}")
+
+    slug = _SLUG_RE.sub("-", raw).strip("._-").lower()
+    if not slug or slug in {".", ".."}:
+        raise UnsafeStubTitleError(f"unsafe stub title: {title!r}")
+    return f"{slug}.md"
+
+
+def _stub_target(out_dir: Path, title: str) -> Path:
+    root = out_dir.resolve()
+    target = (root / _safe_stub_filename(title)).resolve()
+    if not target.is_relative_to(root):
+        raise UnsafeStubTitleError(f"unsafe stub title: {title!r}")
+    return target
+
+
 def write_stubs(
     report: AnswerReport,
     out_dir: Path,
@@ -250,18 +279,16 @@ def write_stubs(
 
     to_write = [d for d in report.drafts if not d.skipped]
 
-    # Collision check first — all-or-nothing write.
-    collisions = [
-        out_dir / f"{d.gap.suggested_note_title}.md"
-        for d in to_write
-        if (out_dir / f"{d.gap.suggested_note_title}.md").exists()
-    ]
+    # Resolve safe targets first — raises UnsafeStubTitleError before any I/O.
+    targets = [(d, _stub_target(out_dir, d.gap.suggested_note_title)) for d in to_write]
+
+    # Collision check — all-or-nothing write.
+    collisions = [target for _draft, target in targets if target.exists()]
     if collisions:
         raise CollisionError(collisions)
 
     written: list[Path] = []
-    for draft in to_write:
-        target = out_dir / f"{draft.gap.suggested_note_title}.md"
+    for draft, target in targets:
         content = render_stub(draft, generated_at=ts)
         target.write_text(content, encoding="utf-8")
         written.append(target)
