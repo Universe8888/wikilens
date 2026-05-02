@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Pre-alpha · P6 shipped (`v0.6.0`). `ingest`, `query`, `audit`, `contradict`, `gap`, and `answer` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Pre-alpha · P6 shipped (`v0.6.1`). `ingest`, `query`, `audit`, `contradict`, `gap`, and `answer` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
