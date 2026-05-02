@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-01 (P6 complete, tag `v0.6.0`)
+**Last updated:** 2026-05-02 (P7 complete, tag `v0.7.0`, live on PyPI)
 
 ---
 
@@ -11,9 +11,10 @@ where the previous session left off, without re-litigating decisions already mad
 
 Start a new chat. Tell the agent:
 
-> We're continuing the `wikilens` project. Read `HANDOFF.md` for orientation,
-> then `docs/p4-decisions.md` for what P4 shipped. P5 (Gap Generator) is next
-> — plan it from scratch before writing code.
+> We're continuing the `wikilens` project at `C:\Projects2026\wikilens\`.
+> P7 is complete (`v0.7.0` live on PyPI). Read `.local/AGENT_BRIEFING.md`,
+> then `.local/HANDOFF.md`, then `HANDOFF.md`, then `ROADMAP.md`.
+> Next step: **P8** — Temporal Drift Detector. Plan before writing code.
 
 That's it.
 
@@ -96,7 +97,7 @@ under the MIT license.
 - **224/224 tests pass.** +71 new tests since P4.
 - Decisions log: `docs/p5-decisions.md`. Benchmark: `BENCHMARK.md`.
 
-### P6 — Answer Generator (COMPLETE, 2026-05-01, tag `v0.6.0`)
+### P6 — Answer Generator (COMPLETE, 2026-05-01, tag `v0.6.1`)
 
 - `wikilens answer <vault> --gaps <gap-json>` consumes `gap --json` output,
   retrieves supporting chunks per gap, drafts structured note stubs.
@@ -112,18 +113,23 @@ under the MIT license.
 - Gold eval fixture: `fixtures/eval/p6_answer_sketches.json` (10 sketches).
   Eval harness: `scripts/eval_p6.py`.
 
-### P7 – P12
+### P7 — PyPI + Installer Polish (COMPLETE, 2026-05-02, tag `v0.7.0`, live on PyPI)
+
+- `pip install wikilens` works from PyPI. OIDC trusted publishing via GitHub Actions.
+- CI matrix expanded to Ubuntu + Windows on Python 3.12.
+- First-run model-download notice on `ingest` and `query`.
+- CHANGELOG.md added; Development Status bumped to Alpha.
+- 317/317 tests pass.
+
+### P8 – P12
 
 Full phase list with launch hooks and eval targets: [`ROADMAP.md`](./ROADMAP.md).
 
-- **P7** — PyPI + installer polish (`v0.7.0`). Gate for any public launch.
 - **P8** — Temporal Drift Detector. Walks vault `git log` for belief changes over time.
 - **P9** — Unnamed Concept Detector. Finds clusters paraphrasing the same unnamed idea.
 - **P10** — Epistemic Confidence Mapper. Classifies claims on hypothesis → verified fact.
 - **P11** — Obsidian Plugin. Thin wrapper over the CLI; marketplace discovery.
 - **P12** — v1.0 launch. Product Hunt + Show HN + `r/ObsidianMD`.
-
-Do not touch P7+ until P6 ships.
 
 ## Hard constraints (do not violate)
 
