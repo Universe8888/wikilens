@@ -10,6 +10,30 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.8.0] — 2026-05-02
+
+### Added
+- **Temporal Drift Detector** (`wikilens drift <vault>`): walks the vault's `git log` and surfaces notes where beliefs shifted over time — not typo fixes, genuine semantic claim changes.
+- Claim extraction from note history: strips frontmatter, fenced code, headings, wikilinks; sentence-level or paragraph-level granularity (`--granularity`).
+- BGE cosine aligner pairs claims across adjacent revisions in `[τ_align, τ_identical)` window; three deterministic pre-filters (whitespace-only, list-reorder, Levenshtein typo).
+- Pluggable drift judge: `MockDriftJudge` (dry-run), `OpenAIDriftJudge` (`gpt-4o`, default), `ClaudeDriftJudge` (`claude-sonnet-4-6`). Output schema: `{drift, type, score 1-5, reasoning}`.
+- Drift types: `reversal`, `refinement`, `scope_change` — all counted as belief changes. `refinement` ("proven" → "may help") included per pre-kickoff decision.
+- Markdown report by default; `--json` for machine-readable output (`schema_version: 1`).
+- Exit 0 clean / 1 findings / 2 bad input — consistent with P3–P6 convention.
+- Cost-control flags: `--sample`, `--since`, `--min-score`, `--only`, hidden `--align-threshold` / `--identical-threshold`.
+- Hand-crafted eval fixture `fixtures/drift_vault/` (8 notes, 9 commits, `dotgit/` for safe tracking): 5 planted semantic drifts + 5 planted surface revisions.
+- Ground-truth `fixtures/eval/p8_ground_truth.json` (10 labeled events with full commit SHAs).
+- Eval harness `scripts/eval_p8.py`: restores fixture git history in a temp dir, scores precision/recall vs. gold, appends to `BENCHMARK.md`. Targets: precision ≥ 0.80, recall ≥ 0.80.
+- Fixture builder `scripts/build_drift_fixture.py` for reproducibility.
+- 106 new tests (4 test files); 413 total.
+- `docs/p8-decisions.md`: decisions log including known limitations.
+
+### Known limitations
+- `--since` flag is parsed but not yet wired into `git log` (G6 in `gotchas.md`; fix deferred to P8.5+).
+- Heavy renames / file splits not tracked (`git log --follow` limitation; documented in README).
+
+---
+
 ## [0.7.0] — 2026-05-02
 
 ### Added
@@ -102,7 +126,8 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - 36-note synthetic sample vault under `fixtures/sample_vault/`.
 - Eval harness `scripts/eval_p2.py`; query fixture `fixtures/eval/p2_queries.jsonl`.
 
-[Unreleased]: https://github.com/Universe8888/wikilens/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/Universe8888/wikilens/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/Universe8888/wikilens/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/Universe8888/wikilens/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/Universe8888/wikilens/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/Universe8888/wikilens/compare/v0.5.0...v0.6.0

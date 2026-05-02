@@ -2,7 +2,7 @@
 
 > Where `wikilens` is going. Every phase ships measurable capability and lands a launch artifact (writeup, demo, or distribution surface) so the project accumulates visible progress rather than vanishing into a long v1 march.
 
-**Current tip:** P6 shipped (`v0.6.1`). P7 is next.
+**Current tip:** P8 shipped (`v0.8.0`). P9 is next.
 
 ---
 
@@ -29,22 +29,18 @@ Close the gap loop. Given `wikilens gap` output, retrieve supporting evidence an
 - **Eval:** 4-axis LLM-judge rubric (faithfulness / coverage / attribution / structure) + automated attribution-rate check. Pass rate = 0.80, attribution rate = 1.00 on 10 gold gaps.
 - **Launch hook:** *"My vault told me what was missing. Then it wrote the first draft."*
 
----
-
-## In progress
-
 ### P7 — PyPI + Installer Polish · `v0.7.0`
-`pip install wikilens` from PyPI. Docs site, quickstart that works in under 2 minutes on a fresh machine, and a clean CI/CD path.
-
----
-
-## Next
+`pip install wikilens` from PyPI. OIDC trusted publishing via GitHub Actions. CI matrix: Ubuntu + Windows. First-run model-download notice.
 
 ### P8 — Temporal Drift Detector · `v0.8.0`
 Walk the `git log` of the vault. Surface notes where thinking has shifted semantically over time — not typo-level diffs, genuine belief changes.
 
-- **Eval:** Precision on a hand-labeled drift-vs-revision fixture (planted semantic changes + planted surface-only edits in the same vault).
+- **Eval:** 8-note fixture, 9-commit history, 5 planted drifts + 5 planted surface revisions. Targets: precision ≥ 0.80, recall ≥ 0.80.
 - **Launch hook:** *"I ran an AI over my git history. It found 12 beliefs I quietly abandoned."*
+
+---
+
+## Next
 
 ### P9 — Unnamed Concept Detector · `v0.9.0`
 Find clusters of notes that paraphrase the same idea without ever naming it. Propose the missing term.

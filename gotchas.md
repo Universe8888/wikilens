@@ -161,3 +161,31 @@ Arrow detour (`to_arrow().to_pylist()`) is the stable path. If a
 future version adds `Table.to_list()` directly, treat that as a
 nice-to-have simplification, not a bug fix — the Arrow form keeps
 working regardless.
+
+---
+
+## G6 — CLI flag parsed but not threaded into the pipeline
+
+**Phase:** P8, step 8.6 (discovered during decisions review)
+**Date:** 2026-05-02
+
+**Symptom:** `wikilens drift --since 2026-01-01` silently ignores the date;
+the full git history is walked regardless.
+
+**Root cause:** `_cmd_drift` reads `args.since` from argparse but never
+passes the value to `walk_note_revisions`, which constructs its `git log`
+command with no `--after` argument. The `--since` flag was designed in the
+SDD as a cost-control knob but its propagation through the pipeline was not
+implemented.
+
+**Fix:** In `_cmd_drift`, pass `since=args.since` down to a revised
+`walk_note_revisions(repo_root, rel, since=None)` signature; inside that
+function, append `f"--after={since}"` to the git log args when `since` is
+not `None`. Deferred to P8.5+.
+
+**When this bites again:** Any time a new CLI flag is added to `_build_parser`
+without a parallel change at every call site in the pipeline function it
+controls. Pattern to follow: write the pipeline function signature first
+(including the new parameter), then add the argparse arg, then thread
+`args.x` to the pipeline call. The type checker will surface missing params
+if the function signatures are annotated.

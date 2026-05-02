@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Alpha · P7 shipped (`v0.7.0`). `ingest`, `query`, `audit`, `contradict`, `gap`, and `answer` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Alpha · P8 shipped (`v0.8.0`). `ingest`, `query`, `audit`, `contradict`, `gap`, `answer`, and `drift` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
@@ -43,9 +43,9 @@ Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want mor
 
 ## Roadmap
 
-Shipped: **P1 – P6** (RAG core, Link Auditor, Contradiction Finder, Gap Generator, Answer Generator, all with hand-labeled evals).
+Shipped: **P1 – P8** (RAG core, Link Auditor, Contradiction Finder, Gap Generator, Answer Generator, PyPI polish, Temporal Drift Detector — all with hand-labeled evals).
 
-Next: **P7 — PyPI + installer polish**, then **P8 — Temporal Drift Detector**, **P9 — Unnamed Concept Detector**, **P10 — Epistemic Confidence Mapper**, **P11 — Obsidian plugin**, **P12 — v1.0 launch**.
+Next: **P9 — Unnamed Concept Detector**, **P10 — Epistemic Confidence Mapper**, **P11 — Obsidian plugin**, **P12 — v1.0 launch**.
 
 Full phase list, launch hooks, and eval targets in [`ROADMAP.md`](./ROADMAP.md).
 
@@ -134,6 +134,22 @@ coverage reported. `answer` exits 2 on bad input or file collisions when
 `--write` is set. Set `OPENAI_API_KEY` (or `ANTHROPIC_API_KEY` for
 `--judge claude`) in your shell or in a `.env` file at the repo root.
 
+```bash
+# Drift — surface notes where beliefs shifted over the vault's git history.
+wikilens drift ./my-vault                              # full history, OpenAI judge
+wikilens drift ./my-vault --judge none                 # dry-run (no API)
+wikilens drift ./my-vault --judge openai --sample 20   # cap API calls
+wikilens drift ./my-vault --json                       # machine-readable output
+wikilens drift ./my-vault --only chemistry.md          # restrict to one note
+wikilens drift ./my-vault --granularity paragraph      # coarser claim units
+```
+
+`drift` requires the vault to be inside a git repository. Exit 0 when no
+drift found, 1 when findings reported, 2 on bad input or missing git repo.
+Known limitation: `--since` is parsed but not yet applied to `git log`
+(fix in P8.5+). Heavy renames / file splits are not tracked (`git log --follow`
+limitation).
+
 ## Benchmark
 
 Four eval suites, all reproducible from a fresh clone.
@@ -147,6 +163,8 @@ Four eval suites, all reproducible from a fresh clone.
 **Gap generator** (P5): Cluster-stage recall = 1.00, matcher-stage F1 = 0.65 on 10 gold gaps. All 10 gold gaps surfaced by some cluster.
 
 **Answer generator** (P6): Pass rate = 0.80 (8/10 drafts pass all 4 axes: faithfulness, coverage, attribution quality, stub structure). Attribution rate = 1.00 (automated). Wall clock 90s for 10 gaps.
+
+**Temporal drift detector** (P8): Eval fixture: 8 notes, 9 commits, 5 planted drifts + 5 planted surface revisions. Targets: precision ≥ 0.80, recall ≥ 0.80. See `BENCHMARK.md` for measured numbers.
 
 See [`BENCHMARK.md`](./BENCHMARK.md) for full tables. Reproduce any suite:
 

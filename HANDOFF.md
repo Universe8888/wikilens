@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-02 (P7 complete, tag `v0.7.0`, live on PyPI)
+**Last updated:** 2026-05-02 (P8 complete, tag `v0.8.0`)
 
 ---
 
@@ -12,9 +12,9 @@ where the previous session left off, without re-litigating decisions already mad
 Start a new chat. Tell the agent:
 
 > We're continuing the `wikilens` project at `C:\Projects2026\wikilens\`.
-> P7 is complete (`v0.7.0` live on PyPI). Read `.local/AGENT_BRIEFING.md`,
+> P8 is complete (`v0.8.0` tagged locally, not pushed). Read `.local/AGENT_BRIEFING.md`,
 > then `.local/HANDOFF.md`, then `HANDOFF.md`, then `ROADMAP.md`.
-> Next step: **P8** — Temporal Drift Detector. Plan before writing code.
+> Next step: **P9** — Unnamed Concept Detector. Plan before writing code.
 
 That's it.
 
@@ -113,6 +113,18 @@ under the MIT license.
 - Gold eval fixture: `fixtures/eval/p6_answer_sketches.json` (10 sketches).
   Eval harness: `scripts/eval_p6.py`.
 
+### P8 — Temporal Drift Detector (COMPLETE, 2026-05-02, tag `v0.8.0`, not pushed)
+
+- `wikilens drift <vault>` walks the vault's `git log` and surfaces notes where beliefs shifted over time.
+- Git walker (subprocess, no GitPython), sentence-level claim extraction (frontmatter/fence/heading-stripped), BGE cosine aligner (τ=0.75/0.98), 3 deterministic filters, pluggable LLM drift judge.
+- Drift types: `reversal`, `refinement`, `scope_change`. All counted as belief changes.
+- `MockDriftJudge`, `OpenAIDriftJudge` (default gpt-4o), `ClaudeDriftJudge`.
+- Markdown + `--json` output, exit 0/1/2.
+- Eval fixture: `fixtures/drift_vault/` (8 notes, 9 commits, `dotgit/`). 10 labeled events.
+- Eval harness: `scripts/eval_p8.py`. Targets: precision ≥ 0.80, recall ≥ 0.80.
+- Known gap: `--since` flag parsed but not yet wired into `git log` (G6, deferred to P8.5+).
+- 413/413 tests pass.
+
 ### P7 — PyPI + Installer Polish (COMPLETE, 2026-05-02, tag `v0.7.0`, live on PyPI)
 
 - `pip install wikilens` works from PyPI. OIDC trusted publishing via GitHub Actions.
@@ -121,11 +133,10 @@ under the MIT license.
 - CHANGELOG.md added; Development Status bumped to Alpha.
 - 317/317 tests pass.
 
-### P8 – P12
+### P9 – P12
 
 Full phase list with launch hooks and eval targets: [`ROADMAP.md`](./ROADMAP.md).
 
-- **P8** — Temporal Drift Detector. Walks vault `git log` for belief changes over time.
 - **P9** — Unnamed Concept Detector. Finds clusters paraphrasing the same unnamed idea.
 - **P10** — Epistemic Confidence Mapper. Classifies claims on hypothesis → verified fact.
 - **P11** — Obsidian Plugin. Thin wrapper over the CLI; marketplace discovery.
