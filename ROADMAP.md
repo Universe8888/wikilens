@@ -2,7 +2,7 @@
 
 > Where `wikilens` is going. Every phase ships measurable capability and lands a launch artifact (writeup, demo, or distribution surface) so the project accumulates visible progress rather than vanishing into a long v1 march.
 
-**Current tip:** P5 shipped (`v0.5.0`). P6 in progress.
+**Current tip:** P6 shipped (`v0.6.0`). P7 is next.
 
 ---
 
@@ -23,23 +23,22 @@ Retrieval-based pair generation (O(n·k)), pluggable LLM judge (Claude / OpenAI)
 ### P5 — Gap Generator · `v0.5.0`
 K-means on chunk embeddings → per-cluster LLM generation → pinned-rubric matcher eval. **Cluster recall = 1.00**, matcher F1 = 0.65 on 10 gold gaps. Budgeted autonomy via `--min-cluster-size` / `--max-clusters` / `--sample`.
 
----
-
-## In progress
-
 ### P6 — Answer Generator · `v0.6.0`
 Close the gap loop. Given `wikilens gap` output, retrieve supporting evidence and draft note stubs that actually answer the identified questions. Stubs carry proof-carrying citations: every factual sentence carries a `[^N]` footnote that resolves to a retrieved `chunk_id`.
 
-- **Status:** P6.1 (plumbing) + P6.2 (cognitive kernel + prompt hardening) complete. P6.3 (gold answer sketches) next.
-- **Eval:** 4-axis LLM-judge rubric (faithfulness / coverage / attribution / structure) + automated attribution-rate check. Target: faithfulness ≥ 0.80.
+- **Eval:** 4-axis LLM-judge rubric (faithfulness / coverage / attribution / structure) + automated attribution-rate check. Pass rate = 0.80, attribution rate = 1.00 on 10 gold gaps.
 - **Launch hook:** *"My vault told me what was missing. Then it wrote the first draft."*
 
 ---
 
-## Next
+## In progress
 
 ### P7 — PyPI + Installer Polish · `v0.7.0`
-`pip install wikilens` from PyPI. Docs site (probably MkDocs Material). Quickstart that works in under 2 minutes on a fresh machine. **This is the gate for any public launch — no launch before this ships.** Converts the project from "clone + install-from-source" to "real tool someone can try without reading the README twice."
+`pip install wikilens` from PyPI. Docs site, quickstart that works in under 2 minutes on a fresh machine, and a clean CI/CD path.
+
+---
+
+## Next
 
 ### P8 — Temporal Drift Detector · `v0.8.0`
 Walk the `git log` of the vault. Surface notes where thinking has shifted semantically over time — not typo-level diffs, genuine belief changes.
