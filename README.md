@@ -3,7 +3,7 @@
 > An agentic intelligence layer for Markdown / Obsidian vaults.
 > RAG + evaluated metacognitive agents, built in public.
 
-**Status:** Pre-alpha · P6 shipped (`v0.6.1`). `ingest`, `query`, `audit`, `contradict`, `gap`, and `answer` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Alpha · P7 shipped (`v0.7.0`). `ingest`, `query`, `audit`, `contradict`, `gap`, and `answer` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
 
 ---
 
@@ -58,7 +58,22 @@ Full phase list, launch hooks, and eval targets in [`ROADMAP.md`](./ROADMAP.md).
 
 ## Install
 
-Not yet published to PyPI. From a clone:
+```bash
+pip install wikilens
+```
+
+Python 3.12+ is required. The first run of `ingest` or `query` downloads two
+local models (~270 MB total, cached for all subsequent runs):
+`BAAI/bge-small-en-v1.5` (embedder) and `BAAI/bge-reranker-base` (reranker).
+
+For `contradict`, `gap`, and `answer` you also need a remote LLM key:
+
+```bash
+pip install 'wikilens[judge]'         # adds openai, anthropic, scikit-learn
+export OPENAI_API_KEY=sk-...          # or ANTHROPIC_API_KEY for --judge claude
+```
+
+**From source** (dev / contributor install):
 
 ```bash
 git clone https://github.com/Universe8888/wikilens.git
@@ -66,17 +81,9 @@ cd wikilens
 pip install -e '.[dev]'
 ```
 
-`.[dev]` installs test, lint, typecheck, and mocked provider-test dependencies.
-For runtime-only remote LLM support, install `.[judge]`.
-
-On Windows, editable installs may place `wikilens.exe` under the user Python
-Scripts directory, for example `%APPDATA%\Python\Python312\Scripts`. If the
-`wikilens` command is not found, add that directory to `PATH` or run commands
-with `python -m wikilens.cli` while developing.
-
-Python 3.12 is required. First run downloads two local models (~270 MB
-total, cached for reuse): `BAAI/bge-small-en-v1.5` for embeddings and
-`BAAI/bge-reranker-base` for reranking.
+On Windows, if the `wikilens` command is not found after install, add the
+Python Scripts directory to `PATH` (e.g. `%APPDATA%\Python\Python312\Scripts`)
+or run `python -m wikilens.cli` while developing.
 
 ## Usage
 

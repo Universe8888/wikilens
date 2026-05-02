@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "wikilens"
-version = "0.6.1"
+version = "0.7.0"
 description = "Agentic intelligence layer for Markdown/Obsidian vaults — RAG + evaluated metacognitive agents."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -22,7 +22,7 @@ keywords = [
     "llm",
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",

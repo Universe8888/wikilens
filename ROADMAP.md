@@ -2,7 +2,7 @@
 
 > Where `wikilens` is going. Every phase ships measurable capability and lands a launch artifact (writeup, demo, or distribution surface) so the project accumulates visible progress rather than vanishing into a long v1 march.
 
-**Current tip:** P6 shipped (`v0.6.0`). P7 is next.
+**Current tip:** P6 shipped (`v0.6.1`). P7 is next.
 
 ---
 
@@ -23,7 +23,7 @@ Retrieval-based pair generation (O(n·k)), pluggable LLM judge (Claude / OpenAI)
 ### P5 — Gap Generator · `v0.5.0`
 K-means on chunk embeddings → per-cluster LLM generation → pinned-rubric matcher eval. **Cluster recall = 1.00**, matcher F1 = 0.65 on 10 gold gaps. Budgeted autonomy via `--min-cluster-size` / `--max-clusters` / `--sample`.
 
-### P6 — Answer Generator · `v0.6.0`
+### P6 — Answer Generator · `v0.6.1`
 Close the gap loop. Given `wikilens gap` output, retrieve supporting evidence and draft note stubs that actually answer the identified questions. Stubs carry proof-carrying citations: every factual sentence carries a `[^N]` footnote that resolves to a retrieved `chunk_id`.
 
 - **Eval:** 4-axis LLM-judge rubric (faithfulness / coverage / attribution / structure) + automated attribution-rate check. Pass rate = 0.80, attribution rate = 1.00 on 10 gold gaps.
