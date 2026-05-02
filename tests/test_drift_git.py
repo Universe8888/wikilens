@@ -13,17 +13,15 @@ import pytest
 
 from wikilens.drift import (
     GitError,
-    Revision,
+    _levenshtein,
+    _normalise,
+    _split_sentences,
     extract_claims,
     fetch_revision_content,
     filter_candidate_pairs,
     resolve_git_root,
     walk_note_revisions,
-    _normalise,
-    _levenshtein,
-    _split_sentences,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -323,7 +321,11 @@ def test_filter_keeps_genuine_drift():
 
 def test_filter_keeps_multiple_genuine_pairs():
     pairs = [
-        ("Meditation is proven to reduce anxiety.", "Some studies suggest meditation may help with anxiety.", 0.80),
+        (
+            "Meditation is proven to reduce anxiety.",
+            "Some studies suggest meditation may help with anxiety.",
+            0.80,
+        ),
         ("We should use Postgres.", "We should use SQLite for this project.", 0.78),
     ]
     result = filter_candidate_pairs(pairs)
@@ -332,8 +334,12 @@ def test_filter_keeps_multiple_genuine_pairs():
 
 def test_filter_mixed_keeps_only_genuine():
     pairs = [
-        ("Dr. Smith published this.", "Dr. Smith published that.", 0.91),  # typo-level, should drop
-        ("AI will replace all coders.", "AI will automate routine coding tasks, not replace all coders.", 0.79),  # genuine
+        ("Dr. Smith published this.", "Dr. Smith published that.", 0.91),  # typo-level
+        (
+            "AI will replace all coders.",
+            "AI will automate routine coding tasks, not replace all coders.",
+            0.79,
+        ),  # genuine
     ]
     result = filter_candidate_pairs(pairs)
     # The first pair normalises to very short edit distance; the second should pass.

@@ -17,15 +17,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from wikilens.drift_judge import (
+    _SYSTEM_PROMPT,
+    _USER_TEMPLATE,
     ClaudeDriftJudge,
     DriftVerdict,
     MockDriftJudge,
     OpenAIDriftJudge,
     _parse_verdict,
-    _SYSTEM_PROMPT,
-    _USER_TEMPLATE,
 )
-
 
 # ---------------------------------------------------------------------------
 # DriftVerdict invariants
@@ -86,7 +85,8 @@ def test_parse_verdict_valid_no_drift():
 
 
 def test_parse_verdict_valid_drift():
-    v = _parse_verdict(_make_raw(drift=True, type_="refinement", score=4, reasoning="Softened claim."))
+    raw = _make_raw(drift=True, type_="refinement", score=4, reasoning="Softened claim.")
+    v = _parse_verdict(raw)
     assert v.drift is True
     assert v.type == "refinement"
     assert v.score == 4
@@ -182,9 +182,11 @@ def test_system_prompt_specifies_score_scale():
 
 def test_openai_judge_missing_key_raises(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    with patch("wikilens.drift_judge.load_dotenv_if_present"):
-        with pytest.raises(OSError, match="OPENAI_API_KEY"):
-            OpenAIDriftJudge()
+    with (
+        patch("wikilens.drift_judge.load_dotenv_if_present"),
+        pytest.raises(OSError, match="OPENAI_API_KEY"),
+    ):
+        OpenAIDriftJudge()
 
 
 # ---------------------------------------------------------------------------
@@ -289,9 +291,11 @@ def test_openai_judge_prompt_contains_note_and_claims(openai_judge):
 
 def test_claude_judge_missing_key_raises(monkeypatch):
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    with patch("wikilens.drift_judge.load_dotenv_if_present"):
-        with pytest.raises(OSError, match="ANTHROPIC_API_KEY"):
-            ClaudeDriftJudge()
+    with (
+        patch("wikilens.drift_judge.load_dotenv_if_present"),
+        pytest.raises(OSError, match="ANTHROPIC_API_KEY"),
+    ):
+        ClaudeDriftJudge()
 
 
 # ---------------------------------------------------------------------------

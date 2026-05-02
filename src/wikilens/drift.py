@@ -116,8 +116,8 @@ def _run_git(repo_root: Path, args: list[str], *, check: bool = True) -> str:
             errors="replace",
             check=check,
         )
-    except FileNotFoundError:
-        raise GitError("git executable not found on PATH")
+    except FileNotFoundError as exc:
+        raise GitError("git executable not found on PATH") from exc
     except subprocess.CalledProcessError as exc:
         raise GitError(
             f"git {args[0]!r} failed (exit {exc.returncode}): {exc.stderr.strip()}"
@@ -159,8 +159,8 @@ def _validate_rel_path(repo_root: Path, rel: str) -> None:
     resolved = (repo_root / rel).resolve()
     try:
         resolved.relative_to(repo_root.resolve())
-    except ValueError:
-        raise GitError(f"path {rel!r} escapes the repository root")
+    except ValueError as exc:
+        raise GitError(f"path {rel!r} escapes the repository root") from exc
 
 
 def walk_note_revisions(repo_root: Path, rel_path: str) -> list[Revision]:
@@ -306,10 +306,7 @@ def _split_sentences(text: str) -> list[str]:
     sentences: list[str] = []
     buffer = ""
     for tok in tokens:
-        if buffer:
-            candidate = buffer + " " + tok
-        else:
-            candidate = tok
+        candidate = buffer + " " + tok if buffer else tok
 
         # Check whether the split happened after an abbreviation.
         # "Dr. Smith" → last word of buffer is an abbreviation.
@@ -444,7 +441,7 @@ def build_candidate_pairs(
         return []
 
     result: list[CandidatePair] = []
-    for prev_rev, next_rev in zip(revisions, revisions[1:]):
+    for prev_rev, next_rev in zip(revisions, revisions[1:], strict=False):
         before_claims = extract_claims(prev_rev.content, granularity)
         after_claims = extract_claims(next_rev.content, granularity)
 
