@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -11,7 +12,32 @@ from wikilens import __version__
 DEFAULT_DB_PATH = ".wikilens/db"
 
 
+def _warn_if_first_run() -> None:
+    """Print a one-time notice when local HF models have not been downloaded yet.
+
+    Checks only the HF hub cache — avoids any network call or heavy import.
+    Prints to stderr so it doesn't corrupt machine-readable stdout output.
+    """
+    hf_home = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface"))
+    hub = hf_home / "hub"
+    embedder_cached = any(hub.glob("models--BAAI--bge-small*"))
+    reranker_cached = any(hub.glob("models--BAAI--bge-reranker*"))
+    if not embedder_cached or not reranker_cached:
+        missing = []
+        if not embedder_cached:
+            missing.append("bge-small-en-v1.5 (embedder, ~130 MB)")
+        if not reranker_cached:
+            missing.append("bge-reranker-base (reranker, ~140 MB)")
+        print(
+            "[wikilens] First run: downloading local model(s) — "
+            + ", ".join(missing)
+            + ". This happens once; models are cached for all subsequent runs.",
+            file=sys.stderr,
+        )
+
+
 def _cmd_ingest(args: argparse.Namespace) -> int:
+    _warn_if_first_run()
     # Heavy imports deferred to keep `wikilens --help` fast.
     from wikilens.pipeline import ingest_vault
 
@@ -24,6 +50,7 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
 
 def _cmd_query(args: argparse.Namespace) -> int:
+    _warn_if_first_run()
     from wikilens.embed import BGEEmbedder
     from wikilens.query import query
     from wikilens.rerank import BGEReranker
