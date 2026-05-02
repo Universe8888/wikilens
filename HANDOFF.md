@@ -172,6 +172,21 @@ P7 — **PyPI + installer polish** (per `ROADMAP.md`). This is the public-launch
 2. Start a fresh chat with updated HANDOFF prompt.
 3. Tag `v0.7.0` locally when P7 ships.
 
+## Release Readiness Fixes
+
+- Secured `wikilens answer --write` so generated stub titles cannot escape `--out`.
+- Made `wikilens ingest` honor documented full rebuild semantics by clearing stale LanceDB rows.
+- Made `.[dev]` sufficient for test, lint, and typecheck workflows.
+- Added `Makefile` targets for local checks and benchmark reproduction.
+- Added GitHub Actions CI for Python 3.12.
+- Synced README and ROADMAP around P6 shipped / P7 next.
+
+Validation:
+- `python -m ruff check .`
+- `python -m mypy src`
+- `python -m pytest`
+- `make check`
+
 ## Glossary
 
 - **SDD** — Specification-Driven Development (Phase 1 output of the Agentic Engineering Protocol)
