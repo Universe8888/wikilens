@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "description": "Ground truth for P8 Temporal Drift Detector eval. 10 planted events: 5 semantic drifts, 5 surface-only revisions.",
+  "fixture_repo": "fixtures/drift_vault/dotgit (rename to .git before use)",
+  "events": [
+    {
+      "id": "E1",
+      "note": "chemistry.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "5f21fee3f9e5a3793b7a0360506b9c445a77d5fd",
+      "label": "drift",
+      "drift_type": "reversal",
+      "before_claim": "Water boils at 100 degrees Celsius at all altitudes.",
+      "after_claim": "Water boils at 100 degrees Celsius only at sea-level atmospheric pressure.",
+      "notes": "Absolute claim replaced by pressure-qualified claim. Classic reversal."
+    },
+    {
+      "id": "E2",
+      "note": "biology.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "f048371e64b5d8f9d38cf763ad6a82eb726ffe57",
+      "label": "drift",
+      "drift_type": "reversal",
+      "before_claim": "Sugar consumption directly causes hyperactivity in children.",
+      "after_claim": "Research does not support the claim that sugar causes hyperactivity in children.",
+      "notes": "Causal claim directly contradicted. Clear reversal."
+    },
+    {
+      "id": "E3",
+      "note": "philosophy.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "1d7419df45497f715c2f25272acaca83479d3c6d",
+      "label": "drift",
+      "drift_type": "refinement",
+      "before_claim": "The scientific method has proven beyond all doubt that free will does not exist.",
+      "after_claim": "Some neuroscientific evidence suggests that free will may be more constrained than we assume.",
+      "notes": "Certain assertion softened to hedged. Refinement/qualification drift."
+    },
+    {
+      "id": "E4",
+      "note": "physics.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "f0a20dee46e17ae95d783857e4024a713594d436",
+      "label": "drift",
+      "drift_type": "scope_change",
+      "before_claim": "Artificial intelligence will replace all human workers across every profession within a decade.",
+      "after_claim": "Artificial intelligence is likely to automate many routine cognitive tasks across various professions.",
+      "notes": "Universal replacement claim narrowed to partial automation. Scope change."
+    },
+    {
+      "id": "E5",
+      "note": "cooking.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "75a883be99f27603abafeb0d1e586aed4a8d59a7",
+      "label": "drift",
+      "drift_type": "scope_change",
+      "before_claim": "Cast iron cookware must never be washed with water or it will be permanently ruined.",
+      "after_claim": "Cast iron cookware can be washed with a small amount of water if dried immediately and re-oiled.",
+      "notes": "Absolute prohibition replaced by conditional guidance. Scope change."
+    },
+    {
+      "id": "E6",
+      "note": "history.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "124c25eabc1b1dd53cc648afd4590d7f8c57dfc7",
+      "label": "surface",
+      "drift_type": null,
+      "before_claim": "The Treaty of Westfalia in 1648 established the principle of state souvereignty.",
+      "after_claim": "The Treaty of Westphalia in 1648 established the principle of state sovereignty.",
+      "notes": "Two spelling corrections. No belief change."
+    },
+    {
+      "id": "E7",
+      "note": "programming.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "f048371e64b5d8f9d38cf763ad6a82eb726ffe57",
+      "label": "surface",
+      "drift_type": null,
+      "before_claim": "It is recommended that one uses explicit type annotations in Python code.",
+      "after_claim": "Developers should use explicit type annotations in Python code.",
+      "notes": "Passive to active voice. Same recommendation, no position change."
+    },
+    {
+      "id": "E8",
+      "note": "music.md",
+      "before_sha": "962e267eba7a39da01d40a4beaa48fe6ed954d06",
+      "after_sha": "f0a20dee46e17ae95d783857e4024a713594d436",
+      "label": "surface",
+      "drift_type": null,
+      "before_claim": "The three primary elements of music are melody, harmony, and rhythm.",
+      "after_claim": "The three primary elements of music are rhythm, melody, and harmony.",
+      "notes": "List reordered. Same three elements, no belief change."
+    },
+    {
+      "id": "E9",
+      "note": "chemistry.md",
+      "before_sha": "5f21fee3f9e5a3793b7a0360506b9c445a77d5fd",
+      "after_sha": "2a81714071b289181816a3dcabfe8a3839d5dbf6",
+      "label": "surface",
+      "drift_type": null,
+      "before_claim": "The boiling point drops significantly with increasing altitude.",
+      "after_claim": "The boiling point drops significantly with increasing altitude.",
+      "notes": "An example sentence added (Everest boiling point). The claim itself unchanged."
+    },
+    {
+      "id": "E10",
+      "note": "biology.md",
+      "before_sha": "f048371e64b5d8f9d38cf763ad6a82eb726ffe57",
+      "after_sha": "96385c69489f955b5ebcc7515464e2b80ae44fc7",
+      "label": "surface",
+      "drift_type": null,
+      "before_claim": "Research does not support the claim that sugar causes hyperactivity in children.",
+      "after_claim": "Research does not support the claim that sugar causes hyperactivity in children.",
+      "notes": "Only the heading changed (Biology -> Biology and Nutrition). Claim unchanged."
+    }
+  ]
+}
