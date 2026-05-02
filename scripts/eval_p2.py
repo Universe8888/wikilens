@@ -158,8 +158,8 @@ def _percentile(data: list[float], pct: float) -> float:
 
 def format_table(reports: list[ModeReport], n_queries: int) -> str:
     lines = [
-        f"| Mode | Hit@5 | Recall@5 | Easy | Medium | Hard | p50 (ms) | p95 (ms) | mean (ms) |",
-        f"|------|-------|----------|------|--------|------|----------|----------|-----------|",
+        "| Mode | Hit@5 | Recall@5 | Easy | Medium | Hard | p50 (ms) | p95 (ms) | mean (ms) |",
+        "|------|-------|----------|------|--------|------|----------|----------|-----------|",
     ]
     for r in reports:
         lines.append(
@@ -258,10 +258,10 @@ def main() -> int:
     )
     args = p.parse_args()
 
-    try:
+    from contextlib import suppress
+
+    with suppress(AttributeError, OSError):
         sys.stdout.reconfigure(encoding="utf-8")
-    except (AttributeError, OSError):
-        pass
 
     if args.reingest:
         from wikilens.pipeline import ingest_vault

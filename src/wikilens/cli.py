@@ -140,7 +140,7 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
         try:
             model = getattr(args, "model", None) or "gpt-4o"
             judge = OpenAIJudge(model=model)
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"wikilens contradict: {e}", file=sys.stderr)
             return 2
     elif args.judge == "claude":
@@ -149,7 +149,7 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
         try:
             model = getattr(args, "model", None) or "claude-sonnet-4-6"
             judge = ClaudeJudge(model=model)
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"wikilens contradict: {e}", file=sys.stderr)
             return 2
     elif args.judge == "ollama":
@@ -164,10 +164,7 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
         return 2
 
     pairs = generate_candidate_pairs(store, embedder=embedder, top_k=args.top_k)
-    if args.sample is not None and args.sample >= 0:
-        judged_pairs = pairs[: args.sample]
-    else:
-        judged_pairs = pairs
+    judged_pairs = pairs[: args.sample] if args.sample is not None and args.sample >= 0 else pairs
 
     findings: list[Finding] = []
     for p in judged_pairs:
@@ -221,7 +218,7 @@ def _cmd_gap(args: argparse.Namespace) -> int:
         try:
             model = getattr(args, "model", None) or "gpt-4o"
             generator = OpenAIGenerator(model=model)
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"wikilens gap: {e}", file=sys.stderr)
             return 2
     elif args.judge == "claude":
@@ -230,7 +227,7 @@ def _cmd_gap(args: argparse.Namespace) -> int:
         try:
             model = getattr(args, "model", None) or "claude-sonnet-4-6"
             generator = ClaudeGenerator(model=model)
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"wikilens gap: {e}", file=sys.stderr)
             return 2
     else:
@@ -329,7 +326,7 @@ def _cmd_answer(args: argparse.Namespace) -> int:
             model = getattr(args, "model", None) or "gpt-4o"
             drafter = OpenAIDrafter(model=model)
             drafter_model = model
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"wikilens answer: {e}", file=sys.stderr)
             return 2
     elif args.judge == "claude":
@@ -339,7 +336,7 @@ def _cmd_answer(args: argparse.Namespace) -> int:
             model = getattr(args, "model", None) or "claude-sonnet-4-6"
             drafter = ClaudeDrafter(model=model)
             drafter_model = model
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"wikilens answer: {e}", file=sys.stderr)
             return 2
     else:
@@ -599,7 +596,10 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p_answer.add_argument(
         "--min-supporting", dest="min_supporting", type=int, default=2,
-        help="Skip gap if retrieved chunks < N; emit external-research stub (default: %(default)s).",
+        help=(
+            "Skip gap if retrieved chunks < N; emit external-research stub "
+            "(default: %(default)s)."
+        ),
     )
     p_answer.add_argument(
         "--sample", type=int, default=None,
@@ -629,14 +629,17 @@ def _build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _force_stdout_utf8() -> None:
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
     # On Windows, stdout defaults to cp1252 and will crash on non-Latin
     # characters that commonly appear in note content (arrows, em-dashes, etc.).
     # Force UTF-8 when we can; fall back silently on platforms without .reconfigure.
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-    except (AttributeError, OSError):
-        pass
+    _force_stdout_utf8()
 
     parser = _build_parser()
     args = parser.parse_args(argv)

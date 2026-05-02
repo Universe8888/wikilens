@@ -222,7 +222,7 @@ class ClaudeMatcher:
                 system=system,
                 messages=[{"role": "user", "content": user_content}],
             )
-            raw = response.content[0].text.strip()
+            raw = getattr(response.content[0], "text", "").strip()
             try:
                 return _parse_match_verdict(raw)
             except ValueError as e:

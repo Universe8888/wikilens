@@ -6,6 +6,7 @@ without network access or spending tokens.
 """
 
 from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -127,24 +128,29 @@ def _make_claude_judge_with_mock(responses: list[str]):
     """Build a ClaudeJudge with a patched Anthropic client."""
     from wikilens.judge import ClaudeJudge
 
-    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test"}):
-        with patch("anthropic.Anthropic") as mock_cls:
-            mock_client = MagicMock()
-            mock_cls.return_value = mock_client
-            mock_client.messages.create.side_effect = [
-                _make_mock_response(r) for r in responses
-            ]
-            judge = ClaudeJudge.__new__(ClaudeJudge)
-            judge._client = mock_client
-            judge._model = "claude-sonnet-4-6"
-            judge._max_tokens = 256
-            judge.calls = 0
-            judge.abstentions = 0
-            return judge
+    with (
+        patch.dict("os.environ", {"ANTHROPIC_API_KEY": "sk-ant-test"}),
+        patch("anthropic.Anthropic") as mock_cls,
+    ):
+        mock_client = MagicMock()
+        mock_cls.return_value = mock_client
+        mock_client.messages.create.side_effect = [
+            _make_mock_response(r) for r in responses
+        ]
+        judge = ClaudeJudge.__new__(ClaudeJudge)
+        judge._client = mock_client
+        judge._model = "claude-sonnet-4-6"
+        judge._max_tokens = 256
+        judge.calls = 0
+        judge.abstentions = 0
+        return judge
 
 
 def test_claude_judge_returns_factual_verdict():
-    response_json = '{"verdict": true, "type": "factual", "score": 0.97, "reasoning": "Paris vs Berlin"}'
+    response_json = (
+        '{"verdict": true, "type": "factual", "score": 0.97,'
+        ' "reasoning": "Paris vs Berlin"}'
+    )
     judge = _make_claude_judge_with_mock([response_json])
     v = judge.score_pair("Paris is the capital of France.", "Berlin is the capital of France.")
     assert v.verdict is True
@@ -155,7 +161,9 @@ def test_claude_judge_returns_factual_verdict():
 
 
 def test_claude_judge_returns_temporal_verdict():
-    response_json = '{"verdict": true, "type": "temporal", "score": 0.85, "reasoning": "db changed"}'
+    response_json = (
+        '{"verdict": true, "type": "temporal", "score": 0.85, "reasoning": "db changed"}'
+    )
     judge = _make_claude_judge_with_mock([response_json])
     v = judge.score_pair("We use Postgres (2022).", "We use MySQL (2024).")
     assert v.type == "temporal"
@@ -183,7 +191,9 @@ def test_claude_judge_missing_key_raises_env_error_without_key():
     from wikilens.judge import ClaudeJudge
 
     # Patch out dotenv so it can't reload the key from .env, then clear env.
-    with patch("wikilens.judge.load_dotenv_if_present"):
-        with patch.dict("os.environ", {}, clear=True):
-            with pytest.raises(EnvironmentError, match="ANTHROPIC_API_KEY"):
-                ClaudeJudge()
+    with (
+        patch("wikilens.judge.load_dotenv_if_present"),
+        patch.dict("os.environ", {}, clear=True),
+        pytest.raises(OSError, match="ANTHROPIC_API_KEY"),
+    ):
+        ClaudeJudge()

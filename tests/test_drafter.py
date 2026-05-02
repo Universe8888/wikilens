@@ -12,12 +12,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from wikilens.drafter import (
+    ClaudeDrafter,
     Drafter,
     DraftInput,
     MockDrafter,
+    OpenAIDrafter,
     _validate_body,
 )
-
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -189,9 +190,7 @@ def _make_openai_response(body: str) -> MagicMock:
     return resp
 
 
-def _make_openai_drafter(responses: list[str]) -> "OpenAIDrafter":
-    from wikilens.drafter import OpenAIDrafter
-
+def _make_openai_drafter(responses: list[str]) -> OpenAIDrafter:
     drafter = OpenAIDrafter.__new__(OpenAIDrafter)
     mock_client = MagicMock()
     mock_client.chat.completions.create.side_effect = [
@@ -205,9 +204,7 @@ def _make_openai_drafter(responses: list[str]) -> "OpenAIDrafter":
     return drafter
 
 
-def _make_claude_drafter(responses: list[str]) -> "ClaudeDrafter":
-    from wikilens.drafter import ClaudeDrafter
-
+def _make_claude_drafter(responses: list[str]) -> ClaudeDrafter:
     drafter = ClaudeDrafter.__new__(ClaudeDrafter)
     mock_client = MagicMock()
     content_blocks = []
@@ -294,7 +291,7 @@ def test_openai_drafter_system_prompt_contains_four_sections():
 
 
 def test_openai_drafter_conforms_to_drafter_protocol():
-    from wikilens.drafter import Drafter, OpenAIDrafter
+    from wikilens.drafter import Drafter
     drafter = _make_openai_drafter([_VALID_BODY])
     assert isinstance(drafter, Drafter)
     assert drafter.name == "openai"
@@ -334,7 +331,7 @@ def test_claude_drafter_system_prompt_enforces_citation_discipline():
 
 
 def test_claude_drafter_conforms_to_drafter_protocol():
-    from wikilens.drafter import ClaudeDrafter, Drafter
+    from wikilens.drafter import Drafter
     drafter = _make_claude_drafter([_VALID_BODY])
     assert isinstance(drafter, Drafter)
     assert drafter.name == "claude"

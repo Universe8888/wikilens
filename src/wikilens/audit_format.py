@@ -61,8 +61,10 @@ def format_markdown(
         if not report.orphans:
             lines.append("_none found._")
         else:
-            for o in report.orphans:
-                lines.append(f"- `{o.node}` ({o.outbound_count} outbound, 0 inbound)")
+            for orphan in report.orphans:
+                lines.append(
+                    f"- `{orphan.node}` ({orphan.outbound_count} outbound, 0 inbound)"
+                )
         lines.append("")
 
     if "shadowed" in mask:

@@ -234,8 +234,9 @@ class OpenAIJudge:
     name = "openai"
 
     def __init__(self, model: str = "gpt-4o"):
-        from wikilens._env import load_dotenv_if_present
         import os
+
+        from wikilens._env import load_dotenv_if_present
         load_dotenv_if_present()
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
@@ -279,15 +280,16 @@ class OpenAIJudge:
                     return JudgeScore(gap_id=gap_id, faithfulness=1, coverage=1,
                                      attribution_quality=1, stub_structure=1,
                                      rationale=f"judge error: {e}|—|—|—")
-        assert False, "unreachable"
+        raise AssertionError("unreachable")
 
 
 class ClaudeJudge:
     name = "claude"
 
     def __init__(self, model: str = "claude-sonnet-4-6"):
-        from wikilens._env import load_dotenv_if_present
         import os
+
+        from wikilens._env import load_dotenv_if_present
         load_dotenv_if_present()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
@@ -329,7 +331,7 @@ class ClaudeJudge:
                     return JudgeScore(gap_id=gap_id, faithfulness=1, coverage=1,
                                      attribution_quality=1, stub_structure=1,
                                      rationale=f"judge error: {e}|—|—|—")
-        assert False, "unreachable"
+        raise AssertionError("unreachable")
 
 
 # ─── Output formatters ───────────────────────────────────────────────────────
@@ -514,7 +516,7 @@ def main() -> int:
         drafter: Drafter = MockDrafter()
         drafter_model = "mock"
     elif args.judge == "openai":
-        from wikilens.drafter import OpenAIDrafter, DEFAULT_OPENAI_MODEL
+        from wikilens.drafter import DEFAULT_OPENAI_MODEL, OpenAIDrafter
         model = args.model or DEFAULT_OPENAI_MODEL
         try:
             drafter = OpenAIDrafter(model=model)
@@ -523,7 +525,7 @@ def main() -> int:
             return 2
         drafter_model = model
     else:
-        from wikilens.drafter import ClaudeDrafter, DEFAULT_CLAUDE_MODEL
+        from wikilens.drafter import DEFAULT_CLAUDE_MODEL, ClaudeDrafter
         model = args.model or DEFAULT_CLAUDE_MODEL
         try:
             drafter = ClaudeDrafter(model=model)

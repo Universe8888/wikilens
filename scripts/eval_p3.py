@@ -170,10 +170,10 @@ def main() -> int:
     p.add_argument("--benchmark", type=Path, default=Path("BENCHMARK.md"))
     args = p.parse_args()
 
-    try:
+    from contextlib import suppress
+
+    with suppress(AttributeError, OSError):
         sys.stdout.reconfigure(encoding="utf-8")
-    except (AttributeError, OSError):
-        pass
 
     print(f"[audit] {args.vault}")
     report = audit_vault(args.vault)

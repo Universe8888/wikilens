@@ -254,7 +254,7 @@ class ClaudeGenerator:
                 system=system,
                 messages=[{"role": "user", "content": user_content}],
             )
-            raw = response.content[0].text.strip()
+            raw = getattr(response.content[0], "text", "").strip()
             try:
                 candidates = _parse_candidates(raw, valid_ids)
                 return candidates[:top_k]
@@ -336,7 +336,8 @@ class OpenAIGenerator:
                     {"role": "user", "content": user_content},
                 ],
             )
-            raw = response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            raw = (content or "").strip()
             try:
                 candidates = _parse_candidates(raw, valid_ids)
                 return candidates[:top_k]

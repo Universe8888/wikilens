@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from wikilens.answer import AnswerDraft, AnswerReport
@@ -28,7 +28,7 @@ JSON_SCHEMA_VERSION = 1
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _wikilinks_from_draft(draft: AnswerDraft) -> list[str]:
@@ -88,7 +88,11 @@ def render_stub(draft: AnswerDraft, *, generated_at: str | None = None) -> str:
         else "  []"
     )
     # Avoid trailing whitespace on empty model field.
-    model_line = f"generator: {draft.drafter_name}/{draft.model}" if draft.model else f"generator: {draft.drafter_name}"
+    model_line = (
+        f"generator: {draft.drafter_name}/{draft.model}"
+        if draft.model
+        else f"generator: {draft.drafter_name}"
+    )
 
     frontmatter = f"""\
 ---

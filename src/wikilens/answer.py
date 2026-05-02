@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from wikilens.drafter import Drafter, DraftInput
+    from wikilens.drafter import Drafter
     from wikilens.embed import Embedder
     from wikilens.query import Mode
     from wikilens.rerank import Reranker
@@ -211,8 +211,8 @@ def load_gaps(path: str | Path) -> list[GapInput]:
     p = Path(path)
     try:
         text = p.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        raise ValueError(f"gaps file not found: {path}")
+    except FileNotFoundError as e:
+        raise ValueError(f"gaps file not found: {path}") from e
     except OSError as e:
         raise ValueError(f"could not read gaps file {path}: {e}") from e
 
@@ -266,12 +266,12 @@ def load_gaps(path: str | Path) -> list[GapInput]:
 
 def retrieve_support(
     gap: GapInput,
-    store: "VectorStore",
-    embedder: "Embedder",
+    store: VectorStore,
+    embedder: Embedder,
     *,
     top_k: int = 8,
-    mode: "Mode" = "rerank",
-    reranker: "Reranker | None" = None,
+    mode: Mode = "rerank",
+    reranker: Reranker | None = None,
 ) -> list[SupportingChunk]:
     """Retrieve evidence chunks for one gap, merging with the gap's own hints.
 
@@ -453,13 +453,13 @@ def check_attribution(
 
 def draft_answers(
     gaps: list[GapInput],
-    store: "VectorStore",
-    embedder: "Embedder",
-    drafter: "Drafter",
+    store: VectorStore,
+    embedder: Embedder,
+    drafter: Drafter,
     *,
     top_k: int = 8,
-    mode: "Mode" = "rerank",
-    reranker: "Reranker | None" = None,
+    mode: Mode = "rerank",
+    reranker: Reranker | None = None,
     min_supporting: int = 2,
     sample: int | None = None,
     drafter_model: str = "",

@@ -174,7 +174,7 @@ class ClaudeJudge:
         load_dotenv_if_present()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not api_key:
-            raise EnvironmentError(
+            raise OSError(
                 "ANTHROPIC_API_KEY is not set. "
                 "Export it in your shell or add it to .env at the repo root."
             )
@@ -215,7 +215,7 @@ class ClaudeJudge:
                 system=system,
                 messages=[{"role": "user", "content": user_content}],
             )
-            raw = response.content[0].text.strip()
+            raw = getattr(response.content[0], "text", "").strip()
             try:
                 return _parse_verdict(raw)
             except ValueError as e:
@@ -250,7 +250,7 @@ class OpenAIJudge:
         load_dotenv_if_present()
         api_key = os.environ.get("OPENAI_API_KEY")
         if not api_key:
-            raise EnvironmentError(
+            raise OSError(
                 "OPENAI_API_KEY is not set. "
                 "Export it in your shell or add it to .env at the repo root."
             )
@@ -289,7 +289,8 @@ class OpenAIJudge:
                     {"role": "user", "content": user_content},
                 ],
             )
-            raw = response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            raw = (content or "").strip()
             try:
                 return _parse_verdict(raw)
             except ValueError as e:

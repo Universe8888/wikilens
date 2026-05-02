@@ -166,10 +166,10 @@ def main() -> int:
     p.add_argument("--benchmark", type=Path, default=BENCHMARK_DEFAULT)
     args = p.parse_args()
 
-    try:
+    from contextlib import suppress
+
+    with suppress(AttributeError, OSError):
         sys.stdout.reconfigure(encoding="utf-8")
-    except (AttributeError, OSError):
-        pass
 
     # --- Load ground truth -----------------------------------------------
     truth_path = args.truth.resolve()
@@ -178,9 +178,6 @@ def main() -> int:
         return 1
     gt = json.loads(truth_path.read_text(encoding="utf-8"))
     gold_pairs: list[dict] = gt["pairs"]
-    gold_by_key: dict[frozenset, dict] = {
-        frozenset([p["chunk_a_id"], p["chunk_b_id"]]): p for p in gold_pairs
-    }
     if args.sample is not None:
         gold_pairs = gold_pairs[: args.sample]
 
@@ -215,7 +212,7 @@ def main() -> int:
     else:
         try:
             judge = ClaudeJudge(model=args.model)
-        except (EnvironmentError, ImportError) as e:
+        except (OSError, ImportError) as e:
             print(f"ERROR: {e}", file=sys.stderr)
             return 1
 
@@ -225,7 +222,6 @@ def main() -> int:
     # path when retrieval-based pair gen is working) or synthesize a pair
     # from the chunk texts directly (fallback for the eval harness so we can
     # still score the judge even when a pair didn't surface via retrieval).
-    from wikilens.contradict import CandidatePair, ChunkRef
 
     table_rows = store._get_or_create_table().to_arrow().to_pylist()  # type: ignore[attr-defined]
     chunk_by_id: dict[str, dict] = {r["chunk_id"]: r for r in table_rows}

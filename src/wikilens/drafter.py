@@ -307,7 +307,8 @@ class OpenAIDrafter:
                     {"role": "user", "content": user_content},
                 ],
             )
-            body = response.choices[0].message.content.strip()
+            content = response.choices[0].message.content
+            body = (content or "").strip()
             if _validate_body(body):
                 return body
             last_err = ValueError(f"missing required sections in draft: {body[:200]!r}")
@@ -389,7 +390,7 @@ class ClaudeDrafter:
                 system=system,
                 messages=[{"role": "user", "content": user_content}],
             )
-            body = response.content[0].text.strip()
+            body = getattr(response.content[0], "text", "").strip()
             if _validate_body(body):
                 return body
             last_err = ValueError(f"missing required sections in draft: {body[:200]!r}")

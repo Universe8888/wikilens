@@ -16,7 +16,6 @@ import pytest
 from wikilens.cli import main
 from wikilens.pipeline import ingest_vault
 
-
 # ─── shared fixture ───────────────────────────────────────────────────────────
 
 
