@@ -151,6 +151,19 @@ wikilens ingest fixtures/gaps_vault --db .wikilens_p5_eval/db
 python scripts/eval_p6.py --judge openai
 ```
 
+Local checks:
+
+```bash
+make lint
+make typecheck
+make test
+make benchmark
+```
+
+`make benchmark` uses no-API mock judges for P4-P6 by default. To reproduce
+published LLM-judged numbers, run the individual eval scripts with
+`--judge claude` or `--judge openai` after setting the relevant API key.
+
 ## Writing / research
 
 Design decisions and methodology writeups are published as they happen. Index will live at [`/docs`](./docs/) once P2 is done.
