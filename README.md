@@ -66,6 +66,14 @@ cd wikilens
 pip install -e '.[dev]'
 ```
 
+`.[dev]` installs test, lint, typecheck, and mocked provider-test dependencies.
+For runtime-only remote LLM support, install `.[judge]`.
+
+On Windows, editable installs may place `wikilens.exe` under the user Python
+Scripts directory, for example `%APPDATA%\Python\Python312\Scripts`. If the
+`wikilens` command is not found, add that directory to `PATH` or run commands
+with `python -m wikilens.cli` while developing.
+
 Python 3.12 is required. First run downloads two local models (~270 MB
 total, cached for reuse): `BAAI/bge-small-en-v1.5` for embeddings and
 `BAAI/bge-reranker-base` for reranking.

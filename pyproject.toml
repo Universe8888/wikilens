@@ -41,6 +41,11 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.6",
     "mypy>=1.10",
+    "types-PyYAML>=6.0",
+    "openai>=1.0",
+    "anthropic>=0.40",
+    "python-dotenv>=1.0",
+    "scikit-learn>=1.4",
 ]
 # Optional remote-LLM + ML dependencies for P4 (Contradiction Finder) and
 # P5 (Gap Generator). Only required when running `wikilens contradict
@@ -73,3 +78,10 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[[tool.mypy.overrides]]
+module = [
+    "lancedb",
+    "sklearn.*",
+]
+ignore_missing_imports = true
