@@ -19,9 +19,21 @@ import re
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Protocol
 
 import numpy as np
+
+
+class _Embedder(Protocol):
+    """Minimal embedder interface used by the aligner.
+
+    Matches the public shape of ``BGEEmbedder.encode_passages`` without
+    forcing an import of the concrete class here (avoids circular imports
+    and keeps the module model-free).
+    """
+
+    def encode_passages(self, passages: list[str]):  # type: ignore[no-untyped-def]
+        ...
 
 DriftType = Literal["reversal", "refinement", "scope_change", "none"]
 
@@ -104,8 +116,12 @@ class DriftReport:
 def _run_git(repo_root: Path, args: list[str], *, check: bool = True) -> str:
     """Run a git command inside repo_root and return stdout as a string.
 
-    Raises GitError on non-zero exit (when check=True).
+    Raises GitError on non-zero exit (when check=True) or if repo_root is
+    not an existing directory (prevents the subprocess from inheriting an
+    ambiguous cwd).
     """
+    if not repo_root.is_dir():
+        raise GitError(f"repo_root is not a directory: {repo_root}")
     cmd = ["git", "-C", str(repo_root)] + args
     try:
         result = subprocess.run(
@@ -146,12 +162,6 @@ def resolve_git_root(vault_path: Path) -> Path:
 
     root = Path(raw.strip())
     return root
-
-
-def _to_git_path(repo_root: Path, abs_path: Path) -> str:
-    """Return a forward-slash relative path for use in git commands."""
-    rel = abs_path.resolve().relative_to(repo_root.resolve())
-    return rel.as_posix()
 
 
 def _validate_rel_path(repo_root: Path, rel: str) -> None:
@@ -237,8 +247,12 @@ _ABBREVS: frozenset[str] = frozenset(
 )
 
 _FENCE_RE = re.compile(r"^```.*?^```", re.MULTILINE | re.DOTALL)
-_FRONTMATTER_RE = re.compile(r"\A---[ \t]*\n.*?\n---[ \t]*\n", re.DOTALL)
 _HEADING_RE = re.compile(r"^#{1,6}\s+.*$", re.MULTILINE)
+
+# Size guard on note content — a single note larger than this is treated
+# as out-of-scope for drift detection. Prevents pathological regex work
+# and keeps the embedder's batch size predictable.
+_MAX_NOTE_BYTES = 1_000_000  # 1 MB
 _WIKILINK_RE = re.compile(r"!\[\[.*?\]\]|\[\[.*?\]\]")
 _MD_LINK_RE = re.compile(r"\[([^\]]*)\]\([^)]*\)")
 _INLINE_CODE_RE = re.compile(r"`[^`]+`")
@@ -252,8 +266,12 @@ def extract_claims(content: str, granularity: str = "sentence") -> list[str]:
         "sentence" — split into individual sentences (default).
         "paragraph" — blank-line-separated blocks.
 
-    Returns an empty list if the note has no prose after stripping.
+    Returns an empty list if the note has no prose after stripping, or if
+    the note exceeds _MAX_NOTE_BYTES (treated as out-of-scope rather than
+    raising, so a single giant note does not abort a whole drift run).
     """
+    if len(content.encode("utf-8", errors="replace")) > _MAX_NOTE_BYTES:
+        return []
     text = content
 
     # Strip YAML frontmatter (line-scanner, not regex — avoids G3 catastrophic backtracking).
@@ -333,7 +351,7 @@ def _split_sentences(text: str) -> list[str]:
 def align_claims(
     before_claims: list[str],
     after_claims: list[str],
-    embedder,  # BGEEmbedder — typed as Any to avoid circular import
+    embedder: _Embedder,
     align_threshold: float = DEFAULT_ALIGN_THRESHOLD,
     identical_threshold: float = DEFAULT_IDENTICAL_THRESHOLD,
 ) -> list[tuple[str, str, float]]:
@@ -376,10 +394,22 @@ def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+_LEVENSHTEIN_MAX_LEN = 1000
+
+
 def _levenshtein(a: str, b: str) -> int:
-    """Pure-Python Levenshtein distance."""
+    """Pure-Python Levenshtein distance.
+
+    Returns a large sentinel (> any realistic threshold) when either input
+    exceeds _LEVENSHTEIN_MAX_LEN chars. This bounds the O(n*m) worst case
+    on adversarial input (a note with a very long sentence) without
+    crashing: the filter downstream will simply keep the pair for the
+    judge to decide, which is the safe failure mode.
+    """
     if a == b:
         return 0
+    if len(a) > _LEVENSHTEIN_MAX_LEN or len(b) > _LEVENSHTEIN_MAX_LEN:
+        return _LEVENSHTEIN_MAX_LEN  # sentinel: definitely above any typo threshold
     if len(a) < len(b):
         a, b = b, a
     prev = list(range(len(b) + 1))
@@ -431,7 +461,7 @@ def filter_candidate_pairs(
 
 def build_candidate_pairs(
     revisions: list[Revision],
-    embedder,
+    embedder: _Embedder,
     align_threshold: float = DEFAULT_ALIGN_THRESHOLD,
     identical_threshold: float = DEFAULT_IDENTICAL_THRESHOLD,
     granularity: str = "sentence",

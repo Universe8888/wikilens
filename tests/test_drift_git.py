@@ -284,6 +284,20 @@ def test_levenshtein_deletion():
     assert _levenshtein("abc", "ac") == 1
 
 
+def test_levenshtein_long_input_returns_sentinel():
+    # Both strings over the length guard — returns sentinel, doesn't hang.
+    a = "x" * 2000
+    b = "y" * 2000
+    result = _levenshtein(a, b)
+    assert result >= 1000
+
+
+def test_extract_claims_oversized_note_returns_empty():
+    from wikilens.drift import _MAX_NOTE_BYTES
+    giant = "word " * (_MAX_NOTE_BYTES // 4)  # ~1.25 MB
+    assert extract_claims(giant) == []
+
+
 # ---------------------------------------------------------------------------
 # filter_candidate_pairs
 # ---------------------------------------------------------------------------

@@ -432,12 +432,12 @@ def _cmd_drift(args: argparse.Namespace) -> int:
         DEFAULT_ALIGN_THRESHOLD,
         DEFAULT_IDENTICAL_THRESHOLD,
         DriftEvent,
+        DriftReport,
         GitError,
         build_candidate_pairs,
         resolve_git_root,
         walk_note_revisions,
     )
-    from wikilens.drift import DriftReport as _DriftReport
     from wikilens.drift_format import format_json, format_markdown
     from wikilens.drift_judge import DriftVerdict, MockDriftJudge
     from wikilens.embed import BGEEmbedder
@@ -488,13 +488,20 @@ def _cmd_drift(args: argparse.Namespace) -> int:
     # Discover markdown notes in the vault.
     note_paths = sorted(vault_path.rglob("*.md"))
     if only_note:
-        note_paths = [p for p in note_paths if p.name == only_note or str(p).endswith(only_note)]
+        # Match by basename or by relative path from the vault root. Never
+        # by raw string suffix: `--only ../../secret.md` must not match.
+        only_basename = Path(only_note).name
+        note_paths = [
+            p for p in note_paths
+            if p.name == only_basename
+            or p.relative_to(vault_path).as_posix() == only_note.replace("\\", "/")
+        ]
 
     # Build embedder once (warm on disk).
     _warn_if_first_run()
     embedder = BGEEmbedder()
 
-    report = _DriftReport(vault=str(vault_path), repo_root=str(repo_root))
+    report = DriftReport(vault=str(vault_path), repo_root=str(repo_root))
 
     all_candidate_pairs = []
     for note_path in note_paths:

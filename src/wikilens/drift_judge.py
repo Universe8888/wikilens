@@ -137,6 +137,18 @@ _USER_TEMPLATE = """\
 """
 
 
+def _sanitise_xml(text: str) -> str:
+    """Strip XML-like tokens that could confuse the prompt delimiters.
+
+    User content (note paths, claim sentences) is interpolated into an XML-
+    tagged template. A claim like "A > B" or "see <note>" would break the
+    delimiter structure and let a malicious vault mount a prompt-injection
+    attack. Defence: replace < and > with their HTML entities. The judge
+    still reads the text correctly; the delimiters stay inviolate.
+    """
+    return text.replace("<", "&lt;").replace(">", "&gt;")
+
+
 # ---------------------------------------------------------------------------
 # Parser
 # ---------------------------------------------------------------------------
@@ -254,11 +266,11 @@ class OpenAIDriftJudge:
     ) -> DriftVerdict:
         self.calls += 1
         user_content = _USER_TEMPLATE.format(
-            note=note,
-            before_claim=before_claim,
-            before_date=before_date,
-            after_claim=after_claim,
-            after_date=after_date,
+            note=_sanitise_xml(note),
+            before_claim=_sanitise_xml(before_claim),
+            before_date=_sanitise_xml(before_date),
+            after_claim=_sanitise_xml(after_claim),
+            after_date=_sanitise_xml(after_date),
         )
         last_err: Exception | None = None
 
@@ -340,11 +352,11 @@ class ClaudeDriftJudge:
     ) -> DriftVerdict:
         self.calls += 1
         user_content = _USER_TEMPLATE.format(
-            note=note,
-            before_claim=before_claim,
-            before_date=before_date,
-            after_claim=after_claim,
-            after_date=after_date,
+            note=_sanitise_xml(note),
+            before_claim=_sanitise_xml(before_claim),
+            before_date=_sanitise_xml(before_date),
+            after_claim=_sanitise_xml(after_claim),
+            after_date=_sanitise_xml(after_date),
         )
         last_err: Exception | None = None
 
