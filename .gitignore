@@ -61,6 +61,11 @@ fixtures/local/
 .DS_Store
 Thumbs.db
 
+# Ruflo / claude-flow runtime
+.claude-flow/
+.mcp.json
+.swarm
+
 # Logs
 *.log
 logs/
