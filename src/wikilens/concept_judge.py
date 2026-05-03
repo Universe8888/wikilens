@@ -189,7 +189,6 @@ class OpenAIConceptJudge:
     def propose(self, chunks: list[ChunkPoint]) -> ConceptProposal:
         self.calls += 1
         user_content = _build_user_content(chunks)
-        last_err: Exception | None = None
 
         for attempt in range(_MAX_RETRIES + 1):
             system = _SYSTEM_PROMPT + (
@@ -210,8 +209,7 @@ class OpenAIConceptJudge:
             raw = (content or "").strip()
             try:
                 return _parse_proposal(raw)
-            except ValueError as e:
-                last_err = e
+            except ValueError:
                 continue
 
         self.abstentions += 1
@@ -257,7 +255,6 @@ class ClaudeConceptJudge:
     def propose(self, chunks: list[ChunkPoint]) -> ConceptProposal:
         self.calls += 1
         user_content = _build_user_content(chunks)
-        last_err: Exception | None = None
 
         for attempt in range(_MAX_RETRIES + 1):
             system = _SYSTEM_PROMPT + (
@@ -275,8 +272,7 @@ class ClaudeConceptJudge:
             raw = getattr(response.content[0], "text", "").strip()
             try:
                 return _parse_proposal(raw)
-            except ValueError as e:
-                last_err = e
+            except ValueError:
                 continue
 
         self.abstentions += 1

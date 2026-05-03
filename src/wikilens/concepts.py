@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from wikilens.embed import DEFAULT_DIM
-from wikilens.gap import ChunkPoint, cluster_chunks, _iter_all_points
+from wikilens.gap import ChunkPoint, _iter_all_points, cluster_chunks
 from wikilens.store import LanceDBStore
 
 if TYPE_CHECKING:
@@ -69,7 +69,7 @@ class ConceptFinding:
 def detect_unnamed_concepts(
     db_path: str,
     table_name: str,
-    judge: "ConceptJudge",
+    judge: ConceptJudge,
     *,
     max_clusters: int = 20,
     min_cluster_size: int = 3,

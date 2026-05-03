@@ -40,7 +40,7 @@ def test_concept_finding_frozen():
         evidence_chunks=["c1"],
         term_freq_in_cluster=0.0,
     )
-    with pytest.raises(Exception):
+    with pytest.raises((AttributeError, TypeError)):
         finding.proposed_term = "other"  # type: ignore[misc]
 
 
@@ -50,7 +50,7 @@ def test_concept_proposal_frozen():
         confidence=0.7,
         rationale="test",
     )
-    with pytest.raises(Exception):
+    with pytest.raises((AttributeError, TypeError)):
         proposal.proposed_term = "other"  # type: ignore[misc]
 
 
@@ -117,7 +117,7 @@ def test_term_freq_present(tmp_path):
     pts = [
         _point("c0", "a.md", f"discussion about {term}"),
         _point("c1", "b.md", f"the {term} is important"),
-        _point("c2", "c.md", f"mock_concept appears here"),
+        _point("c2", "c.md", "mock_concept appears here"),
     ]
     cluster = _cluster(pts, cluster_id=3)
 
@@ -140,13 +140,12 @@ def test_term_freq_present(tmp_path):
 
 
 def test_absence_filter_excludes_named(tmp_path):
-    term = "mock_concept"
     pts = [
-        _point("c0", "a.md", f"mock_concept everywhere"),
-        _point("c1", "b.md", f"mock_concept again"),
-        _point("c2", "c.md", f"mock_concept here too"),
-        _point("c3", "d.md", f"unrelated text"),
-        _point("c4", "e.md", f"more unrelated"),
+        _point("c0", "a.md", "mock_concept everywhere"),
+        _point("c1", "b.md", "mock_concept again"),
+        _point("c2", "c.md", "mock_concept here too"),
+        _point("c3", "d.md", "unrelated text"),
+        _point("c4", "e.md", "more unrelated"),
     ]
     cluster = _cluster(pts, cluster_id=1)
 
