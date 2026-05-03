@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-02 (P8 complete, tag `v0.8.0`)
+**Last updated:** 2026-05-03 (P9 complete, tag `v0.9.0`)
 
 ---
 
@@ -12,9 +12,9 @@ where the previous session left off, without re-litigating decisions already mad
 Start a new chat. Tell the agent:
 
 > We're continuing the `wikilens` project at `C:\Projects2026\wikilens\`.
-> P8 is complete (`v0.8.0` tagged locally, not pushed). Read `.local/AGENT_BRIEFING.md`,
+> P9 is complete (`v0.9.0` tagged locally, not pushed). Read `.local/AGENT_BRIEFING.md`,
 > then `.local/HANDOFF.md`, then `HANDOFF.md`, then `ROADMAP.md`.
-> Next step: **P9** — Unnamed Concept Detector. Plan before writing code.
+> Next step: **P10** — Epistemic Confidence Mapper. Plan before writing code.
 
 That's it.
 
@@ -133,11 +133,19 @@ under the MIT license.
 - CHANGELOG.md added; Development Status bumped to Alpha.
 - 317/317 tests pass.
 
-### P9 – P12
+### P9 — Unnamed Concept Detector (COMPLETE, 2026-05-03, tag `v0.9.0`, not pushed)
+
+- `wikilens concepts <vault>` clusters vault chunks via BGE + K-means, calls an LLM judge per cluster to propose the canonical term the notes circle around without naming.
+- Absence filter: proposed term must appear in fewer than 20% of cluster chunks.
+- `MockConceptJudge`, `OpenAIConceptJudge` (default gpt-4o), `ClaudeConceptJudge`.
+- Markdown + `--json` output, exit 0/1/2. Cost-control: `--top-k`, `--min-cluster-size`, `--max-clusters`, `--absence-threshold`.
+- Eval fixture: `fixtures/concepts_vault/` (12 notes, 5 planted unnamed concepts). Targets: precision ≥ 0.70, recall ≥ 0.70.
+- 427/427 tests pass.
+
+### P10 – P12
 
 Full phase list with launch hooks and eval targets: [`ROADMAP.md`](./ROADMAP.md).
 
-- **P9** — Unnamed Concept Detector. Finds clusters paraphrasing the same unnamed idea.
 - **P10** — Epistemic Confidence Mapper. Classifies claims on hypothesis → verified fact.
 - **P11** — Obsidian Plugin. Thin wrapper over the CLI; marketplace discovery.
 - **P12** — v1.0 launch. Product Hunt + Show HN + `r/ObsidianMD`.

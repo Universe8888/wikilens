@@ -10,6 +10,24 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.0] — 2026-05-03
+
+### Added
+- **Unnamed Concept Detector** (`wikilens concepts <vault>`): clusters vault chunks via BGE embeddings + K-means, then calls an LLM judge per cluster to propose the canonical term the notes are collectively circling around without ever naming it.
+- Absence filter: a finding is kept only when the proposed term appears in fewer than 20% of the cluster's chunks — ensuring the concept is genuinely unnamed.
+- Pluggable concept judge: `MockConceptJudge` (dry-run), `OpenAIConceptJudge` (`gpt-4o`, default), `ClaudeConceptJudge` (`claude-sonnet-4-6`). JSON response schema: `{proposed_term, confidence 0–1, rationale}`.
+- `ConceptFinding` dataclass: `cluster_id`, `proposed_term`, `confidence`, `rationale`, `supporting_notes`, `evidence_chunks`, `term_freq_in_cluster`.
+- Markdown report by default; `--json` for machine-readable output (`schema_version: 1`).
+- Cost-control flags: `--top-k`, `--min-cluster-size`, `--max-clusters`, `--absence-threshold`.
+- Exit 0 clean / 1 findings / 2 bad input — consistent with P3–P8 convention.
+- Hand-crafted eval fixture `fixtures/concepts_vault/` (12 notes, 5 planted unnamed concepts): `cognitive load`, `emergence`, `opportunity cost`, `compounding`, `satisficing` — each described without using its canonical term.
+- Ground-truth `fixtures/eval/p9_ground_truth.json` (5 labeled concepts with supporting note lists).
+- Eval harness `scripts/eval_p9.py`: ingests fixture vault into a temp DB, scores precision/recall vs. gold, appends to `BENCHMARK.md`. Targets: precision ≥ 0.70, recall ≥ 0.70.
+- 9 new tests; 427 total.
+- XML prompt sanitization (`_sanitise_xml`) and retry/fallback pattern applied to all judge backends.
+
+---
+
 ## [0.8.0] — 2026-05-02
 
 ### Added

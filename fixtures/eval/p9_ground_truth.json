@@ -1,0 +1,51 @@
+{
+  "concepts": [
+    {
+      "id": "cognitive-load",
+      "canonical_term": "cognitive load",
+      "supporting_notes": [
+        "working-memory-limits.md",
+        "mental-effort-and-task-complexity.md",
+        "chunking-information.md"
+      ],
+      "description": "The total mental effort imposed on working memory during a task; encompasses intrinsic, extraneous, and germane demands."
+    },
+    {
+      "id": "emergence",
+      "canonical_term": "emergence",
+      "supporting_notes": [
+        "ant-colony-behavior.md",
+        "traffic-jam-formation.md"
+      ],
+      "description": "Complex system-level behaviour that arises from simple local rules without central coordination."
+    },
+    {
+      "id": "opportunity-cost",
+      "canonical_term": "opportunity cost",
+      "supporting_notes": [
+        "time-allocation-tradeoffs.md",
+        "resource-scarcity-and-choice.md"
+      ],
+      "description": "The value of the next-best alternative foregone when a choice is made; the hidden price of any decision."
+    },
+    {
+      "id": "compounding",
+      "canonical_term": "compounding",
+      "supporting_notes": [
+        "interest-on-interest.md",
+        "habit-accumulation.md"
+      ],
+      "description": "Exponential growth produced by reinvesting returns so that each period's gain becomes the base for the next."
+    },
+    {
+      "id": "satisficing",
+      "canonical_term": "satisficing",
+      "supporting_notes": [
+        "good-enough-decisions.md",
+        "bounded-rationality.md",
+        "threshold-based-choice.md"
+      ],
+      "description": "A decision strategy of accepting the first option that meets a minimum threshold rather than optimising for the best possible outcome."
+    }
+  ]
+}

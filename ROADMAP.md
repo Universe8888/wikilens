@@ -2,7 +2,7 @@
 
 > Where `wikilens` is going. Every phase ships measurable capability and lands a launch artifact (writeup, demo, or distribution surface) so the project accumulates visible progress rather than vanishing into a long v1 march.
 
-**Current tip:** P8 shipped (`v0.8.0`). P9 is next.
+**Current tip:** P9 shipped (`v0.9.0`). P10 is next.
 
 ---
 
@@ -38,15 +38,15 @@ Walk the `git log` of the vault. Surface notes where thinking has shifted semant
 - **Eval:** 8-note fixture, 9-commit history, 5 planted drifts + 5 planted surface revisions. Targets: precision ≥ 0.80, recall ≥ 0.80.
 - **Launch hook:** *"I ran an AI over my git history. It found 12 beliefs I quietly abandoned."*
 
----
-
-## Next
-
 ### P9 — Unnamed Concept Detector · `v0.9.0`
 Find clusters of notes that paraphrase the same idea without ever naming it. Propose the missing term.
 
-- **Eval:** Expert-rated "yes, I should have named this" on proposed concepts across 5 real-vault runs.
+- **Eval:** 12-note fixture, 5 planted unnamed concepts (`cognitive load`, `emergence`, `opportunity cost`, `compounding`, `satisficing`). Targets: precision ≥ 0.70, recall ≥ 0.70.
 - **Launch hook:** *"My second brain was circling a concept 18 times without ever naming it. Here's what it found."*
+
+---
+
+## Next
 
 ### P10 — Epistemic Confidence Mapper · `v0.10.0`
 Classify claims across notes on the **hypothesis → verified fact** spectrum. Flag conclusions that outrun their evidence.
