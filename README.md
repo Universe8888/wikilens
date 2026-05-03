@@ -1,9 +1,23 @@
 # wikilens
 
-> An agentic intelligence layer for Markdown / Obsidian vaults.
-> RAG + evaluated metacognitive agents, built in public.
+8 evaluated agents, one command, any Markdown vault — turning a folder of notes into a queryable, auditable, self-aware knowledge system.
 
-**Status:** Alpha · P8 shipped (`v0.8.0`). `ingest`, `query`, `audit`, `contradict`, `gap`, `answer`, and `drift` all work end-to-end on local Markdown vaults. [See benchmark →](./BENCHMARK.md)
+**Status:** Pre-1.0 · 8 agents shipped, all with hand-labeled evals. [See full benchmark numbers →](./BENCHMARK.md)
+
+---
+
+## Agents
+
+| Command | What it finds | Best metric |
+|---------|--------------|-------------|
+| `audit` | Broken wikilinks, one-way links, orphan notes, shadowed basenames | F1 = 1.00 |
+| `contradict` | Contradicting claim pairs across notes | F1 = 0.82 |
+| `gap` | Unanswered questions implied by vault content | Recall = 1.00 |
+| `answer` | Drafts cited stub notes answering identified gaps | Pass rate = 0.80 |
+| `drift` | Notes where beliefs shifted over git history | Targets: P>=0.80, R>=0.80 |
+| `concepts` | Clusters of notes circling an unnamed concept | F1 >= 0.70 targets met |
+| `confidence` | Claims below an epistemic threshold (5-level scale) | F1 = 0.89 |
+| `query` | Semantic search over the indexed vault | Hit@5 = 1.00 |
 
 ---
 
@@ -14,8 +28,8 @@
 It is:
 
 - **Local-first.** Runs on your machine. Your notes never leave unless you explicitly call a remote LLM.
-- **Agent-based.** Individual capabilities (link auditing, contradiction detection, gap finding) are isolated agents with measured performance.
-- **Evaluated, not vibes.** Every agent ships with a labeled test fixture and a reported score. No "it seems to work."
+- **Agent-based.** Individual capabilities are isolated agents with measured performance.
+- **Evaluated, not vibes.** Every agent ships with a labeled test fixture and a reported score.
 - **Markdown-native.** Understands Obsidian-flavored syntax: `[[wikilinks]]`, YAML frontmatter, callouts, embeds.
 
 It is not:
@@ -24,37 +38,17 @@ It is not:
 - A note editor (bring your own — Obsidian, VS Code, plain text)
 - A chatbot wrapper ("chat with your notes" is table stakes; this is the layer above that)
 
-## Why it exists
+---
 
-Second-brain tools have exploded, but most are storage-shaped, not thinking-shaped. They help you *save* notes, not *reason across them*.
+## Quickstart
 
-The interesting question isn't "can an LLM answer a question about my vault" — that's solved. The interesting questions are:
+```bash
+pip install wikilens
+wikilens ingest /path/to/vault
+wikilens audit /path/to/vault
+```
 
-- Where does my vault **contradict itself**?
-- What **should be there but isn't** (gaps)?
-- Which links are **missing** or **wrong**?
-- What am I **circling without naming** (emergent concepts)?
-
-Each of those is an agent. Each has a measurable success criterion. That's the project.
-
-## Who it's for
-
-Knowledge workers who keep a serious Markdown vault (≥ 200 notes) and want more than search. Researchers, writers, developers, second-brain practitioners.
-
-## Roadmap
-
-Shipped: **P1 – P8** (RAG core, Link Auditor, Contradiction Finder, Gap Generator, Answer Generator, PyPI polish, Temporal Drift Detector — all with hand-labeled evals).
-
-Next: **P9 — Unnamed Concept Detector**, **P10 — Epistemic Confidence Mapper**, **P11 — Obsidian plugin**, **P12 — v1.0 launch**.
-
-Full phase list, launch hooks, and eval targets in [`ROADMAP.md`](./ROADMAP.md).
-
-## Design principles
-
-1. **No silent steps.** Every agent explains what it did and why.
-2. **Reproducible evaluation.** `make benchmark` produces the numbers in `BENCHMARK.md`.
-3. **No vendor lock.** Swappable embeddings, swappable LLMs, swappable vector stores.
-4. **Fail loud.** Broken inputs are surfaced, never guessed.
+---
 
 ## Install
 
@@ -66,12 +60,14 @@ Python 3.12+ is required. The first run of `ingest` or `query` downloads two
 local models (~270 MB total, cached for all subsequent runs):
 `BAAI/bge-small-en-v1.5` (embedder) and `BAAI/bge-reranker-base` (reranker).
 
-For `contradict`, `gap`, and `answer` you also need a remote LLM key:
+For `contradict`, `gap`, `answer`, `drift`, `concepts`, and `confidence` you also need a remote LLM key:
 
 ```bash
 pip install 'wikilens[judge]'         # adds openai, anthropic, scikit-learn
 export OPENAI_API_KEY=sk-...          # or ANTHROPIC_API_KEY for --judge claude
 ```
+
+LLM backends are bring-your-own-key; OpenAI (`gpt-4o`) is the default, Claude is available via `--judge claude`.
 
 **From source** (dev / contributor install):
 
@@ -84,6 +80,8 @@ pip install -e '.[dev]'
 On Windows, if the `wikilens` command is not found after install, add the
 Python Scripts directory to `PATH` (e.g. `%APPDATA%\Python\Python312\Scripts`)
 or run `python -m wikilens.cli` while developing.
+
+---
 
 ## Usage
 
@@ -111,22 +109,22 @@ directory; override with `--db <path>`.
 ```bash
 # Contradict — find conflicting chunk pairs.
 pip install -e '.[judge]'
-wikilens contradict ./my-vault --judge claude                    # full run
-wikilens contradict ./my-vault --judge none                      # dry-run (no API)
-wikilens contradict ./my-vault --judge claude --sample 20        # cap API calls
+wikilens contradict ./my-vault --judge openai                   # full run
+wikilens contradict ./my-vault --judge none                     # dry-run (no API)
+wikilens contradict ./my-vault --judge openai --sample 20       # cap API calls
 
 # Gap — find unanswered questions the vault implies but doesn't answer.
-wikilens gap ./my-vault --judge claude                           # full run
-wikilens gap ./my-vault --judge none                             # dry-run (no API)
-wikilens gap ./my-vault --judge claude --max-clusters 10         # budget cap
-wikilens gap ./my-vault --judge claude --top-gaps-per-cluster 2  # fewer per cluster
+wikilens gap ./my-vault --judge openai                          # full run
+wikilens gap ./my-vault --judge none                            # dry-run (no API)
+wikilens gap ./my-vault --judge openai --max-clusters 10        # budget cap
+wikilens gap ./my-vault --judge openai --top-gaps-per-cluster 2 # fewer per cluster
 
 # Answer — for each gap, retrieve vault evidence and draft a note stub.
-wikilens gap ./my-vault --judge openai --json > gaps.json        # generate gaps first
-wikilens answer ./my-vault --gaps gaps.json --judge openai       # draft stubs to stdout
+wikilens gap ./my-vault --judge openai --json > gaps.json       # generate gaps first
+wikilens answer ./my-vault --gaps gaps.json --judge openai      # draft stubs to stdout
 wikilens answer ./my-vault --gaps gaps.json --judge openai \
-    --write --out ./stubs/                                       # write .md files
-wikilens answer ./my-vault --gaps gaps.json --judge none         # dry-run (no API)
+    --write --out ./stubs/                                      # write .md files
+wikilens answer ./my-vault --gaps gaps.json --judge none        # dry-run (no API)
 ```
 
 `contradict`, `gap`, and `answer` exit 0 when clean, 1 when findings / partial
@@ -147,36 +145,25 @@ wikilens drift ./my-vault --granularity paragraph      # coarser claim units
 `drift` requires the vault to be inside a git repository. Exit 0 when no
 drift found, 1 when findings reported, 2 on bad input or missing git repo.
 Known limitation: `--since` is parsed but not yet applied to `git log`
-(fix in P8.5+). Heavy renames / file splits are not tracked (`git log --follow`
+(fix deferred). Heavy renames / file splits are not tracked (`git log --follow`
 limitation).
+
+```bash
+# Concepts — detect clusters of notes circling an unnamed concept.
+wikilens concepts ./my-vault --judge openai
+wikilens concepts ./my-vault --judge none              # dry-run (no API)
+
+# Confidence — flag claims below an epistemic threshold.
+wikilens confidence ./my-vault --judge openai
+wikilens confidence ./my-vault --threshold 3           # stricter threshold (1–5 scale)
+wikilens confidence ./my-vault --judge none            # dry-run (no API)
+```
+
+---
 
 ## Benchmark
 
-Four eval suites, all reproducible from a fresh clone.
-
-**Retrieval** (P2): Hit@5 = 1.00 in all four modes on the 36-note synthetic vault. Latency p95: 37 ms (dense) to 1846 ms (rerank).
-
-**Link audit** (P3): Precision = Recall = F1 = 1.00 on all four detector classes (16-note fixture, 19 planted defects).
-
-**Contradiction finder** (P4): F1 = 0.82, retrieval recall = 0.90 on the 24-pair hand-labeled fixture. Wall clock 67.7s.
-
-**Gap generator** (P5): Cluster-stage recall = 1.00, matcher-stage F1 = 0.65 on 10 gold gaps. All 10 gold gaps surfaced by some cluster.
-
-**Answer generator** (P6): Pass rate = 0.80 (8/10 drafts pass all 4 axes: faithfulness, coverage, attribution quality, stub structure). Attribution rate = 1.00 (automated). Wall clock 90s for 10 gaps.
-
-**Temporal drift detector** (P8): Eval fixture: 8 notes, 9 commits, 5 planted drifts + 5 planted surface revisions. Targets: precision ≥ 0.80, recall ≥ 0.80. See `BENCHMARK.md` for measured numbers.
-
-See [`BENCHMARK.md`](./BENCHMARK.md) for full tables. Reproduce any suite:
-
-```bash
-# P6 answer generator
-pip install -e '.[dev,judge]'
-rm -rf .wikilens_p5_eval
-wikilens ingest fixtures/gaps_vault --db .wikilens_p5_eval/db
-python scripts/eval_p6.py --judge openai
-```
-
-Local checks:
+Full tables and per-run history in [`BENCHMARK.md`](./BENCHMARK.md). Reproduce any suite:
 
 ```bash
 make lint
@@ -187,11 +174,30 @@ make benchmark
 
 `make benchmark` uses no-API mock judges for P4-P6 by default. To reproduce
 published LLM-judged numbers, run the individual eval scripts with
-`--judge claude` or `--judge openai` after setting the relevant API key.
+`--judge openai` or `--judge claude` after setting the relevant API key.
 
-## Writing / research
+---
 
-Design decisions and methodology writeups are published as they happen. Index will live at [`/docs`](./docs/) once P2 is done.
+## Design principles
+
+1. **No silent steps.** Every agent explains what it did and why.
+2. **Reproducible evaluation.** `make benchmark` produces the numbers in `BENCHMARK.md`.
+3. **No vendor lock.** Swappable embeddings, swappable LLMs, swappable vector stores.
+4. **Fail loud.** Broken inputs are surfaced, never guessed.
+
+---
+
+## Roadmap
+
+Full phase list, launch hooks, and eval targets in [`ROADMAP.md`](./ROADMAP.md).
+
+---
+
+## Versioning
+
+wikilens is pre-1.0. Minor version bumps may include CLI and schema changes; see CHANGELOG.
+
+---
 
 ## License
 

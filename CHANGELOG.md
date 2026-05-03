@@ -10,6 +10,16 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.11.0] — 2026-05-03
+
+### Changed
+- **README rewritten for v0.11.0 launch.** New structure: single-sentence hook, 8-agent capability table with benchmark numbers, 3-command quickstart, link to `BENCHMARK.md`. Technical audience; no hand-holding sections.
+- Versioning policy added to README: pre-1.0, minor bumps may include CLI and schema changes.
+- P11 (Obsidian Plugin) deferred indefinitely; removed from README and ROADMAP next-steps.
+- ROADMAP updated: P12 (v0.11.0 Launch) is the active phase.
+
+---
+
 ## [0.10.0] — 2026-05-03
 
 ### Added

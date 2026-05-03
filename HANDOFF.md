@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-03 (P10 complete, tag `v0.10.0`)
+**Last updated:** 2026-05-03 (P10 complete, tag `v0.10.0`; P11 deferred; P12 is next)
 
 ---
 
@@ -12,9 +12,9 @@ where the previous session left off, without re-litigating decisions already mad
 Start a new chat. Tell the agent:
 
 > We're continuing the `wikilens` project at `C:\Projects2026\wikilens\`.
-> P10 is complete (`v0.10.0` tagged locally, not pushed). Read `.local/AGENT_BRIEFING.md`,
-> then `.local/HANDOFF.md`, then `HANDOFF.md`, then `ROADMAP.md`.
-> Next step: **P11** — Obsidian Plugin. Plan before writing code.
+> P10 is complete (`v0.10.0` tagged locally, not pushed). P11 (Obsidian Plugin) is deferred.
+> Read `.local/AGENT_BRIEFING.md`, then `.local/HANDOFF.md`, then `HANDOFF.md`, then `ROADMAP.md`.
+> Next step: **P12** — v1.0 Launch. Plan before writing anything.
 
 That's it.
 
@@ -153,12 +153,12 @@ under the MIT license.
 - Eval fixture: `fixtures/confidence_vault/` (15 notes, 179 labeled claims). Precision=0.91, Recall=0.88, F1=0.89, QWK=0.881 — both ≥ 0.70 targets met.
 - 468/468 tests pass.
 
-### P11 – P12
+### P12 — v1.0 Launch (next)
 
 Full phase list with launch hooks and eval targets: [`ROADMAP.md`](./ROADMAP.md).
 
-- **P11** — Obsidian Plugin. Thin wrapper over the CLI; marketplace discovery.
-- **P12** — v1.0 launch. Product Hunt + Show HN + `r/ObsidianMD`.
+- **P12** — v1.0 launch. Product Hunt + Show HN + `r/ObsidianMD`. Polish README, record demo, write launch post with all 8-agent benchmark numbers.
+- **P11** — Obsidian Plugin (deferred indefinitely). See `docs/p11-plan.md` if revisited.
 
 ## Hard constraints (do not violate)
 

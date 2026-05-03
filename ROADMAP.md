@@ -2,7 +2,7 @@
 
 > Where `wikilens` is going. Every phase ships measurable capability and lands a launch artifact (writeup, demo, or distribution surface) so the project accumulates visible progress rather than vanishing into a long v1 march.
 
-**Current tip:** P9 shipped (`v0.9.0`). P10 is next.
+**Current tip:** P10 shipped (`v0.10.0`). P12 (v1.0 Launch) is next — P11 (Obsidian Plugin) is deferred indefinitely.
 
 ---
 
@@ -48,20 +48,14 @@ Find clusters of notes that paraphrase the same idea without ever naming it. Pro
 
 ## Next
 
-### P10 — Epistemic Confidence Mapper · `v0.10.0`
-Classify claims across notes on the **hypothesis → verified fact** spectrum. Flag conclusions that outrun their evidence.
-
-- **Eval:** Precision / recall on a hand-labeled confidence fixture (each claim tagged on a 5-point scale).
-- **Launch hook:** *"I audited my own vault for epistemic debt. Here's what I found."*
-
-### P11 — Obsidian Plugin · `v0.11.0`
-Thin wrapper calling the `wikilens` CLI, displays findings in a side pane. Submit to the Obsidian community plugin directory.
-
-- **Why:** Passive discovery via the plugin marketplace — ongoing traffic, not a one-shot launch.
-- **Scope:** Plugin is a view layer, not a reimplementation. All reasoning stays in the CLI so the plugin benefits from every future agent automatically.
-
 ### P12 — v1.0 Launch
-Product Hunt + Show HN + `r/ObsidianMD` simultaneously. **Requires P6 – P11 all shipped.** Bundle all benchmark numbers into a single writeup: *"Here's what `wikilens` caught on 5 real vaults."* One post, five agents, real numbers.
+Product Hunt + Show HN + `r/ObsidianMD` simultaneously. Bundle all benchmark numbers into a single writeup: *"Here's what `wikilens` caught on 5 real vaults."* One post, eight agents, real numbers.
+
+- **Launch hook:** *"I built 8 AI agents that audit a knowledge base. Here are the honest benchmark numbers."*
+- **Scope:** Polish README, record a short demo, write the launch post. All agents already shipped.
+
+### P11 — Obsidian Plugin (deferred)
+Thin wrapper calling the `wikilens` CLI, displays findings in a side pane. Deferred until the CLI has traction and there is user demand for a GUI layer. See `docs/p11-plan.md` for the full SDD if revisited.
 
 ---
 
