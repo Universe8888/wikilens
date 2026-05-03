@@ -78,6 +78,7 @@ select = ["E", "F", "I", "N", "UP", "B", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/build_drift_fixture.py" = ["E501"]
+"scripts/_gen_p10_gt.py" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
