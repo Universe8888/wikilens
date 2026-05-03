@@ -1,0 +1,1447 @@
+{
+  "schema_version": 2,
+  "description": "Ground truth for P10 Epistemic Confidence Mapper eval. 179 labeled claims across 15 public-domain notes. claim_text values match wikilens.drift.extract_claims() output exactly.",
+  "fixture_vault": "fixtures/confidence_vault",
+  "generated": "2026-05-03",
+  "level_descriptions": {
+    "1": "speculation - explicit hedge",
+    "2": "conjecture - stated flat, no support",
+    "3": "inference - reasoned from other claims",
+    "4": "attributed - cited to named external source",
+    "5": "verified - textbook-empirical"
+  },
+  "claims": [
+    {
+      "id": "C001",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "e2b2146d71e44b4808818c297806e120bcfd9a136fc86d1718f98415763f2a98",
+      "claim_text": "My is about eight months old now — a 100% hydration rye-fed culture I keep at room temperature between bakes.",
+      "level": 2,
+      "rationale": "Personal practice stated as fact, no support."
+    },
+    {
+      "id": "C002",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "d4939b519ab6f8d9d6a94ae14d53826076feaf89ac268e4756a712252af72546",
+      "claim_text": "The feeding routine has become second nature: discard all but 30g, add 30g rye flour and 30g water, wait for the dome and the little bubbles along the sides of the jar before mixing a dough.",
+      "level": 2,
+      "rationale": "Personal practice stated as fact."
+    },
+    {
+      "id": "C003",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "c9392cdb449e4fae852c65ea80d26a0b13bb3b1e1bd23672e83063ae68ed3a64",
+      "claim_text": "I suspect that lower hydration limits gas expansion during the bake, which would explain why the ear never opened the way I wanted.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C004",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "efafaedcbe36250dd7f2d798cfeacee23ee6dca2fa11a430b3cfbdad468b171b",
+      "claim_text": "Bumping to 80% made the shaping harder, but the open crumb came back.",
+      "level": 2,
+      "rationale": "Observation reported flat, no reasoning chain."
+    },
+    {
+      "id": "C005",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "265359562382b7d6a74a4622b1b229d9508a6d0ab7dd9d35a08bfb2c3db9b9a6",
+      "claim_text": "According to Chad Robertson in *Tartine Bread*, the target dough temperature after mixing should sit around 78°F, and he treats that as the single most controllable lever for fermentation rate.",
+      "level": 4,
+      "rationale": "Attributed to named author + book."
+    },
+    {
+      "id": "C006",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "dcab21bf0d195cfccd70ec95a823106b9ba89996853d12eec1bcdfdfeb67e129",
+      "claim_text": "I think the \"poke test\" — where the dough should spring back slowly but not fully — is more reliable than the clock, but I haven't proven that to myself rigorously.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C007",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "8b2cf9df3708c8777f75ed192e0a453d070f88c6b10855bbf41f62bd4bbf53e4",
+      "claim_text": "Because my kitchen runs cold in winter (around 64°F), the bulk ferment stretches to eight or nine hours versus the four hours I get in summer; this tracks with , where I noted that yeast activity roughly halves for every 10°C drop in temperature.",
+      "level": 3,
+      "rationale": "Explicit causal chain + wikilink cross-reference."
+    },
+    {
+      "id": "C008",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "543a12b3a86cc1024ea31413f2f03188ad9448accde6ea6329d160164f3de1fe",
+      "claim_text": "Gluten development during stretch-and-fold produces the network that traps CO2 released by yeast, and without that structure the loaf spreads flat instead of rising — this is basic bread science and not something I'm guessing at.",
+      "level": 5,
+      "rationale": "Textbook bread biochemistry, well-established."
+    },
+    {
+      "id": "C009",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "9562cec110ccae92c02344c719c3ad0008cf0db637ceccb294eaa3bd5fa6f7a5",
+      "claim_text": "The oven spring is really just that CO2 expanding rapidly as the dough hits heat, which is why a cold, underproofed loaf can sometimes spring well: the yeast still has sugar to consume and CO2 to produce once the oven warms it.",
+      "level": 3,
+      "rationale": "Reasoned from CO2 mechanism to observed outcome."
+    },
+    {
+      "id": "C010",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "f94d0bd404749cc80c715e9e3d6c825c0b08cb8aecc759750c31e5093e4d618b",
+      "claim_text": "The ear seems to depend on blade angle and tension in the dough surface — maybe 30 degrees off vertical is the sweet spot, but I honestly have no idea if that's right or if I just got lucky a few times.",
+      "level": 1,
+      "rationale": "Explicit hedge 'maybe' + 'honestly have no idea'."
+    },
+    {
+      "id": "C011",
+      "note": "sourdough-baking.md",
+      "claim_id_sha256": "5b89ee8bed6e291883d5c5cac9cb22da3ba51210e0f586591384c0e655acb11e",
+      "claim_text": "Cold retarding overnight in the fridge has made the scoring easier because the dough holds its shape, and I think the longer cold ferment also develops more acetic acid, giving the crust a sharper, more complex flavor than a same-day bake.",
+      "level": 3,
+      "rationale": "Causal chain: cold -> firm dough -> easier scoring."
+    },
+    {
+      "id": "C012",
+      "note": "roman-history.md",
+      "claim_id_sha256": "606a7d566097cce042198730afddab1cc69082ce6136e5dd55e30a919db22f6d",
+      "claim_text": "The Roman Republic was formally abolished — or rather, hollowed out — when Octavian accepted the title *Augustus* from the Senate in 27 BCE, a date that most historians treat as the conventional start of the Principate.",
+      "level": 5,
+      "rationale": "Textbook-empirical, scholarly consensus date."
+    },
+    {
+      "id": "C013",
+      "note": "roman-history.md",
+      "claim_id_sha256": "a07eada470a42c0c7c41fcdd186c12b6b769dcb6c09a4a741644e679e71b9035",
+      "claim_text": "I find it striking how long Romans went on using republican vocabulary — *consul*, *Senate*, *tribune* — even after real power had concentrated in a single household.",
+      "level": 1,
+      "rationale": "First-person interpretive hedge."
+    },
+    {
+      "id": "C014",
+      "note": "roman-history.md",
+      "claim_id_sha256": "9fa23e31f2f2b24b52590c797218d8711e57548d85fcd6b7e3c90feda76382b6",
+      "claim_text": "That rhetorical continuity must have been deliberate, a way of making autocracy palatable to an aristocracy still saturated with memories of Brutus and Cincinnatus.",
+      "level": 3,
+      "rationale": "Inference from persistence of vocabulary."
+    },
+    {
+      "id": "C015",
+      "note": "roman-history.md",
+      "claim_id_sha256": "d6d282d1b3523fc46c5632fb404ec395a5ea67a77b41ac2a377c58e63a4e8a82",
+      "claim_text": "The Roman legions were the most disciplined standing army the ancient world had ever seen, and their logistical organization alone explains why no enemy could match them over the long run.",
+      "level": 2,
+      "rationale": "Flat superlative opinion, no support."
+    },
+    {
+      "id": "C016",
+      "note": "roman-history.md",
+      "claim_id_sha256": "cc928ae5eb05b264dfb955804caf42389b27f404fb188d9a5819731dd3504e86",
+      "claim_text": "Suetonius, in *The Twelve Caesars*, describes Caesar's soldiers as capable of covering thirty miles a day under full kit — a figure that, if accurate, dwarfs the operational tempo of most pre-modern armies.",
+      "level": 4,
+      "rationale": "Attributed to named primary source."
+    },
+    {
+      "id": "C017",
+      "note": "roman-history.md",
+      "claim_id_sha256": "34e5636dca5f2d90cef77ca04f65bb8738cde748ccac618c39812c25eb23c903",
+      "claim_text": "Julius Caesar was born in 100 BCE and assassinated on the Ides of March, 44 BCE; these dates are not in serious dispute.",
+      "level": 5,
+      "rationale": "Uncontested historical dates."
+    },
+    {
+      "id": "C018",
+      "note": "roman-history.md",
+      "claim_id_sha256": "3234a524582d3e91215bd10c21a1a5bf18f9165e92af4ef7df3e8346dc46cc40",
+      "claim_text": "Given the remarkable speed of Caesar's Gallic campaigns, his army's march rates were probably at the upper end of what ancient sources report, not an exaggeration for effect.",
+      "level": 3,
+      "rationale": "Reasoned inference from campaign evidence."
+    },
+    {
+      "id": "C019",
+      "note": "roman-history.md",
+      "claim_id_sha256": "6d460f336a8cf4ec94474947f95b58f8015d379bda574d594c3bc50a01cee561",
+      "claim_text": "Mary Beard, in *SPQR* (2015), argues persuasively that Rome's expansion was less the product of deliberate imperial strategy and more a series of ad hoc interventions that created dependencies Rome then felt obliged to defend.",
+      "level": 4,
+      "rationale": "Attributed to named modern scholar + work."
+    },
+    {
+      "id": "C020",
+      "note": "roman-history.md",
+      "claim_id_sha256": "d56d990494eaf03caf7c7d0af0f67a6c6733343ce944bbd5deecdedee52c4caf",
+      "claim_text": "I suspect the Senate never quite understood that each new province was also a new commitment — the logic of expansion fed itself almost accidentally.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C021",
+      "note": "roman-history.md",
+      "claim_id_sha256": "deb525842780a6d23166f737a28610da8e39e6f866c5438bf5eb8d9236f6ac47",
+      "claim_text": "What strikes me about the ancient sources is how differently they frame the same story.",
+      "level": 1,
+      "rationale": "First-person framing sentence."
+    },
+    {
+      "id": "C022",
+      "note": "roman-history.md",
+      "claim_id_sha256": "817aba33000d367e62b75f23a562f30fc991a6f68c244202175830cca6bd17a3",
+      "claim_text": "Livy's account of the early Republic in *Ab Urbe Condita* presents the conquest of Italy as a story of defensive wars and reluctant alliances, though modern scholars read the same evidence as straightforwardly aggressive.",
+      "level": 4,
+      "rationale": "Attributed to named primary source."
+    },
+    {
+      "id": "C023",
+      "note": "roman-history.md",
+      "claim_id_sha256": "d65173d23bbbb8a6945862062119b74fecc40bcaf8eb278ad6897876f22e6cdf",
+      "claim_text": "Tacitus, writing under the emperors he despised, is our best source for the moral atmosphere of the Principate; in the *Annals* he constructs a Rome in which every senatorial courtesy is a potential trap and every honor a veiled threat.",
+      "level": 4,
+      "rationale": "Attributed to named primary source."
+    },
+    {
+      "id": "C024",
+      "note": "roman-history.md",
+      "claim_id_sha256": "2adc665ea157d184adddf73c2ff7cde777e0beb7fc1b1864d05ef20a085dce7a",
+      "claim_text": "Reading Gibbon alongside the ancient sources, I keep coming back to his thesis.",
+      "level": 1,
+      "rationale": "First-person framing sentence."
+    },
+    {
+      "id": "C025",
+      "note": "roman-history.md",
+      "claim_id_sha256": "0a0acac14238221847a2443019ea3284705cd6591644cc8d423c03fa71729791",
+      "claim_text": "Edward Gibbon, in *The History of the Decline and Fall of the Roman Empire* (1776–1789), famously located the seeds of decline in the moment the empire stopped expanding — a thesis that has been refined but never fully displaced.",
+      "level": 4,
+      "rationale": "Attributed to named author + work."
+    },
+    {
+      "id": "C026",
+      "note": "roman-history.md",
+      "claim_id_sha256": "2393f0de7b7de0e90dae2629fde99e9b3c6ee111b7016444819e56e85dceeb2e",
+      "claim_text": "I find the structural vulnerability of late Rome clarifies a lot.",
+      "level": 1,
+      "rationale": "First-person framing sentence."
+    },
+    {
+      "id": "C027",
+      "note": "roman-history.md",
+      "claim_id_sha256": "91cdd44c239e185b97d15f8de5df18327d73f9f68f7d4c0f20fb754d562b5e61",
+      "claim_text": "Because the grain supply to the city of Rome depended entirely on Egyptian and North African surpluses, any disruption to Mediterranean trade routes would have translated almost immediately into urban unrest; the political fragility of the late third century CE makes more sense when viewed through that supply-chain lens.",
+      "level": 3,
+      "rationale": "Explicit causal inference."
+    },
+    {
+      "id": "C028",
+      "note": "roman-history.md",
+      "claim_id_sha256": "2b74c44a79fead441b4957ef8d448d1da9a1ea9bce6f3612ee1a8394c9990331",
+      "claim_text": "The Western Roman Empire fell in 476 CE when the Germanic chieftain Odoacer deposed the last emperor, Romulus Augustulus — a fact that anchors the entire periodization of late antiquity.",
+      "level": 5,
+      "rationale": "Textbook-empirical, scholarly consensus."
+    },
+    {
+      "id": "C029",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "1b45f209137abd7830386dcd3808b5211ac0da620a66a6ab2644d0bcf1b95cbb",
+      "claim_text": "The Earth is approximately 4.54 billion years old, a figure pinned down by radiometric dating of the oldest zircon crystals and independently confirmed by dating meteorites.",
+      "level": 5,
+      "rationale": "Scientific consensus, independently confirmed."
+    },
+    {
+      "id": "C030",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "9ce019f94b54a80bb042acf76001e1a2847883f2e843846224fe5dbb6a9d3ef6",
+      "claim_text": "The lithosphere — the rigid outer shell — is divided into roughly a dozen major tectonic plates and several smaller ones, all floating on the semi-plastic asthenosphere beneath them.",
+      "level": 5,
+      "rationale": "Standard plate-tectonics consensus."
+    },
+    {
+      "id": "C031",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "b24481cc3ba85412b648a88fb706195ba526a9d41de7b3aa997e58820a13ff93",
+      "claim_text": "According to the USGS, most plates move at rates between 2 and 15 centimetres per year, roughly the speed at which fingernails grow.",
+      "level": 4,
+      "rationale": "Explicitly cited to USGS by name."
+    },
+    {
+      "id": "C032",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "f143ef609a175ed4cdf5ccb55071f46b6e568bc308c30f8cafdac7e60b567e76",
+      "claim_text": "Because the Atlantic Ocean is approximately 6,500 kilometres wide, and assuming an average spreading rate of around 2.5 cm/year at the Mid-Atlantic Ridge, the basin must have taken something like 260 million years to reach its current width — which lines up nicely with the accepted breakup of Pangaea starting around 175 million years ago.",
+      "level": 3,
+      "rationale": "Explicit arithmetic reasoning chain."
+    },
+    {
+      "id": "C033",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "c04bd522984ec0092714ff50691ea2bf8d91d4ad0031f9d736eb6c6cff7505e3",
+      "claim_text": "There are three types of plate boundary: convergent (plates colliding), divergent (plates pulling apart), and transform (plates sliding laterally past each other).",
+      "level": 5,
+      "rationale": "Textbook plate-tectonics taxonomy."
+    },
+    {
+      "id": "C034",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "4bb9396f9c87a7dc9dc7a30dbde505418f3ca93281fdb166cde886aa93a64934",
+      "claim_text": "At convergent boundaries where an oceanic plate meets a continental one, the denser oceanic crust descends into the mantle in a process called .",
+      "level": 5,
+      "rationale": "Definitional scientific fact about subduction."
+    },
+    {
+      "id": "C035",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "717bc52af39191496310fc898ceabca57cb2ac42ae4ec233f18f841c4cae8192",
+      "claim_text": "Fortey describes standing in the Andes and knowing the ground beneath him was scraped-up ocean sediment — the physical residue of an ocean that no longer exists.",
+      "level": 4,
+      "rationale": "Attributed to Richard Fortey by name."
+    },
+    {
+      "id": "C036",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "2c0f14d81b9dc335eb771724987d234a9cb8b69ac816496035ac813b91b4f7fd",
+      "claim_text": "The descending slab releases water into the overlying mantle wedge, lowering the melting point of the rock and generating magma that punches upward to form volcanic arcs.",
+      "level": 3,
+      "rationale": "Mechanistic inference chain."
+    },
+    {
+      "id": "C037",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "f11e404bb5250bdd5d054d5f57e907349ac9c3cc7f867b4727641e83506af701",
+      "claim_text": "That is why the Pacific Rim hosts so many volcanoes: it is ringed by subduction zones, the so-called Ring of Fire.  at mid-ocean ridges is the engine that drives the whole system.",
+      "level": 3,
+      "rationale": "Explicit causal derivation from preceding mechanism."
+    },
+    {
+      "id": "C038",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "e548bef47f61953649bdcc7d3129f43ae90e804d9a698bc5634c2ad69c1da311",
+      "claim_text": "Harry Hess first articulated seafloor spreading in the early 1960s, and the hypothesis was confirmed decisively when the symmetric magnetic reversal stripes on either side of the ridges were mapped — each stripe a frozen record of the geomagnetic field at the time the rock solidified.",
+      "level": 4,
+      "rationale": "Attributed to Harry Hess by name."
+    },
+    {
+      "id": "C039",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "4424989605665d565db195406d6752f466ed39cf433dd667a5e135919b2a42c4",
+      "claim_text": "I think the most underappreciated consequence of all this is the long-term carbon cycle: subducting plates carry carbonate sediments back into the mantle, and volcanic arcs return that carbon as CO2, regulating atmospheric composition over geological timescales in ways we are only beginning to quantify.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C040",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "63d4d6338ed32869395260589dfdf58072d294841e5fff31615edfe08df4e2f7",
+      "claim_text": "The Himalayan mountain chain formed as a result of the ongoing collision between the Indian and Eurasian plates, a process that began roughly 50 million years ago and is still actively pushing the range upward today.",
+      "level": 2,
+      "rationale": "Stated flat, no citation, no reasoning."
+    },
+    {
+      "id": "C041",
+      "note": "geology-plate-tectonics.md",
+      "claim_id_sha256": "66b50e62162f717ddb46a8d9523752da96f4285c6c3d92827c487d9e1c94d450",
+      "claim_text": "Maybe the weirdest thing about to me is that Wegener proposed it in 1912 and was largely laughed out of serious geology for thirty years, purely because no one could imagine a mechanism strong enough to move continents.",
+      "level": 1,
+      "rationale": "Explicit hedge 'Maybe'."
+    },
+    {
+      "id": "C042",
+      "note": "astronomy.md",
+      "claim_id_sha256": "c5d0e68020e8d5427af09bb62194bc7c42f9a4408ffe3a09cd6264947e76f5b8",
+      "claim_text": "I have been pointing a small reflector telescope at the sky for about three years now, and what keeps striking me is how the numbers refuse to feel real.",
+      "level": 2,
+      "rationale": "Flat personal assertion, no support."
+    },
+    {
+      "id": "C043",
+      "note": "astronomy.md",
+      "claim_id_sha256": "a4ec94b12b7c7bcdbd183a3b2ff2d2e6277fbcf6301146931e844191e0d21a60",
+      "claim_text": "Light travels at roughly 299,792 kilometres per second — I have that memorised — and yet the Sun's light still takes about eight minutes to reach Earth, crossing a distance of around 150 million kilometres.",
+      "level": 5,
+      "rationale": "Textbook physics constants."
+    },
+    {
+      "id": "C044",
+      "note": "astronomy.md",
+      "claim_id_sha256": "6ca2b8766abea3772eb087157aa7e5d12dab50b67a0ab87412e4cf54fe8b93b0",
+      "claim_text": "Those are verified, textbook figures, but standing in my backyard they still feel like fiction.",
+      "level": 5,
+      "rationale": "Self-confirming verified claim."
+    },
+    {
+      "id": "C045",
+      "note": "astronomy.md",
+      "claim_id_sha256": "97a1dd37ebd5bf34464d5fa082182bd4d7b88c48a9f31ea2cd010b30e1b48378",
+      "claim_text": "Last month I started reading Carl Sagan's *Cosmos*, and his description of stellar evolution sharpened something I had been vague on: stars on the main sequence fuse hydrogen into helium, and once that fuel runs out, the core contracts while the outer layers expand into a red giant phase.",
+      "level": 4,
+      "rationale": "Attributed to Carl Sagan, Cosmos."
+    },
+    {
+      "id": "C046",
+      "note": "astronomy.md",
+      "claim_id_sha256": "bca38e1125a9cd6dac684640126909ea06bdf58caedc5bb6e245c0530a6fc0cc",
+      "claim_text": "The Sun will reach that stage in roughly five billion years.",
+      "level": 5,
+      "rationale": "Standard stellar astrophysics."
+    },
+    {
+      "id": "C047",
+      "note": "astronomy.md",
+      "claim_id_sha256": "296044bfb9957933d8a4d0ab153d5acd8699079ca2fde2c10d92cb9fd418cb98",
+      "claim_text": "I think dark matter might be the most philosophically unsettling idea in all of science, because we are essentially saying the majority of the mass in the universe is something we cannot directly detect.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C048",
+      "note": "astronomy.md",
+      "claim_id_sha256": "1d277911dac60e4e5b5d30440abe7c82478e57d63897aaa8ea784ac838c0560b",
+      "claim_text": "I wonder if it will turn out to be multiple distinct phenomena lumped under one label — the way \"fever\" once covered dozens of unrelated illnesses.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I wonder'."
+    },
+    {
+      "id": "C049",
+      "note": "astronomy.md",
+      "claim_id_sha256": "e4d694d64e31a00e70cee1c798465ccd183ee4fd409672680210e0ab2f4b3292",
+      "claim_text": "According to NASA JPL mission data, the Voyager 1 probe has now travelled beyond the heliopause, confirming that the solar wind does have a definite outer boundary.",
+      "level": 4,
+      "rationale": "Attributed to NASA JPL by name."
+    },
+    {
+      "id": "C050",
+      "note": "astronomy.md",
+      "claim_id_sha256": "5d6a96970473b46be30af70d7e76cd8e91c406e11c755572fe2bbaf23435a531",
+      "claim_text": "Because we have direct in-situ measurements from that probe, I feel confident treating the existence of the heliopause as a fact rather than a model inference.",
+      "level": 3,
+      "rationale": "Inference from direct measurements."
+    },
+    {
+      "id": "C051",
+      "note": "astronomy.md",
+      "claim_id_sha256": "4df8fe5da6efb04f4fef4d6ffc4289748d03b32019339eed16832a06df6aa2d3",
+      "claim_text": "Stars more massive than about eight solar masses end their lives in core-collapse supernovae, seeding the interstellar medium with heavy elements — that is the standard picture, well established in astrophysics literature.",
+      "level": 5,
+      "rationale": "Standard astrophysics."
+    },
+    {
+      "id": "C052",
+      "note": "astronomy.md",
+      "claim_id_sha256": "7aca691a70649e13c17bf726e3dc20a095b7d2b34d6ce1ac9aee8cc7ecb7ae07",
+      "claim_text": "From that, I conclude that every iron atom in my telescope mount was forged inside a star that exploded before the Sun formed.",
+      "level": 3,
+      "rationale": "Explicit inference from supernova-seeding premise."
+    },
+    {
+      "id": "C053",
+      "note": "astronomy.md",
+      "claim_id_sha256": "3c5817638054b9a3a8cb63894621202cccd5f2a9aa5eff5f04133483c212b353",
+      "claim_text": "The is a barred spiral galaxy; the bar at its centre was confirmed through infrared surveys because visible light gets absorbed by dust clouds along the galactic plane.",
+      "level": 3,
+      "rationale": "Inference: IR surveys bypassed dust, confirmed bar."
+    },
+    {
+      "id": "C054",
+      "note": "astronomy.md",
+      "claim_id_sha256": "003289902c2b64156a77739720d9cbd3b0deef72b04fa4a44a74eef62d5b08aa",
+      "claim_text": "Our galaxy is roughly 100,000 light-years in diameter, which is another of those figures I trust completely but cannot intuitively grasp.",
+      "level": 5,
+      "rationale": "Textbook astronomy."
+    },
+    {
+      "id": "C055",
+      "note": "astronomy.md",
+      "claim_id_sha256": "85933915791b85f1f43d695d387c42dabef83f2dfde9af1a1046c08f4c46ccba",
+      "claim_text": "I suspect the Fermi Paradox will eventually be dissolved rather than solved — that some combination of revised Drake Equation parameters and observational selection effects will make the \"silence\" stop looking like silence.",
+      "level": 2,
+      "rationale": "Flat conjecture, no external support."
+    },
+    {
+      "id": "C056",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "91f36ff3d3693a4e0b640442361356fbb10b3bf8a11f7383c5ee9839bab359ab",
+      "claim_text": "I wonder whether they choose these deliberately because the transition zone concentrates insects from two different microhabitats at once, making foraging more efficient than either habitat alone.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I wonder whether'."
+    },
+    {
+      "id": "C057",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "4026b9114e55d7a2ac0cdf0f0695222338c3c6c93ae65987eb8b06e45e8078bf",
+      "claim_text": "The warblers arrived a full two weeks earlier than my notes from last March, and because that gap is so consistent across three species I've been tracking, this spring must have been significantly warmer along the migration corridor than usual.",
+      "level": 3,
+      "rationale": "Inference from multi-year observation pattern."
+    },
+    {
+      "id": "C058",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "0094af50228a0af88a8d89c73875ed0da6b26d7abea8525d51a45b92d83b22c7",
+      "claim_text": "I think the small flock was a staging group rather than residents settling in — the birds were restless, feeding hard but not singing, which to my eye signals a refueling stop before the next leg north.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C059",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "442aaf8bec539150f10b11ee97b1f3705f790487cf782f1b7f77d71dea1baef2",
+      "claim_text": "A lone individual I kept losing in the willows was noticeably brighter than the others; that bird is almost certainly a male in fresh breeding plumage.",
+      "level": 2,
+      "rationale": "Flat ID claim stated as near-fact."
+    },
+    {
+      "id": "C060",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "9e0edcd3635f6f14f61aecf63fd3acb7014f7fda4826c971cd8760d24bc026e0",
+      "claim_text": "According to the *Sibley Guide to Birds*, yellow-rumped warblers are the most widespread warbler in North America during migration and among the last to depart in autumn, a detail that matches my own October records exactly.",
+      "level": 4,
+      "rationale": "Attributed to Sibley Guide to Birds by name."
+    },
+    {
+      "id": "C061",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "8612d8dadbae04756f4f38900164cc334444b25e3df1039d48047e61858474fb",
+      "claim_text": "I suspect that timing tracks insect emergence more tightly than temperature alone, which would mean a warm March without a matching insect bloom might still delay departure from wintering grounds.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C062",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "34afaad84323993d48d182638fc41b228ca27136ab8bd5122fda6ffeb19a3254",
+      "claim_text": "I also wonder whether the reservoir acts as a navigational anchor — whether birds following the river valley use this open water as a landmark to reorient before pushing farther.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I wonder whether'."
+    },
+    {
+      "id": "C063",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "12a3fe30322b4caeea0685610bc590ae8284c2a4e6d769668330a25ed0de35c1",
+      "claim_text": "I have no good explanation for the directional drift, but maybe it follows a current I cannot see from the bank.",
+      "level": 1,
+      "rationale": "Explicit hedge 'maybe'."
+    },
+    {
+      "id": "C064",
+      "note": "birdwatching.md",
+      "claim_id_sha256": "c52da97eaae567e1ea94e8e5e696d0eb048d87eb3c9e1202bd924a6bd24d8ab0",
+      "claim_text": "Birds navigate in part by sensing the Earth's magnetic field, an ability well established in migratory species across taxa.",
+      "level": 5,
+      "rationale": "Well-established ornithology fact."
+    },
+    {
+      "id": "C065",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "439b845618b21a301ead03c58c27e1c399b19aa5984ef2e46d624adb86d18176",
+      "claim_text": "There is so much conflicting advice online that I suspect a lot of what passes for \"theory\" is really just club-level folklore that never got challenged properly.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C066",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "2c14447069b167531fae7da24e4a3391dc2d92175bce6fdf7bab877e651444e0",
+      "claim_text": "The Italian Game is the best opening for beginners — it teaches natural development without forcing you to memorize twenty-move tactical trees.",
+      "level": 2,
+      "rationale": "Flat opinion stated as fact."
+    },
+    {
+      "id": "C067",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "4253afecc5025de9ce50f143afd407863c0b33045e142116f11b6d692005479e",
+      "claim_text": "I feel genuinely more confident in the middlegame when I have come out of an Italian rather than stumbling into a Sicilian.",
+      "level": 1,
+      "rationale": "Personal subjective experience as hedge."
+    },
+    {
+      "id": "C068",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "60d6f7e0bb80e20e77fa7845349c501f670edb17152d2c43f1e280c87fd68451",
+      "claim_text": "Maybe the reason the Ruy Lopez has a worse reputation among beginners is simply that it requires more precise follow-up moves, not that it is fundamentally inferior.",
+      "level": 1,
+      "rationale": "Explicit hedge 'Maybe'."
+    },
+    {
+      "id": "C069",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "c600829be124c11d9d9b0a47298b5414f7f3cde53515f07a31df0a66a88d9a91",
+      "claim_text": "Because the center is contested so early, early piece development matters more than pawn structure in open games.",
+      "level": 3,
+      "rationale": "Explicit causal reasoning chain."
+    },
+    {
+      "id": "C070",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "8ed965b8beecd7c9d1dda104e44633e558c6d13aecffa6109b6ce26c4a466e85",
+      "claim_text": "The English Opening, on the other hand, fights for the center from the flank, which means pawn structure becomes the dominant consideration from move one — that connection between opening choice and structural priorities surprised me when I first saw it spelled out.",
+      "level": 3,
+      "rationale": "Structural inference from opening choice."
+    },
+    {
+      "id": "C071",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "23e56f15ddffaf583a7b509256a8e6c766e39045e4c05f814169feff51082eb9",
+      "claim_text": "I suspect the Queen's Gambit is less aggressive than it looks; White is not genuinely sacrificing the pawn because recapturing the d4 pawn is nearly always available later.",
+      "level": 2,
+      "rationale": "Opinion stated flat, no external support."
+    },
+    {
+      "id": "C072",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "6cb51e201fa59a7a06c8143561087c352cb4a8e51761abd793423f072bbfc97c",
+      "claim_text": "Silman's *Complete Endgame Course* opened my eyes to how opening choices echo through into endgame pawn endings — an insight I had not expected from a book nominally about endgames.",
+      "level": 4,
+      "rationale": "Attributed to Silman by name."
+    },
+    {
+      "id": "C073",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "601886d7be48b106139c0115c5255fe3627ed9769bf0d1284b51e5524cfe5edd",
+      "claim_text": "Kasparov's *My Great Predecessors* traces exactly how top players of the 1950s and 60s used the King's Indian to generate practical counterplay against larger space advantages, and reading those annotated games gave me more intuition about than any opening manual did.",
+      "level": 4,
+      "rationale": "Attributed to Kasparov by name."
+    },
+    {
+      "id": "C074",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "d4b1f36ef67490397745eb5bba1a0d3c278d95e3462dddbbcd74d1fde0d9159b",
+      "claim_text": "What the books agree on, and what is simply established: en passant is only legal on the move immediately after an opposing pawn advances two squares from its starting rank — miss that window and the capture is gone forever.",
+      "level": 5,
+      "rationale": "Established rule of chess."
+    },
+    {
+      "id": "C075",
+      "note": "chess-openings.md",
+      "claim_id_sha256": "f9bca2ba1c8f6cb95bec7a6cd43e01afb41c685da552337e2b1ef0742593337a",
+      "claim_text": "For now I am focusing on arising from the Italian and the Queen's Gambit Declined, trusting that understanding those two clusters deeply will transfer into the better than skimming a dozen openings at surface level.",
+      "level": 2,
+      "rationale": "Personal learning conviction stated flat."
+    },
+    {
+      "id": "C076",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "1df21c92e787a766a65712f19f3d129b69a72411bce994fe705c4f905f87dc52",
+      "claim_text": "The one physics fact I keep coming back to: ISO measures the sensor's sensitivity to light, and doubling the ISO value doubles the effective sensitivity, which is why every stop up in ISO introduces proportionally more noise into the signal.",
+      "level": 5,
+      "rationale": "Sensor physics, textbook fact."
+    },
+    {
+      "id": "C077",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "72f95c79d6ed76487bf0d488dbbe6ddfc9dee19e1367eacbeac5ad67fed84827",
+      "claim_text": "Because a wider aperture lets in more light, a faster shutter speed can be used in bright conditions without underexposing, which is why sports photographers shoot wide open in a stadium.",
+      "level": 3,
+      "rationale": "Reasoning from optics."
+    },
+    {
+      "id": "C078",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "3ead17615c9b328c8c08359ee58d3db836882606bdbe315131041724e14d25a2",
+      "claim_text": "Similarly, because a narrow aperture starves the sensor, ISO has to compensate — and that trade-off shows up immediately on the if you know what to look for.",
+      "level": 3,
+      "rationale": "Logical consequence of exposure mechanics."
+    },
+    {
+      "id": "C079",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "d697e8826bb92de5e6bbfd1e8ef7015e0fd96dd651a26dd2d51a58f2cfb7da88",
+      "claim_text": "Morning light is always better than afternoon light.",
+      "level": 2,
+      "rationale": "Flat personal opinion stated as universal fact."
+    },
+    {
+      "id": "C080",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "7a38c31edcbbd4e201aedee8fafbc96a72aac8e50672258c7ca4186e25c1ed76",
+      "claim_text": "Bryan Peterson argues in *Understanding Exposure* that most photographers over-rely on Program mode and never learn to see exposure as a creative decision.",
+      "level": 4,
+      "rationale": "Attributed to Peterson + named work."
+    },
+    {
+      "id": "C081",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "c931d63a8a21639250e0ed754282f6bfc7f46c2e8033b7ef9ee981ac34ebe00e",
+      "claim_text": "I think he's right.",
+      "level": 2,
+      "rationale": "Personal agreement stated flat, no support."
+    },
+    {
+      "id": "C082",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "1a441caae7a98b8a14c6218793eb5ff783f52574e9bf067a8c25e154ac516ea1",
+      "claim_text": "I suspect I rely too much on aperture priority when I should be taking manual control, especially in tricky backlit scenes where the camera meters for the wrong thing.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C083",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "d7910a37ab0b78ca08052d81028a0d293abad4b6c92ea68ad2793388fe3ad786",
+      "claim_text": "Ansel Adams writes in *The Negative* that visualization — pre-seeing the final print before pressing the shutter — requires understanding exactly how every zone of the scene will map to a tone.",
+      "level": 4,
+      "rationale": "Attributed to Adams + named work."
+    },
+    {
+      "id": "C084",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "2bf6391deab49f85f8dd5c8200682aa26a555057bf5eaa15f8e872a724b394aa",
+      "claim_text": "That discipline is what separates deliberate exposure from guessing.  and exposure are linked in a way I didn't appreciate early on.",
+      "level": 3,
+      "rationale": "Structural consequence of the exposure triangle."
+    },
+    {
+      "id": "C085",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "4cac56dbd38dec947eb8fc0de8ba2525695d250bf9b9f43cc9757866d593369b",
+      "claim_text": "I think the hardest part is not the math but the habit: reading the scene before reaching for the dial, not after.",
+      "level": 2,
+      "rationale": "Flat craft opinion, no support."
+    },
+    {
+      "id": "C086",
+      "note": "photography-exposure.md",
+      "claim_id_sha256": "5bde2102c28bee53af3b20d300a16487d7ed6de02914b52b6975de7be712ddd7",
+      "claim_text": "Maybe the reason I mess up flash exposures is that I haven't internalized the inverse square law — light falls off with the square of the distance, so moving a flash from one meter to two meters doesn't halve the exposure; it quarters it.",
+      "level": 1,
+      "rationale": "Explicit hedge 'Maybe'."
+    },
+    {
+      "id": "C087",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "7798f67d7caa0a7010134958418c468bb648fe0314d1a331674cd514e052f4cd",
+      "claim_text": "The bowline is the most important knot to learn first.",
+      "level": 2,
+      "rationale": "Flat craft opinion stated as fact."
+    },
+    {
+      "id": "C088",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "118491a287d3027e6cc1535c28d42e0b913859529c0457dfbe4ebfc6f13b74e0",
+      "claim_text": "Everything else — clove hitches, sheet bends, cleats — feels secondary once you have a reliable bowline.",
+      "level": 2,
+      "rationale": "Flat comparative craft opinion."
+    },
+    {
+      "id": "C089",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "d7812c971315d72af3929322d6fe0531b80383b8ace8480ce82f8d0a1873a9f1",
+      "claim_text": "Because the bowline forms a fixed loop that won't slip or tighten under load, it's safe for life-safety applications like attaching a crew harness tether to a jackstay; a knot that capsizes under load in that situation is not a mistake you get to learn from.",
+      "level": 3,
+      "rationale": "Reasoning from mechanics to safety conclusion."
+    },
+    {
+      "id": "C090",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "698e5172855213783e50e7c0a50f250d0fdf8687ea72e25c8333641072f27010",
+      "claim_text": "The RYA Day Skipper Manual lists the bowline, cleat hitch, round turn and two half hitches, and figure-of-eight stopper as the minimum competency set for coastal sailing.",
+      "level": 4,
+      "rationale": "Attributed to RYA manual by name."
+    },
+    {
+      "id": "C091",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "84be0bd6405f8c6dd0ba1dfecfbdd1d5d62ca58d8baece584acea9762f5bc72a",
+      "claim_text": "The figure-of-eight is a worse stopper knot than the Ashley stopper under high load.",
+      "level": 2,
+      "rationale": "Flat comparative opinion, no support."
+    },
+    {
+      "id": "C092",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "1db76c853aab132c848a22b03d86c1da8463fa0d0b0569bcfecf9478bd2a8646",
+      "claim_text": "I used to default to the figure-of-eight until I read Clifford Ashley's *The Ashley Book of Knots*, which documents over 3,800 knots and explicitly notes that the Ashley stopper jams less and holds more reliably under shock loading than the figure-of-eight.",
+      "level": 4,
+      "rationale": "Attributed to Ashley's Book of Knots by name."
+    },
+    {
+      "id": "C093",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "e1a67635d1a63ff55393f6863396d51ebdf08611a586c48be1ad93c1dc585316",
+      "claim_text": "Friction is what makes most knots hold at all.",
+      "level": 3,
+      "rationale": "Mechanism stated from observation."
+    },
+    {
+      "id": "C094",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "a8cbcc92f0a6df728e52906ee57f3da2f5efd91b70c833e41244c88b674492c2",
+      "claim_text": "Rope-on-rope or rope-on-metal contact generates surface resistance that prevents the working end from pulling through; the greater the number of wraps and contact angle, the higher the friction force — this is a direct consequence of the capstan equation, where holding force increases exponentially with the angle of wrap and the friction coefficient of the material.",
+      "level": 5,
+      "rationale": "Physics/engineering fact, capstan equation."
+    },
+    {
+      "id": "C095",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "c555f7ace53b77834caac2cd3c92866dbbc6d7c5f2bd3628d53c00c28beca79a",
+      "claim_text": "A knot always reduces the breaking strength of the rope it's tied in.",
+      "level": 5,
+      "rationale": "Measurable engineering fact."
+    },
+    {
+      "id": "C096",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "8f807649c2e060cde8a5e1a7cf4bc5e8a8bf2b5dc389a28caabe6cffe90cd3ca",
+      "claim_text": "I wonder whether I'm overcomplicating my knot selection for camping.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I wonder whether'."
+    },
+    {
+      "id": "C097",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "9df14a60c22ad266f7a340c0ab71f1b0e99026b54583f96b000b20208db5c617",
+      "claim_text": "Maybe two or three deeply practiced knots are genuinely more useful than a wider repertoire tied less confidently.",
+      "level": 1,
+      "rationale": "Explicit hedge 'Maybe'."
+    },
+    {
+      "id": "C098",
+      "note": "knot-tying.md",
+      "claim_id_sha256": "ecba2131cef1fbeba16001ad30ade607f3d4bb4b5cb8235f5633c96dca0295b0",
+      "claim_text": "I think the taut-line is more forgiving of imprecise tying than the prussik, though I'm less certain of that than I'd like to be — it's based on feel rather than any systematic comparison I've done myself.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C099",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "e28ad9dc50b12686e15bfaebe60c143fbf29744e6ff06a3b32e2b9c96ca18c26",
+      "claim_text": "I've been playing long enough that I can hear when a chord is off, but not always long enough to know exactly why.",
+      "level": 1,
+      "rationale": "Personal uncertainty framing."
+    },
+    {
+      "id": "C100",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "2fed501ffc6d4529e588590a1a958de3d94fb8d4ff122e95ac778cd0e8f7d0ba",
+      "claim_text": "The octave frequency ratio is exactly 2:1 — an A at 880 Hz vibrates twice as fast as the A below it at 440 Hz.",
+      "level": 5,
+      "rationale": "Physics fact, verified."
+    },
+    {
+      "id": "C101",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "0cde59ab91a24722c6e4c4cfec1b2d7ae68ce07a8c19dc355a05d2646b3071de",
+      "claim_text": "Standard concert pitch sets A4 at 440 Hz, and every other note on the instrument is derived from that anchor.",
+      "level": 5,
+      "rationale": "Established international standard."
+    },
+    {
+      "id": "C102",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "c246d840e3b2024ff7f60b956dafd33d1cdb321466dae6ea6c909d646237f1a7",
+      "claim_text": "Because divides the octave into 12 equal semitones, every interval except the octave is slightly out of pure tune — which is why open chords can sound fuller than fretted ones at the same pitch.",
+      "level": 3,
+      "rationale": "Reasoning from equal-temperament math to interval impurity."
+    },
+    {
+      "id": "C103",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "af4bb5216c729406010dd3063d136340c1fbbe74b88153d804369357018439f6",
+      "claim_text": "The open strings form coincidental harmonic relationships that equal temperament's compromises don't destroy the way fretting does.",
+      "level": 3,
+      "rationale": "Deduced from harmonic series reasoning."
+    },
+    {
+      "id": "C104",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "252ec5e12e7f4b9dfaa99de79191c2e8619c8c13cbf170a3c9ebe81b782e596e",
+      "claim_text": "A guitar never sounds perfectly in tune in every key simultaneously.",
+      "level": 2,
+      "rationale": "Flat opinion stated as universal fact."
+    },
+    {
+      "id": "C105",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "c92de13aaa3fbcc1f3a0d08dfec0ce05ecfb75167ec8fbe159bfda85ee22b311",
+      "claim_text": "According to Frank Ford's intonation guide on Frets.com, nut slot depth is one of the most overlooked causes of sharpness at the first few frets: too deep a slot effectively lengthens the vibrating string at low positions and throws the whole first position sharp even after the saddle is set correctly.  sidestep some of this by retuning the open strings to a chord, so the most-used voicings sit on open or lightly fretted strings where the harmonic relationships are cleanest.",
+      "level": 2,
+      "rationale": "Stated as known fact about the temperament trade-off."
+    },
+    {
+      "id": "C106",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "57361144f6bcd4ca36cf0f19da501149e0b35973ae4ec8616e046e73fa030ba5",
+      "claim_text": "I think I'm more sensitive to thirds being out of tune than to fifths — a slightly flat major third seems to bother me in a way that an equally-tempered fifth doesn't, though I can't say whether that's trained or just personal tolerance.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C107",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "4652f1536f5203e54c06ea247e0cd708fd0769155dfc87aeb4266596bb06997e",
+      "claim_text": "I suspect that years of playing in standard tuning have made my ear accept the compromise fifths as normal, while pure thirds in an occasional just-tuned chord always sound startlingly right by contrast.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C108",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "c3399aef6fa43718072ae9ff006cab6ff64c9708e09f6bdd7ef09b3b8e7ee92e",
+      "claim_text": "That's probably why slide playing in open E sounds so consonant — most of the notes that count are harmonics of the open-string fundamentals, not equal-tempered compromises.",
+      "level": 2,
+      "rationale": "Opinion about acoustic effect stated flat."
+    },
+    {
+      "id": "C109",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "11088885d7901b9365fb470013631dc4f3d8ed95041bbdcd232eda188991d8a3",
+      "claim_text": "I think my ear training has improved more from playing acoustic than electric, because the acoustic gives immediate feedback when two strings beat against each other.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C110",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "e7a6daabad019edff52487538c2f862c50f1a81c340b8971e5ebe2ef17b18ead",
+      "claim_text": "Maybe that means I should do tuning drills unplugged even when I'm preparing for an amplified set — I haven't tested this systematically, but the unforgiving resonance of the acoustic box makes mismatches harder to ignore.",
+      "level": 1,
+      "rationale": "Explicit hedge 'Maybe'."
+    },
+    {
+      "id": "C111",
+      "note": "guitar-tuning.md",
+      "claim_id_sha256": "657920097abde41c6d81f5e17e5b9408f01211faf4da4766771bcfe1b5f7b2ab",
+      "claim_text": "Because intonation errors compound across the neck, a guitar that is barely sharp at the second fret will be noticeably sharp at the twelfth — this is why setting intonation by comparing the open string to the twelfth-fret harmonic versus the fretted note is the standard diagnostic.",
+      "level": 3,
+      "rationale": "Explicit reasoning chain."
+    },
+    {
+      "id": "C112",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "5b1eb51f0910b59460e3d778588c284bf96b3a385723c7d3fcc76781f435c0f2",
+      "claim_text": "I've been maintaining my own bikes for about four years now, mostly road and light gravel, and the notes below are what I keep coming back to.",
+      "level": 2,
+      "rationale": "Personal framing opinion stated flat."
+    },
+    {
+      "id": "C113",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "ddb2af366ed6fa0594a8c385bd9d79fcd03f917379bc184c7d3e110e72a18fb1",
+      "claim_text": "Because chain wear is cumulative and a stretched chain wears cassette teeth unevenly, replacing the chain before it hits 0.75% stretch extends cassette life significantly — I used to wait until 1.0% and went through two cassettes in a season before I caught on.",
+      "level": 3,
+      "rationale": "Explicit causal reasoning chain."
+    },
+    {
+      "id": "C114",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "da75e6239caad0acd718c0c1278a70f7a730a3479535952a944064928f741aa1",
+      "claim_text": "Steel stretches under tension through a process of bushing and pin elongation — this is basic metallurgy, not something I'm inferring — so the wear is genuinely irreversible once it sets in; see for the measurement method I use.",
+      "level": 5,
+      "rationale": "Verified metallurgy/engineering fact."
+    },
+    {
+      "id": "C115",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "94387f80782ef20e67e5414c6c5a1da0d2598459fe06991746457dcfe96b2f63",
+      "claim_text": "Brake pad replacement is something I don't try to optimise: you should replace brake pads every 2,000 km on a wet-weather commuter, or earlier if the wear-line disappears.",
+      "level": 2,
+      "rationale": "Practical opinion stated as rule."
+    },
+    {
+      "id": "C116",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "bee40c39f3755d753fede93f070535f785bfb11580d6d58b05efb540d6bbaa0a",
+      "claim_text": "According to Barnett's *Bicycle Repair Manual*, contaminated pads should be replaced immediately rather than cleaned, because oil migrates into the pad compound and the contamination is permanent — that advice changed how I handle any hydraulic brake bleed near the wheel.",
+      "level": 4,
+      "rationale": "Attributed to named book."
+    },
+    {
+      "id": "C117",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "ae0004f97f04ab298ab6389ca40f4f8497d3918474c5ab99f407e39b1263bfe1",
+      "claim_text": "Given that my rear derailleur is indexed, even slight cable stretch will cause ghost shifting, usually nudging the chain toward the next-larger cog under load.",
+      "level": 3,
+      "rationale": "Explicit causal reasoning chain."
+    },
+    {
+      "id": "C118",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "4dd5a303ba8d55763ac329a702099dd647d8e5abeb2d1b4ffaea91f328cac197",
+      "claim_text": "I re-tension the cable with the barrel adjuster after the first 200 km on any new cable; that single preemptive step has eliminated almost all the ghost-shifting I used to blame on derailleur alignment — see for the quarter-turn protocol.",
+      "level": 3,
+      "rationale": "Inference from personal evidence."
+    },
+    {
+      "id": "C119",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "b4b91266682798a251e7449c808bf45e3492696902747ee83841906769a00701",
+      "claim_text": "I think my front derailleur trim position is still slightly off on the big-big combination, but I haven't been systematic enough about it to say for certain.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C120",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "76f729d0b08b3cc123eda288ab4155459dac306f567b6d20b8655bd4f500b073",
+      "claim_text": "Zinn & the Art of Road Bike Maintenance recommends setting the outer cage plate 1–2 mm above the large chainring, and I suspect I'm running it a touch high, which would explain the faint rub I hear only on steep climbs.",
+      "level": 4,
+      "rationale": "Attributed to Zinn + named book."
+    },
+    {
+      "id": "C121",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "71c8225f9f8859d9527312cf61528ce82d25b960237369b9e5a5643fa63384ba",
+      "claim_text": "Ball bearings reduce rolling friction by replacing sliding contact with rolling contact — the geometry means contact area is minimal and the force is transmitted through compression rather than shear.",
+      "level": 5,
+      "rationale": "Verified physics fact."
+    },
+    {
+      "id": "C122",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "b96336ecfdeb89d09b905b3756f302a24c70a43899606a2fd2341f03e9709f07",
+      "claim_text": "That's why a worn headset bearing that has developed flat spots feels notchy; it's no longer rolling cleanly.",
+      "level": 3,
+      "rationale": "Inference from physics."
+    },
+    {
+      "id": "C123",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "2931c7d56ac7f4f854e640c7678a3db3c3014a190750bc4568be342101bb4707",
+      "claim_text": "You should service cup-and-cone hubs at least once a year if you ride in rain regularly, because water ingress accelerates the pitting that causes that flat-spot failure.",
+      "level": 2,
+      "rationale": "Practical maintenance opinion stated flat."
+    },
+    {
+      "id": "C124",
+      "note": "bicycle-maintenance.md",
+      "claim_id_sha256": "fa535205a2f83e5ffa9e6d9b0ec41173fb6ab75de7b447a262ef486c86455a9e",
+      "claim_text": "Since my are hydraulic, I also bleed the lines each spring; moisture absorption in mineral oil raises the boiling point threshold and restores firm lever feel.",
+      "level": 3,
+      "rationale": "Reasoning from material properties."
+    },
+    {
+      "id": "C125",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "fb29d02d721cf3f3ea0af917aef7f5735fd5dab896fa0b2fb81d1b5e41433f8b",
+      "claim_text": "Because my grinder has large burr gaps, the grind distribution is uneven, which explains the inconsistent extraction I keep getting: some days the shot tastes balanced, other days it's simultaneously bitter on the front and weak on the finish.",
+      "level": 3,
+      "rationale": "Explicit causal inference chain."
+    },
+    {
+      "id": "C126",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "fa3a111f357d103792e8da6a440ed873c3106b932469abe2e9bfaba80b71bacf",
+      "claim_text": "I suspect the solution is either stepping up to a flat-burr grinder or at minimum replacing the conical burrs — though I haven't committed to either yet.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C127",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "8bbe044ae73f8e0a9baf300a077560ad1c40d115497f1f7dcb13442745974939",
+      "claim_text": "It seems like the dial between 14 and 16 seconds is the sweet spot for my current setup, but I'm not confident enough to call that settled.",
+      "level": 1,
+      "rationale": "Explicit hedge 'It seems like'."
+    },
+    {
+      "id": "C128",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "29afc99570f9b83ab58dc599f43a14bc729f3ef71ea3a48d4f27417957b63938",
+      "claim_text": "Given that espresso extracts optimally around 93°C and my kettle maxes out at 89°C, under-extraction is the likely cause of the sour taste — the cooler water simply isn't pulling enough dissolved solids.",
+      "level": 3,
+      "rationale": "Explicit causal reasoning: temp gap -> under-extraction."
+    },
+    {
+      "id": "C129",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "7d448df6bbc39395774a85c9ef529f2048782a08ca897f2e743a47a53ccece68",
+      "claim_text": "Light roast always has more caffeine than dark roast: roasting drives off caffeine, so darker beans end up with less.",
+      "level": 2,
+      "rationale": "Flat opinion stated as universal fact."
+    },
+    {
+      "id": "C130",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "6e0807231a0943dac40595eebca190a16aab0750c28fc081ca50104cee54f599",
+      "claim_text": "Robusta has about twice the caffeine of Arabica regardless of roast level, which is a fact most cafe menus ignore entirely.",
+      "level": 2,
+      "rationale": "Stated as established fact, no source cited."
+    },
+    {
+      "id": "C131",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "de17b2af65ada312474515dd22567618e98b3dbcff1a47869ef8a91bcf34d28c",
+      "claim_text": "Coffee solubles dissolve faster at higher temperatures — this is straightforward chemistry, and it's why brew temperature is one of the most controllable levers available to a home brewer.",
+      "level": 5,
+      "rationale": "Basic physical chemistry."
+    },
+    {
+      "id": "C132",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "a0efda6f7df3aa101cdc3902592cb4901fe6c0ae97bf45a5b53906080e9a50b0",
+      "claim_text": "The during roasting is also responsible for the hundreds of aromatic compounds that distinguish a well-developed roast from a pale one; it's not just browning, it's a cascade of new flavor molecules that didn't exist in the green bean.",
+      "level": 5,
+      "rationale": "Established food chemistry."
+    },
+    {
+      "id": "C133",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "b8b2e90125570b094f9c8f9b33dc57db59d24bd4d6ce6ca5ac140f39cac64d9e",
+      "claim_text": "I think I've been under-valuing water chemistry; maybe soft water is pulling too many light acids and not enough sugars.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C134",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "da576b70fb038d95aad7284f2b7b2ef1a55a1eb7fd0abc2b92f44c825d12d839",
+      "claim_text": "James Hoffmann in *The World Atlas of Coffee* devotes a full chapter to water mineral content, making the case that filtered water with moderate hardness extracts more cleanly than either very soft or very hard water.",
+      "level": 4,
+      "rationale": "Attributed to named author + named work."
+    },
+    {
+      "id": "C135",
+      "note": "coffee-brewing.md",
+      "claim_id_sha256": "f2b673c206e1eb22b1ec61c4abd007f33c84f6968469e5d02844e35650db3bbc",
+      "claim_text": "I suspect the answer is in the roast development time rather than the dose, but that's still a working theory.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C136",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "4633ba0f043e1639fa5ecfaa13c0b368d449beda05965f97750d76c7e633a19c",
+      "claim_text": "The borrow checker is Rust's most notorious feature, and I think it's actually a static analysis pass that builds a liveness graph over the intermediate representation rather than working purely on the source AST.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C137",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "8bc4b9104778aa4867e776550ae7340053c8bd59945407091d9ccb50d11c121d",
+      "claim_text": "I'm speculating here; the internals aren't something I've confirmed yet, so I could be completely wrong about the representation it uses.",
+      "level": 1,
+      "rationale": "Explicit speculation hedge."
+    },
+    {
+      "id": "C138",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "57caca943d29af25b01ef9837e070f73c163fee9db0a905ff73ce7b9bcfcc034",
+      "claim_text": "Rust's design tradeoff is obviously worth it.",
+      "level": 2,
+      "rationale": "Flat opinion stated without support."
+    },
+    {
+      "id": "C139",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "e8e3f80cffb6d121859c5b791537e1cc02943bf3394d24cfee6f6198e97c1b6a",
+      "claim_text": "Because Rust enforces single ownership at compile time, data races on heap-allocated data are impossible at runtime — which is a stronger guarantee than you get from a garbage-collected language, where the GC prevents memory leaks but does nothing for concurrent mutation.",
+      "level": 3,
+      "rationale": "Explicit causal reasoning chain."
+    },
+    {
+      "id": "C140",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "42b865f70f64c41509d403c249cb3e06b3b6e7d8dca0bf6c7e11a19b92ff3969",
+      "claim_text": "As I noted in , the relationship between borrows and lifetimes is where the borrow checker actually does most of its work; ownership is the easy part, but lifetime elision rules hide a lot of complexity that you have to excavate once you write anything non-trivial.",
+      "level": 3,
+      "rationale": "Inference + wikilink cross-reference."
+    },
+    {
+      "id": "C141",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "44b4ae4f480ed18f294fcaad54ed0e7e160e1fa2f87eace28c06dcf7b56235dd",
+      "claim_text": "Memory-safe programs cannot contain dangling pointers by definition — a dangling pointer requires a reference to a memory location that has already been freed, which is structurally impossible if the type system enforces that no live reference can outlive the value it points to.",
+      "level": 5,
+      "rationale": "Verified CS definition."
+    },
+    {
+      "id": "C142",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "faeb94b69ec7491d4373b2406af37ebc623cd9cdea2a24da0dc9b01492405823",
+      "claim_text": "I suspect the reason non-lexical lifetimes took so long to stabilise is that the control-flow analysis required to prove a borrow ends before a new mutable borrow begins is genuinely expensive to implement correctly across complex match arms and early returns.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C143",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "c28d8f183d928259b1ec4be7dccedfe48362c743bd48ddfcdbad884c6d8be256",
+      "claim_text": "According to the Rust Reference, a value is dropped when its owning variable goes out of scope, and destructors run in reverse declaration order for local variables — which is exactly the RAII pattern that C++ programmers are familiar with, but enforced by the compiler rather than convention.",
+      "level": 4,
+      "rationale": "Attributed to Rust Reference by name."
+    },
+    {
+      "id": "C144",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "263cdb37db4e277f115f20c79f30c50c58fb1283e61a6d13f1a8052ae82f1080",
+      "claim_text": "The rejects a huge class of bugs at zero runtime cost, which is why systems programmers who have tried Rust rarely go back to manual memory management willingly.",
+      "level": 3,
+      "rationale": "Inference chain: compile-time check -> zero-runtime-cost."
+    },
+    {
+      "id": "C145",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "1e4fe75b39f14c9e09cb8e2b55fa91ea93eeb60f309e4bf2fbf507d7be78070c",
+      "claim_text": "Klabnik and Nichols explain that the trait is an explicit deep copy and that moves are the default precisely to force the programmer to acknowledge when copying is expensive — a design choice I initially found annoying but now think is one of the best ideas in the language's ergonomics.",
+      "level": 4,
+      "rationale": "Attributed to Klabnik & Nichols."
+    },
+    {
+      "id": "C146",
+      "note": "rust-ownership.md",
+      "claim_id_sha256": "539aa533c35b339a24b67b94ce14cd04c4984dadfc6f3d2a85c30539714df337",
+      "claim_text": "This is the point Jon Gjengset hammers home in the opening chapters of *Rust for Rustaceans*: the ownership system is a concurrency model disguised as a memory model.",
+      "level": 4,
+      "rationale": "Attributed to Gjengset + named book."
+    },
+    {
+      "id": "C147",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "6a810611fdf20fbfb147cfde84dd3d7bff14f85d2d3a3fa92a542d3bc89fd7b8",
+      "claim_text": "I've been cutting joints by hand for about three years now, and the more I practice the more I think joint selection matters more than technique — a mediocre in the right place still outperforms a perfect biscuit in the wrong one.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C148",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "64d1c83159842c3b859a5a7d1d7eb78f3975b6afd8d11db43e17ec750c755307",
+      "claim_text": "The mortise and tenon is the strongest joint for furniture frames.",
+      "level": 2,
+      "rationale": "Flat craft opinion."
+    },
+    {
+      "id": "C149",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "f9668dd16a541f3ee1eb52555ea432e8fd06f719b059c0631f744b462a5e4274",
+      "claim_text": "I use it for chair legs, table aprons, and anything that takes racking stress; nothing else comes close for that application.",
+      "level": 2,
+      "rationale": "Personal craft opinion stated flat."
+    },
+    {
+      "id": "C150",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "a4c593fb4c16f63e41c5e3c79892a78cd319e4c8d0e4d5f36ddbd5efe3d4d909",
+      "claim_text": "The dovetail, by contrast, is the joint of choice for drawer fronts and carcase corners — because the dovetail's mechanical interlock resists tension perpendicular to the glue line, it's preferred for drawer fronts where the pull-force is exactly that direction.",
+      "level": 3,
+      "rationale": "Mechanical reasoning chain."
+    },
+    {
+      "id": "C151",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "cb58ccda9adf3df31b8b0fc8fd419793570edc4ee6f2e15ef8997e521d46ea6a",
+      "claim_text": "Given that wood moves with humidity changes and the joint runs cross-grain, a rigid glue like hide glue may actually crack before the wood does; this is why traditional craftsmen often left mortise-and-tenon shoulders slightly proud rather than flush.",
+      "level": 3,
+      "rationale": "Inference: humidity + cross-grain -> construction practice."
+    },
+    {
+      "id": "C152",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "38d198ae706a9cb20d24cc0e06a2db00ff61c378f539833fdbda49bea19277d9",
+      "claim_text": "I suspect that most joint failures I've seen in old furniture are not glue failure but wood failure adjacent to the joint line, where seasonal movement accumulates stress over decades.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C153",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "c80650e510da8c3b043159f744fbd3848185a648ec0646204105db9793bee294",
+      "claim_text": "Jim Tolpin, in *The New Traditional Woodworker*, argues that the hand-tool tradition built joints to the tolerances the wood itself demanded — not to thousandths of an inch, but to the feel of hand pressure on a well-fitted tenon.",
+      "level": 4,
+      "rationale": "Attributed to named author + named book."
+    },
+    {
+      "id": "C154",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "0de5b4835497203b43963693579369464b37da003889bd31915961d713728cea",
+      "claim_text": "Tage Frid, in *Tage Frid Teaches Woodworking*, is more prescriptive about the dovetail ratio: 1:8 for softwoods, 1:6 for hardwoods.",
+      "level": 4,
+      "rationale": "Attributed to named author + named book."
+    },
+    {
+      "id": "C155",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "9b55f80463e309efd7a5da5c53bdfc538cbf2c8134cb7ffb94f31127e844ffea",
+      "claim_text": "Because hardwoods resist shear more effectively, the steeper angle can be used without the tails becoming fragile; a 1:8 ratio in oak would produce tails wide enough to split under a mallet blow.",
+      "level": 3,
+      "rationale": "Material property -> ratio consequence."
+    },
+    {
+      "id": "C156",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "7c4ea64fa892e1a6a5115d35b065e07e7b61a7907b489f78de1748fd292a400b",
+      "claim_text": "Wood is anisotropic — stronger along the grain than across it — and modern adhesives form bonds that under direct tension actually exceed the tensile strength of the surrounding wood fibers; it is the wood itself that fails first, not the glue line.",
+      "level": 5,
+      "rationale": "Materials science fact."
+    },
+    {
+      "id": "C157",
+      "note": "woodworking-joints.md",
+      "claim_id_sha256": "51734357c522efe15bec102b270a46a1f6561654f6b8234e0e25bfd94a879dd2",
+      "claim_text": "I think a dedicated marking gauge set to the ratio might be faster than resetting the bevel for every board, but I haven't run the experiment carefully enough to be sure.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C158",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "fe580ac3123fccd5ea35c4467cf1aa9deecd7bbfcdfaa63978a0c0b0a069982b",
+      "claim_text": "I think the quality of a session has less to do with how long I sit than with the conditions of the hour before — coffee, screens, whether I rushed here.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C159",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "0938ec6a6b1c72960437a333ddc98216932270de5b755bf0f5e9bbd214e1be5b",
+      "claim_text": "Because my attention keeps fragmenting in the first five minutes, the scatter probably reflects my cortisol rhythm rather than poor technique; it nearly always settles by the eight-minute mark regardless of what I do, which suggests the issue is physiological timing, not effort.",
+      "level": 3,
+      "rationale": "Causal reasoning: observation -> physiological cause."
+    },
+    {
+      "id": "C160",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "39db718c81c906dc544dbbabcf527a1398ba32205049782915e0dfff6a5600c8",
+      "claim_text": "It seems like the \"observer\" quality — that faint capacity to notice I've drifted — is actually more trainable than itself, and that cultivating it is the more transferable skill.",
+      "level": 1,
+      "rationale": "Explicit hedge 'It seems like'."
+    },
+    {
+      "id": "C161",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "8a606976442f910be5f32f8fcd21a25715a297912603d7d33168dfb2164d8ce0",
+      "claim_text": "Lazar et al. (2005) found cortical thickening in the prefrontal cortex and right anterior insula of long-term meditators, which at least establishes that consistent practice produces measurable structural changes.",
+      "level": 4,
+      "rationale": "Attributed to named study."
+    },
+    {
+      "id": "C162",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "6bc44da88f43189511d3ce977e370dfea168d523b20aeae287d8a2aa4a89f81d",
+      "claim_text": "The is reliably active during mind-wandering and self-referential thought — this is one of the most replicated findings in cognitive neuroscience.",
+      "level": 5,
+      "rationale": "Replicated neuroscience fact."
+    },
+    {
+      "id": "C163",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "dcc7b5f5fa1ab154e8acd2be1ca5f94525afe85085980c2b71e6843c0ee83407",
+      "claim_text": "I suspect the sessions where I feel the least accomplished are often the ones doing the most work, because tolerating restlessness without quitting seems to be the actual practice.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C164",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "5f88e5e55128b375193d2f32b39f76291f473c433732c1918417d5972da6b794",
+      "claim_text": "Jon Kabat-Zinn argues in *Full Catastrophe Living* that non-striving is itself the core disposition — the goal is to have no goal — which I find both clarifying and somewhat maddening.",
+      "level": 4,
+      "rationale": "Attributed to named author + book."
+    },
+    {
+      "id": "C165",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "6cbd3b64a8b34cb883208ba12bdaa64bb5f40f9e10e937e07fc6034c211fbca7",
+      "claim_text": "Body scans do something different from breath-counting; I think they access a more interoceptive layer of attention, though I couldn't say precisely how or why.",
+      "level": 1,
+      "rationale": "Contains 'I think' in same sentence."
+    },
+    {
+      "id": "C166",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "a8dc0eaef964e845385442c513c08107ff4c0c7b2bec9b69c1d0446cd29d6b4e",
+      "claim_text": "Because I tend to catastrophize lapses in practice — three days off and I feel I've lost everything — the continuity probably matters less than I believe; Thich Nhat Hanh's framing in *The Miracle of Mindfulness* treats each breath as a fresh beginning rather than a point on a streak.",
+      "level": 4,
+      "rationale": "Attributed to named author + book."
+    },
+    {
+      "id": "C167",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "dc6cd849417f27cced4a83eda378a9982dcaee1d22a21e4f20e387afbffe2c8c",
+      "claim_text": "Maybe the resistance I feel before sitting is not laziness but a mild threat response — the mind pre-empting the loss of narrative momentum that stillness brings.",
+      "level": 1,
+      "rationale": "Explicit hedge 'Maybe'."
+    },
+    {
+      "id": "C168",
+      "note": "meditation-practice.md",
+      "claim_id_sha256": "a35b1080f1252d0b35ed669e05be78dd56cf36e2e1c3a6d20fa73c526973ddc3",
+      "claim_text": "Informal practice during commutes genuinely seems to transfer something back to the cushion, though I can't isolate whether it's the repetition, the variety of context, or just the accumulation of intentional moments.",
+      "level": 2,
+      "rationale": "Opinion stated flat without support."
+    },
+    {
+      "id": "C169",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "067b09f5ef343d8c6be6c17915d1559fb078e0b914c5eb75a03da613a4ed949c",
+      "claim_text": "I think the clay subsoil underneath is still compacting the drainage even after I added the raised layer, which might explain why the roots look stunted when I pull a test plant.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C170",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "5b1f454cc46394170f70fe4c014b2a2699c4fb5a33940f1d468e9163db8e1542",
+      "claim_text": "Drainage has always been the silent variable in this garden, and I suspect the problem goes deeper than the topsoil layer I can reach with a fork.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I suspect'."
+    },
+    {
+      "id": "C171",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "42116abc9bea8d480d09b06cdf1c50143b60231607f47034f8e2d33a125b34a8",
+      "claim_text": "Companion planting always improves yields.",
+      "level": 2,
+      "rationale": "Flat opinion stated as universal rule."
+    },
+    {
+      "id": "C172",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "04222dc81a60d97317967d08c235ae1f2246c8012addc0326fd40a247879ac82",
+      "claim_text": "The beds that skip companions consistently underperform, and I am not interested in running a controlled experiment to disprove my own eyes.",
+      "level": 2,
+      "rationale": "Personal observation generalised flat."
+    },
+    {
+      "id": "C173",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "bd97a7523aa5e7bcc25c5bd3755140c25f6b88e336b73b1f404dda399f6c3240",
+      "claim_text": "Because that bed gets afternoon shade from the fence, the soil stays wetter longer, which creates anaerobic pockets that block calcium uptake; that calcium deficit is what causes the tissue collapse at the blossom end — and this tracks with what I noted in , where low pH further inhibits calcium mobility in wet soil.",
+      "level": 3,
+      "rationale": "Explicit causal chain."
+    },
+    {
+      "id": "C174",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "973a627064ffae1872ff1956422fc4f65ea2e62191fb1a59eacffe852200bd63",
+      "claim_text": "My pH strips have been reading around 5.8 in the south bed, which would explain the yellowing between the veins on the brassica leaves — classic signs of manganese excess that opens up at lower pH levels.",
+      "level": 3,
+      "rationale": "Inference from pH reading to nutrient lockout."
+    },
+    {
+      "id": "C175",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "c4b743a510eb2bf52085b4301c56effa09cce9dececd39aa30cf0208f069788b",
+      "claim_text": "I have been experimenting with deep mulching around the squash, and I think it is suppressing the powdery mildew by keeping spore splash from the soil surface to a minimum.",
+      "level": 1,
+      "rationale": "Explicit hedge 'I think'."
+    },
+    {
+      "id": "C176",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "68416030efdc6cc7f863723d7c16aaceb2ed3538d2b7b3e40da99c5f33eabc4c",
+      "claim_text": "Maybe there is also a moisture-regulation effect that keeps the leaf surfaces drier at night, though I have not confirmed that.",
+      "level": 2,
+      "rationale": "Plausible mechanism stated flat, unconfirmed."
+    },
+    {
+      "id": "C177",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "17cfdb39c59d9a109a3f05951a708cea015094576a64bee51f653aa1a80b5b89",
+      "claim_text": "According to Eliot Coleman in *The New Organic Grower*, a soil temperature below 50°F significantly slows the microbial activity that converts organic nitrogen into plant-available forms, and he recommends waiting until the soil genuinely warms before transplanting brassicas outdoors.",
+      "level": 4,
+      "rationale": "Attributed to named author + named book."
+    },
+    {
+      "id": "C178",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "f6ce7ef38f51fc8b34d8212dbf9318746a1a11e073ea38f4e3cfcc86675de41a",
+      "claim_text": "The RHS Gardening handbook recommends a soil pH of 6.5 to 7.0 for most vegetables, noting that outside that range, nutrient lockout becomes the primary limiting factor regardless of how much compost you add.",
+      "level": 4,
+      "rationale": "Attributed to named publication."
+    },
+    {
+      "id": "C179",
+      "note": "home-gardening.md",
+      "claim_id_sha256": "b6f586edf8040a9f6ea09cce053e627d7e845a59b4fac943ef5b292a3ed61d78",
+      "claim_text": "Legumes fix atmospheric nitrogen through a symbiosis with Rhizobium bacteria in their root nodules, converting N2 gas into ammonia that the plant and surrounding soil can use — this is established biochemistry, not something I am reasoning from observation.",
+      "level": 5,
+      "rationale": "Established plant biochemistry."
+    }
+  ]
+}

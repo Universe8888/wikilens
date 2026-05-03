@@ -10,6 +10,30 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.10.0] — 2026-05-03
+
+### Added
+- **Epistemic Confidence Mapper** (`wikilens confidence <vault>`): reads each note, extracts sentence-level declarative claims (reusing `drift.extract_claims()`), and classifies every claim on a five-level epistemic confidence scale — speculation (1), conjecture (2), inference (3), attributed (4), verified (5).
+- Pluggable confidence judge: `MockConfidenceJudge` (dry-run), `OpenAIConfidenceJudge` (`gpt-4o`, default), `ClaudeConfidenceJudge` (`claude-sonnet-4-6`). JSON verdict schema: `{level 1–5, rationale, confidence 0–1}`.
+- System prompt uses an explicit decision order (L5 → L4 → L3 → L1 → L2) with signal-word lists for each level. L1 requires an explicit hedge phrase; L2 is the last resort. Eliminates first-person-voice false positives.
+- Response parser strips markdown code fences before `json.loads` and adds `response_format={"type": "json_object"}` for gpt-4o, eliminating ~40% abstention rate from JSON-in-fence wrapping.
+- Context window for judge: claim sentence ± 2 surrounding sentences from the same note.
+- `ConfidenceFinding` dataclass: `note`, `claim`, `level`, `rationale`, `confidence`, `span`.
+- Markdown report by default (low-confidence claims listed with level, rationale, span); `--json` for machine-readable output (`schema_version: 1`).
+- Cost-control flags: `--threshold N` (report level ≤ N; default 2), `--sample N` (cap judge calls), `--only NOTE`, `--min-confidence F`.
+- Exit 0 clean / 1 findings / 2 bad input — consistent with P3–P9 convention.
+- Hand-crafted eval fixture `fixtures/confidence_vault/` (15 public-domain hobbyist notes, ~249 extractable claims).
+- Ground-truth `fixtures/eval/p10_ground_truth.json` (179 labeled claims: L1=49, L2=32, L3=39, L4=31, L5=28).
+- Eval harness `scripts/eval_p10.py`: P/R/F1 on binary low-confidence class + Quadratic Weighted Kappa (QWK) over 5-level ordinal. Scoring uses partial-annotation methodology — unmatched predictions excluded (standard NER/claim-detection practice for non-exhaustive gold sets). Appends to `BENCHMARK.md`.
+- New modules: `confidence.py`, `confidence_judge.py`, `confidence_format.py`.
+- 41 new tests; 468 total.
+
+### Eval results (gpt-4o, `fixtures/confidence_vault/`, threshold=2)
+- Precision = 0.91, Recall = 0.88, F1 = 0.89 — both ≥ 0.70 targets met.
+- QWK (ordinal, 5-class) = 0.881 — well above the 0.30 collapse warning threshold.
+
+---
+
 ## [0.9.0] — 2026-05-03
 
 ### Added

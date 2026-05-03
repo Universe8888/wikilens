@@ -652,6 +652,70 @@ def _cmd_drift(args: argparse.Namespace) -> int:
     return 1 if report.findings else 0
 
 
+def _cmd_confidence(args: argparse.Namespace) -> int:
+    from wikilens.confidence import run_confidence
+    from wikilens.confidence_format import format_json, format_markdown
+    from wikilens.confidence_judge import MockConfidenceJudge
+
+    vault_path = str(args.vault_path.resolve())
+
+    # Resolve judge backend.
+    from wikilens.confidence_judge import ConfidenceJudge
+
+    judge: ConfidenceJudge
+    if args.judge == "none":
+        judge = MockConfidenceJudge()
+    elif args.judge == "openai":
+        from wikilens.confidence_judge import OpenAIConfidenceJudge
+
+        try:
+            model = getattr(args, "model", None) or "gpt-4o"
+            judge = OpenAIConfidenceJudge(model=model)
+        except (OSError, ImportError) as e:
+            print(f"wikilens confidence: {e}", file=sys.stderr)
+            return 2
+    elif args.judge == "claude":
+        from wikilens.confidence_judge import ClaudeConfidenceJudge
+
+        try:
+            model = getattr(args, "model", None) or "claude-sonnet-4-6"
+            judge = ClaudeConfidenceJudge(model=model)
+        except (OSError, ImportError) as e:
+            print(f"wikilens confidence: {e}", file=sys.stderr)
+            return 2
+    else:
+        print(f"wikilens confidence: unknown judge: {args.judge!r}", file=sys.stderr)
+        return 2
+
+    sample: int | None = getattr(args, "sample", None)
+    only: str | None = getattr(args, "only", None)
+    threshold: int = getattr(args, "threshold", 2)
+    min_confidence: float = getattr(args, "min_confidence", 0.0)
+
+    if getattr(args, "verbose", False):
+        print(
+            f"wikilens confidence: vault={vault_path!r} judge={judge.name!r} "
+            f"threshold={threshold} sample={sample}",
+            file=sys.stderr,
+        )
+
+    report = run_confidence(
+        vault_path=vault_path,
+        judge=judge,
+        threshold=threshold,
+        sample=sample,
+        only=only,
+        min_confidence=min_confidence,
+    )
+
+    if args.json:
+        sys.stdout.write(format_json(report))
+    else:
+        sys.stdout.write(format_markdown(report))
+
+    return 1 if report.has_findings else 0
+
+
 def _cmd_stub(name: str, phase: str):
     def _fn(args: argparse.Namespace) -> int:
         print(f"wikilens: '{name}' is not available yet ({phase}).")
@@ -980,6 +1044,60 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Emit JSON report instead of markdown (schema_version: 1).",
     )
     p_concepts.set_defaults(func=_cmd_concepts)
+
+    p_confidence = sub.add_parser(
+        "confidence",
+        help="Classify claims in a vault on a 1-5 epistemic confidence scale.",
+    )
+    p_confidence.add_argument("vault_path", type=Path, help="Path to the vault directory.")
+    p_confidence.add_argument(
+        "--judge",
+        choices=["none", "openai", "claude"],
+        default="openai",
+        help="LLM backend to use (default: openai). 'none' uses the mock judge.",
+    )
+    p_confidence.add_argument(
+        "--model",
+        default=None,
+        help="Override the judge model name.",
+    )
+    p_confidence.add_argument(
+        "--threshold",
+        type=int,
+        default=2,
+        metavar="N",
+        help="Report claims with level <= N (default: 2; range 1-5).",
+    )
+    p_confidence.add_argument(
+        "--sample",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Cap total judge calls to N (smoke mode).",
+    )
+    p_confidence.add_argument(
+        "--only",
+        default=None,
+        metavar="NOTE",
+        help="Restrict to notes whose basename contains NOTE (case-insensitive).",
+    )
+    p_confidence.add_argument(
+        "--min-confidence",
+        type=float,
+        default=0.0,
+        dest="min_confidence",
+        metavar="F",
+        help="Drop verdicts whose judge confidence is below F (default: 0.0).",
+    )
+    p_confidence.add_argument(
+        "--json", action="store_true",
+        help="Emit JSON report instead of markdown (schema_version: 1).",
+    )
+    p_confidence.add_argument(
+        "-v", "--verbose", action="store_true",
+        help="Print progress to stderr.",
+    )
+    p_confidence.set_defaults(func=_cmd_confidence)
 
     # Stubs for later phases (keep the help surface honest)
     for name, phase in [

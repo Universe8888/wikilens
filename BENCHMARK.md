@@ -247,3 +247,224 @@ Cluster-stage recall: 0/4 = 0.00
 | `rerank` | 1.00 | 0.97 | 1.00 | 1.00 | 1.00 | 1574 | 1846 | 1584 |
 
 Eval set: 20 queries.
+
+## 2026-05-03 13:02:51 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `none/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 0.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 43 | — |
+| FP | 7 | — |
+| FN | 38 | — |
+| Precision | 0.86 | >= 0.70 |
+| Recall | 0.53 | >= 0.70 |
+| F1 | 0.66 | — |
+| QWK (ordinal, 5-class) | 0.000 | report only (flag if < 0.30) |
+
+## 2026-05-03 13:36:40 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 233.
+- Wall clock: 627.5s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 8 | — |
+| FP | 2 | — |
+| FN | 73 | — |
+| Precision | 0.80 | >= 0.70 |
+| Recall | 0.10 | >= 0.70 |
+| F1 | 0.18 | — |
+| QWK (ordinal, 5-class) | 0.714 | report only (flag if < 0.30) |
+
+## 2026-05-03 13:39:29 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `none/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 0.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 43 | — |
+| FP | 12 | — |
+| FN | 38 | — |
+| Precision | 0.78 | >= 0.70 |
+| Recall | 0.53 | >= 0.70 |
+| F1 | 0.63 | — |
+| QWK (ordinal, 5-class) | 0.565 | report only (flag if < 0.30) |
+
+## 2026-05-03 13:49:45 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 229.
+- Wall clock: 607.5s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 5 | — |
+| FP | 6 | — |
+| FN | 76 | — |
+| Precision | 0.45 | >= 0.70 |
+| Recall | 0.06 | >= 0.70 |
+| F1 | 0.11 | — |
+| QWK (ordinal, 5-class) | 0.102 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:14:04 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 228.
+- Wall clock: 676.5s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 10 | — |
+| FP | 3 | — |
+| FN | 71 | — |
+| Precision | 0.77 | >= 0.70 |
+| Recall | 0.12 | >= 0.70 |
+| F1 | 0.21 | — |
+| QWK (ordinal, 5-class) | 0.172 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:28:15 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `none/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 0.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 49 | — |
+| FP | 6 | — |
+| FN | 32 | — |
+| Precision | 0.89 | >= 0.70 |
+| Recall | 0.60 | >= 0.70 |
+| F1 | 0.72 | — |
+| QWK (ordinal, 5-class) | 0.571 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:28:19 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `none/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 0.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 49 | — |
+| FP | 6 | — |
+| FN | 32 | — |
+| Precision | 0.89 | >= 0.70 |
+| Recall | 0.60 | >= 0.70 |
+| F1 | 0.72 | — |
+| QWK (ordinal, 5-class) | 0.571 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:40:52 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 230.
+- Wall clock: 728.2s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 4 | — |
+| FP | 5 | — |
+| FN | 77 | — |
+| Precision | 0.44 | >= 0.70 |
+| Recall | 0.05 | >= 0.70 |
+| F1 | 0.09 | — |
+| QWK (ordinal, 5-class) | 0.091 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:50:17 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `none/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 0.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 49 | — |
+| FP | 6 | — |
+| FN | 32 | — |
+| Precision | 0.89 | >= 0.70 |
+| Recall | 0.60 | >= 0.70 |
+| F1 | 0.72 | — |
+| QWK (ordinal, 5-class) | 0.571 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:55:43 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 217.2s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 76 | — |
+| FP | 65 | — |
+| FN | 5 | — |
+| Precision | 0.54 | >= 0.70 |
+| Recall | 0.94 | >= 0.70 |
+| F1 | 0.68 | — |
+| QWK (ordinal, 5-class) | 0.858 | report only (flag if < 0.30) |
+
+## 2026-05-03 14:59:45 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 217.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 76 | — |
+| FP | 60 | — |
+| FN | 5 | — |
+| Precision | 0.56 | >= 0.70 |
+| Recall | 0.94 | >= 0.70 |
+| F1 | 0.70 | — |
+| QWK (ordinal, 5-class) | 0.883 | report only (flag if < 0.30) |
+
+## 2026-05-03 15:05:56 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `none/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 0.1s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 49 | — |
+| FP | 6 | — |
+| FN | 32 | — |
+| Precision | 0.89 | >= 0.70 |
+| Recall | 0.60 | >= 0.70 |
+| F1 | 0.72 | — |
+| QWK (ordinal, 5-class) | 0.571 | report only (flag if < 0.30) |
+
+## 2026-05-03 15:10:15 — P10 eval
+
+- Vault: `fixtures/confidence_vault` (249 claims classified).
+- Judge: `openai/gpt-4o`. Threshold: 2. Sample: all.
+- Judge calls: 249. Abstentions: 0.
+- Wall clock: 255.7s.
+
+| Metric | Value | Target |
+|--------|-------|--------|
+| TP | 71 | — |
+| FP | 7 | — |
+| FN | 10 | — |
+| Precision | 0.91 | >= 0.70 |
+| Recall | 0.88 | >= 0.70 |
+| F1 | 0.89 | — |
+| QWK (ordinal, 5-class) | 0.881 | report only (flag if < 0.30) |

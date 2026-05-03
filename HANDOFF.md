@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-03 (P9 complete, tag `v0.9.0`)
+**Last updated:** 2026-05-03 (P10 complete, tag `v0.10.0`)
 
 ---
 
@@ -12,9 +12,9 @@ where the previous session left off, without re-litigating decisions already mad
 Start a new chat. Tell the agent:
 
 > We're continuing the `wikilens` project at `C:\Projects2026\wikilens\`.
-> P9 is complete (`v0.9.0` tagged locally, not pushed). Read `.local/AGENT_BRIEFING.md`,
+> P10 is complete (`v0.10.0` tagged locally, not pushed). Read `.local/AGENT_BRIEFING.md`,
 > then `.local/HANDOFF.md`, then `HANDOFF.md`, then `ROADMAP.md`.
-> Next step: **P10** — Epistemic Confidence Mapper. Plan before writing code.
+> Next step: **P11** — Obsidian Plugin. Plan before writing code.
 
 That's it.
 
@@ -142,11 +142,21 @@ under the MIT license.
 - Eval fixture: `fixtures/concepts_vault/` (12 notes, 5 planted unnamed concepts). Targets: precision ≥ 0.70, recall ≥ 0.70.
 - 427/427 tests pass.
 
-### P10 – P12
+### P10 — Epistemic Confidence Mapper (COMPLETE, 2026-05-03, tag `v0.10.0`, not pushed)
+
+- `wikilens confidence <vault>` extracts sentence-level declarative claims from every note and classifies each on a 5-level epistemic scale: speculation (1), conjecture (2), inference (3), attributed (4), verified (5).
+- Reports claims below `--threshold` (default 2 = "low confidence") — surfaces claims that outrun their evidence.
+- `MockConfidenceJudge`, `OpenAIConfidenceJudge` (default gpt-4o), `ClaudeConfidenceJudge`.
+- Prompt uses explicit decision order (L5→L4→L3→L1→L2) with signal-word lists; L2 is the last resort.
+- JSON fence stripping + `response_format={"type":"json_object"}` eliminate ~40% abstention rate.
+- Markdown + `--json` output, exit 0/1/2. Cost-control: `--threshold`, `--sample`, `--only`, `--min-confidence`.
+- Eval fixture: `fixtures/confidence_vault/` (15 notes, 179 labeled claims). Precision=0.91, Recall=0.88, F1=0.89, QWK=0.881 — both ≥ 0.70 targets met.
+- 468/468 tests pass.
+
+### P11 – P12
 
 Full phase list with launch hooks and eval targets: [`ROADMAP.md`](./ROADMAP.md).
 
-- **P10** — Epistemic Confidence Mapper. Classifies claims on hypothesis → verified fact.
 - **P11** — Obsidian Plugin. Thin wrapper over the CLI; marketplace discovery.
 - **P12** — v1.0 launch. Product Hunt + Show HN + `r/ObsidianMD`.
 
