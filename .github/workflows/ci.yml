@@ -28,6 +28,12 @@ jobs:
       - name: Install package
         run: python -m pip install -e ".[dev]"
 
+      - name: Sanitization gate
+        run: python scripts/check_sanitization.py --all-tracked
+
+      - name: Line-count gate (500 lines max)
+        run: python scripts/check_line_count.py
+
       - name: Lint
         run: python -m ruff check .
 
@@ -37,4 +43,4 @@ jobs:
       - name: Test
         env:
           HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
-        run: python -m pytest
+        run: python -m pytest --cov=wikilens --cov-fail-under=84

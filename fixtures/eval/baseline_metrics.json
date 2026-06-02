@@ -1,0 +1,31 @@
+{
+  "generated": "2026-06-02",
+  "note": "M0 baseline — judge=none dry-run metrics. Real-LLM metrics are in BENCHMARK.md.",
+  "p2_retrieval": {
+    "dense": {"hit_at_5": 1.0, "recall_at_5": 1.0},
+    "bm25": {"hit_at_5": 1.0, "recall_at_5": 0.97},
+    "hybrid": {"hit_at_5": 1.0, "recall_at_5": 0.97},
+    "rerank": {"hit_at_5": 1.0, "recall_at_5": 0.97}
+  },
+  "p3_audit": {
+    "broken": {"f1": 1.0},
+    "one_way": {"f1": 1.0},
+    "orphans": {"f1": 1.0},
+    "shadowed": {"f1": 1.0}
+  },
+  "p4_contradict_dry": {
+    "overall_f1": 1.0,
+    "threshold": 0.75
+  },
+  "p5_gap_dry": {
+    "overall_f1": 0.0,
+    "threshold": 0.6,
+    "note": "dry-run with --judge none produces no real matches; real-LLM F1=0.65"
+  },
+  "p6_answer_dry": {
+    "pass_rate": 1.0,
+    "attr_rate": 1.0,
+    "threshold_pass": 0.8,
+    "threshold_attr": 0.9
+  }
+}

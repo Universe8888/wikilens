@@ -1,7 +1,7 @@
 .PHONY: test lint typecheck check benchmark
 
 test:
-	python -m pytest
+	python -m pytest --cov=wikilens --cov-report=term-missing
 
 lint:
 	python -m ruff check .
