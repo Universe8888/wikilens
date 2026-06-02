@@ -194,8 +194,12 @@ class ClaudeJudge:
 
     def score_pair(self, text_a: str, text_b: str) -> JudgeVerdict:
         """Call Claude once per pair. Retries on malformed JSON up to _MAX_RETRIES."""
+        from wikilens._prompt import sanitise_xml
+
         self.calls += 1
-        user_content = _JUDGE_USER_TEMPLATE.format(text_a=text_a, text_b=text_b)
+        user_content = _JUDGE_USER_TEMPLATE.format(
+            text_a=sanitise_xml(text_a), text_b=sanitise_xml(text_b)
+        )
         last_err: Exception | None = None
 
         for attempt in range(_MAX_RETRIES + 1):
@@ -270,8 +274,12 @@ class OpenAIJudge:
 
     def score_pair(self, text_a: str, text_b: str) -> JudgeVerdict:
         """Call OpenAI once per pair. Retries on malformed JSON up to _MAX_RETRIES."""
+        from wikilens._prompt import sanitise_xml
+
         self.calls += 1
-        user_content = _JUDGE_USER_TEMPLATE.format(text_a=text_a, text_b=text_b)
+        user_content = _JUDGE_USER_TEMPLATE.format(
+            text_a=sanitise_xml(text_a), text_b=sanitise_xml(text_b)
+        )
         last_err: Exception | None = None
 
         for attempt in range(_MAX_RETRIES + 1):

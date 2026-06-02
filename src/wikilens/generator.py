@@ -144,12 +144,14 @@ _MAX_TOKENS_PER_CLUSTER = 1024
 
 
 def _format_passages(cluster_chunks: list[tuple[str, str]]) -> str:
+    from wikilens._prompt import sanitise_xml
+
     parts = []
     for chunk_id, text in cluster_chunks:
         snippet = text.strip().replace("\n", " ")
         if len(snippet) > 400:
             snippet = snippet[:400] + "..."
-        parts.append(f"[{chunk_id}]\n{snippet}")
+        parts.append(f"[{sanitise_xml(chunk_id)}]\n{sanitise_xml(snippet)}")
     return "\n\n".join(parts)
 
 

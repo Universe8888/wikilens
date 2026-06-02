@@ -13,6 +13,7 @@ import os
 from typing import Protocol, runtime_checkable
 
 from wikilens._env import load_dotenv_if_present
+from wikilens._prompt import sanitise_xml as _sanitise_xml
 from wikilens.concepts import ConceptProposal
 from wikilens.gap import ChunkPoint
 
@@ -75,10 +76,6 @@ Propose a single canonical term.
 
 _CHUNK_BLOCK_TEMPLATE = "<chunk id=\"{chunk_id}\">{text}</chunk>"
 
-
-def _sanitise_xml(text: str) -> str:
-    """Replace < and > with HTML entities to keep XML prompt delimiters intact."""
-    return text.replace("<", "&lt;").replace(">", "&gt;")
 
 
 def _build_user_content(chunks: list[ChunkPoint]) -> str:

@@ -149,12 +149,16 @@ _MAX_TOKENS = 1536
 
 
 def _format_passages(chunks: tuple[tuple[str, str, str], ...]) -> str:
+    from wikilens._prompt import sanitise_xml
+
     parts = []
     for chunk_id, source_rel, text in chunks:
         snippet = text.strip().replace("\n", " ")
         if len(snippet) > 500:
             snippet = snippet[:500] + "..."
-        parts.append(f"[{chunk_id}] ({source_rel})\n{snippet}")
+        safe_id = sanitise_xml(chunk_id)
+        safe_rel = sanitise_xml(source_rel)
+        parts.append(f"[{safe_id}] ({safe_rel})\n{sanitise_xml(snippet)}")
     return "\n\n".join(parts)
 
 

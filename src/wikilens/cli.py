@@ -129,7 +129,6 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
         format_markdown,
     )
     from wikilens.embed import BGEEmbedder
-    from wikilens.judge import Judge, MockJudge
     from wikilens.store import LanceDBStore
 
     only_tuple: tuple[str, ...] | None = None
@@ -156,39 +155,11 @@ def _cmd_contradict(args: argparse.Namespace) -> int:
         print(f"No index at {args.db}. Run `wikilens ingest <vault>` first.", file=sys.stderr)
         return 2
 
-    # Resolve judge backend. Phase 4.1 ships only MockJudge; ClaudeJudge
-    # and OllamaJudge are wired in Phase 4.2.
-    judge: Judge
-    if args.judge == "none":
-        judge = MockJudge()
-    elif args.judge == "openai":
-        from wikilens.judge import OpenAIJudge
+    from wikilens.backends import resolve_backend
 
-        try:
-            model = getattr(args, "model", None) or "gpt-4o"
-            judge = OpenAIJudge(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens contradict: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "claude":
-        from wikilens.judge import ClaudeJudge
-
-        try:
-            model = getattr(args, "model", None) or "claude-sonnet-4-6"
-            judge = ClaudeJudge(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens contradict: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "ollama":
-        print(
-            "wikilens contradict: --judge ollama is not yet implemented. "
-            "Use --judge none, --judge openai, or --judge claude.",
-            file=sys.stderr,
-        )
-        return 2
-    else:
-        print(f"wikilens contradict: unknown judge: {args.judge!r}", file=sys.stderr)
-        return 2
+    judge, err = resolve_backend("contradict", args.judge, model=getattr(args, "model", None))
+    if err is not None:
+        return err
 
     pairs = generate_candidate_pairs(store, embedder=embedder, top_k=args.top_k)
     judged_pairs = pairs[: args.sample] if args.sample is not None and args.sample >= 0 else pairs
@@ -220,7 +191,6 @@ def _cmd_gap(args: argparse.Namespace) -> int:
     from wikilens.embed import BGEEmbedder
     from wikilens.gap import generate_gaps
     from wikilens.gap_format import GapReport, format_json, format_markdown
-    from wikilens.generator import Generator, MockGenerator
     from wikilens.store import LanceDBStore
 
     embedder = BGEEmbedder()
@@ -234,32 +204,11 @@ def _cmd_gap(args: argparse.Namespace) -> int:
         print(f"No index at {args.db}. Run `wikilens ingest <vault>` first.", file=sys.stderr)
         return 2
 
-    # Resolve generator backend. Phase 5.1 ships only MockGenerator;
-    # ClaudeGenerator lands in Phase 5.2.
-    generator: Generator
-    if args.judge == "none":
-        generator = MockGenerator()
-    elif args.judge == "openai":
-        from wikilens.generator import OpenAIGenerator
+    from wikilens.backends import resolve_backend
 
-        try:
-            model = getattr(args, "model", None) or "gpt-4o"
-            generator = OpenAIGenerator(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens gap: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "claude":
-        from wikilens.generator import ClaudeGenerator
-
-        try:
-            model = getattr(args, "model", None) or "claude-sonnet-4-6"
-            generator = ClaudeGenerator(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens gap: {e}", file=sys.stderr)
-            return 2
-    else:
-        print(f"wikilens gap: unknown judge: {args.judge!r}", file=sys.stderr)
-        return 2
+    generator, err = resolve_backend("gap", args.judge, model=getattr(args, "model", None))
+    if err is not None:
+        return err
 
     clusters, findings = generate_gaps(
         store,
@@ -302,7 +251,6 @@ def _cmd_answer(args: argparse.Namespace) -> int:
         format_markdown,
         write_stubs,
     )
-    from wikilens.drafter import Drafter, MockDrafter
     from wikilens.embed import BGEEmbedder
     from wikilens.store import LanceDBStore
 
@@ -340,35 +288,17 @@ def _cmd_answer(args: argparse.Namespace) -> int:
         )
         return 2
 
-    # Resolve drafter backend.
-    drafter: Drafter
-    drafter_model: str
+    from wikilens.backends import DEFAULT_CLAUDE_MODEL, DEFAULT_OPENAI_MODEL, resolve_backend
+
+    drafter, err = resolve_backend("answer", args.judge, model=getattr(args, "model", None))
+    if err is not None:
+        return err
     if args.judge == "none":
-        drafter = MockDrafter()
         drafter_model = "mock"
     elif args.judge == "openai":
-        from wikilens.drafter import OpenAIDrafter
-
-        try:
-            model = getattr(args, "model", None) or "gpt-4o"
-            drafter = OpenAIDrafter(model=model)
-            drafter_model = model
-        except (OSError, ImportError) as e:
-            print(f"wikilens answer: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "claude":
-        from wikilens.drafter import ClaudeDrafter
-
-        try:
-            model = getattr(args, "model", None) or "claude-sonnet-4-6"
-            drafter = ClaudeDrafter(model=model)
-            drafter_model = model
-        except (OSError, ImportError) as e:
-            print(f"wikilens answer: {e}", file=sys.stderr)
-            return 2
+        drafter_model = getattr(args, "model", None) or DEFAULT_OPENAI_MODEL
     else:
-        print(f"wikilens answer: unknown judge: {args.judge!r}", file=sys.stderr)
-        return 2
+        drafter_model = getattr(args, "model", None) or DEFAULT_CLAUDE_MODEL
 
     # Reranker only for rerank mode.
     reranker = None
@@ -430,35 +360,16 @@ def _cmd_answer(args: argparse.Namespace) -> int:
 def _cmd_concepts(args: argparse.Namespace) -> int:
     import json as _json
 
-    from wikilens.concept_judge import (
-        ClaudeConceptJudge,
-        ConceptJudge,
-        MockConceptJudge,
-        OpenAIConceptJudge,
-    )
     from wikilens.concepts import detect_unnamed_concepts
 
     vault_path = args.vault_path.resolve()
     db_path = getattr(args, "db", DEFAULT_DB_PATH)
 
-    judge: ConceptJudge
-    if args.judge == "none":
-        judge = MockConceptJudge()
-    elif args.judge == "openai":
-        try:
-            judge = OpenAIConceptJudge(model=args.model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens concepts: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "claude":
-        try:
-            judge = ClaudeConceptJudge(model=args.model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens concepts: {e}", file=sys.stderr)
-            return 2
-    else:
-        print(f"wikilens concepts: unknown judge: {args.judge!r}", file=sys.stderr)
-        return 2
+    from wikilens.backends import resolve_backend
+
+    judge, err = resolve_backend("concepts", args.judge, model=getattr(args, "model", None))
+    if err is not None:
+        return err
 
     try:
         findings = detect_unnamed_concepts(
@@ -521,7 +432,7 @@ def _cmd_drift(args: argparse.Namespace) -> int:
         walk_note_revisions,
     )
     from wikilens.drift_format import format_json, format_markdown
-    from wikilens.drift_judge import DriftVerdict, MockDriftJudge
+    from wikilens.drift_judge import DriftVerdict
     from wikilens.embed import BGEEmbedder
 
     vault_path = args.vault_path.resolve()
@@ -533,33 +444,11 @@ def _cmd_drift(args: argparse.Namespace) -> int:
         print(f"wikilens drift: {e}", file=sys.stderr)
         return 2
 
-    # Resolve judge backend.
-    from wikilens.drift_judge import DriftJudge
+    from wikilens.backends import resolve_backend
 
-    judge: DriftJudge
-    if args.judge == "none":
-        judge = MockDriftJudge()
-    elif args.judge == "openai":
-        from wikilens.drift_judge import OpenAIDriftJudge
-
-        try:
-            model = getattr(args, "model", None) or "gpt-4o"
-            judge = OpenAIDriftJudge(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens drift: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "claude":
-        from wikilens.drift_judge import ClaudeDriftJudge
-
-        try:
-            model = getattr(args, "model", None) or "claude-sonnet-4-6"
-            judge = ClaudeDriftJudge(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens drift: {e}", file=sys.stderr)
-            return 2
-    else:
-        print(f"wikilens drift: unknown judge: {args.judge!r}", file=sys.stderr)
-        return 2
+    judge, err = resolve_backend("drift", args.judge, model=getattr(args, "model", None))
+    if err is not None:
+        return err
 
     align_threshold = getattr(args, "align_threshold", DEFAULT_ALIGN_THRESHOLD)
     identical_threshold = getattr(args, "identical_threshold", DEFAULT_IDENTICAL_THRESHOLD)
@@ -655,37 +544,14 @@ def _cmd_drift(args: argparse.Namespace) -> int:
 def _cmd_confidence(args: argparse.Namespace) -> int:
     from wikilens.confidence import run_confidence
     from wikilens.confidence_format import format_json, format_markdown
-    from wikilens.confidence_judge import MockConfidenceJudge
 
     vault_path = str(args.vault_path.resolve())
 
-    # Resolve judge backend.
-    from wikilens.confidence_judge import ConfidenceJudge
+    from wikilens.backends import resolve_backend
 
-    judge: ConfidenceJudge
-    if args.judge == "none":
-        judge = MockConfidenceJudge()
-    elif args.judge == "openai":
-        from wikilens.confidence_judge import OpenAIConfidenceJudge
-
-        try:
-            model = getattr(args, "model", None) or "gpt-4o"
-            judge = OpenAIConfidenceJudge(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens confidence: {e}", file=sys.stderr)
-            return 2
-    elif args.judge == "claude":
-        from wikilens.confidence_judge import ClaudeConfidenceJudge
-
-        try:
-            model = getattr(args, "model", None) or "claude-sonnet-4-6"
-            judge = ClaudeConfidenceJudge(model=model)
-        except (OSError, ImportError) as e:
-            print(f"wikilens confidence: {e}", file=sys.stderr)
-            return 2
-    else:
-        print(f"wikilens confidence: unknown judge: {args.judge!r}", file=sys.stderr)
-        return 2
+    judge, err = resolve_backend("confidence", args.judge, model=getattr(args, "model", None))
+    if err is not None:
+        return err
 
     sample: int | None = getattr(args, "sample", None)
     only: str | None = getattr(args, "only", None)

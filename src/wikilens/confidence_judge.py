@@ -14,6 +14,7 @@ import re
 from typing import Protocol, runtime_checkable
 
 from wikilens._env import load_dotenv_if_present
+from wikilens._prompt import sanitise_xml as _sanitise_xml
 from wikilens.confidence import ConfidenceVerdict
 
 _MAX_RETRIES = 2
@@ -100,10 +101,6 @@ Classify the epistemic confidence level of the <claim> (1-5).
 Use the <context> only to check for cross-references or hedges in nearby sentences.
 """
 
-
-def _sanitise_xml(text: str) -> str:
-    """Replace < and > with HTML entities to keep XML prompt delimiters intact."""
-    return text.replace("<", "&lt;").replace(">", "&gt;")
 
 
 def _build_user_content(claim: str, note_context: str) -> str:
