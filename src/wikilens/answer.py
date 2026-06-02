@@ -315,15 +315,19 @@ def retrieve_support(
         # Pull those chunks from the store if not already in by_id.
         missing_ids = set(gap.supporting_chunk_ids) - by_id.keys()
         if missing_ids:
-            all_rows = store._get_or_create_table().to_arrow().to_pylist()  # type: ignore[attr-defined]
+            all_rows = store.iter_rows(
+                ["chunk_id", "source_rel", "heading_path", "text"]
+            )
             rank_offset = len(by_id) + 1
             for row in all_rows:
                 cid = row.get("chunk_id", "")
                 if cid in missing_ids:
+                    heading = row.get("heading_path") or ""
+                    hp = tuple(s for s in heading.split(" > ") if s) if heading else ()
                     by_id[cid] = SupportingChunk(
                         chunk_id=cid,
                         source_rel=row.get("source_rel", ""),
-                        heading_path=tuple(row.get("heading_path") or []),
+                        heading_path=hp,
                         text=row.get("text", ""),
                         retrieval_rank=rank_offset,
                         retrieval_score=0.0,

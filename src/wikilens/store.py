@@ -69,6 +69,16 @@ class VectorStore(Protocol):
         """BM25 full-text search, returning top-k hits."""
         ...
 
+    def iter_rows(
+        self, columns: Sequence[str], *, batch_size: int = 1000
+    ) -> list[dict[str, Any]]:
+        """Return all rows projected to the given columns."""
+        ...
+
+    def fetch_vectors(self, chunk_ids: Sequence[str]) -> list[list[float]]:
+        """Return dense vectors for the given chunk_ids, in order."""
+        ...
+
 
 def _build_schema(dim: int) -> pa.Schema:
     return pa.schema(
@@ -200,6 +210,22 @@ class LanceDBStore:
             text=row["text"],
             score=score,
         )
+
+    def iter_rows(
+        self, columns: Sequence[str], *, batch_size: int = 1000
+    ) -> list[dict[str, Any]]:
+        """Return all rows projected to the given columns."""
+        table = self._get_or_create_table()
+        arrow_table = table.to_arrow().select(columns)
+        return arrow_table.to_pylist()
+
+    def fetch_vectors(self, chunk_ids: Sequence[str]) -> list[list[float]]:
+        """Return dense vectors for the given chunk_ids, in input order."""
+        table = self._get_or_create_table()
+        arrow_table = table.to_arrow().select(["chunk_id", "vector"])
+        rows = arrow_table.to_pylist()
+        lookup = {r["chunk_id"]: r["vector"] for r in rows}
+        return [lookup[cid] for cid in chunk_ids]
 
     def search_dense(self, query_vector: Any, k: int) -> list[SearchHit]:
         table = self._get_or_create_table()

@@ -126,7 +126,7 @@ def test_ingest_full_rebuild_removes_deleted_file_chunks(tmp_path: Path, embedde
     second = ingest_vault(vault, db_path=db, embedder=embedder)
 
     store = LanceDBStore(db_path=db, dim=embedder.dim)
-    rows = store._get_or_create_table().to_arrow().to_pylist()  # type: ignore[attr-defined]
+    rows = store.iter_rows(["source_rel"])
     source_rels = {row["source_rel"] for row in rows}
 
     assert store.count() == second.chunks_emitted

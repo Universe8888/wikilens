@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 
+from wikilens.clustering import ChunkPoint, Cluster
 from wikilens.concept_judge import MockConceptJudge
 from wikilens.concepts import ConceptFinding, ConceptProposal, detect_unnamed_concepts
-from wikilens.gap import ChunkPoint, Cluster
 
 
 def _point(chunk_id: str, source_rel: str, text: str = "body") -> ChunkPoint:
@@ -81,14 +81,12 @@ def test_mock_judge_deterministic():
 # ---------------------------------------------------------------------------
 
 
-def _fake_store() -> MagicMock:
-    table = MagicMock()
-    arrow = MagicMock()
-    arrow.to_pylist.return_value = []
-    table.to_arrow.return_value = arrow
-    store = MagicMock()
-    store._get_or_create_table.return_value = table
-    return store
+def _rows_from_points(pts: list[ChunkPoint]) -> list[dict]:
+    return [
+        {"chunk_id": p.chunk_id, "source_rel": p.source_rel,
+         "text": p.text, "vector": list(p.vector)}
+        for p in pts
+    ]
 
 
 def test_term_freq_absent(tmp_path):
@@ -99,8 +97,9 @@ def test_term_freq_absent(tmp_path):
     ]
     cluster = _cluster(pts, cluster_id=7)
 
-    with patch("wikilens.concepts._iter_all_points", return_value=pts), \
+    with patch("wikilens.concepts.LanceDBStore") as mock_store, \
          patch("wikilens.concepts.cluster_chunks", return_value=[cluster]):
+        mock_store.return_value.iter_rows.return_value = _rows_from_points(pts)
         findings = detect_unnamed_concepts(
             str(tmp_path / "db"),
             "chunks",
@@ -121,8 +120,9 @@ def test_term_freq_present(tmp_path):
     ]
     cluster = _cluster(pts, cluster_id=3)
 
-    with patch("wikilens.concepts._iter_all_points", return_value=pts), \
+    with patch("wikilens.concepts.LanceDBStore") as mock_store, \
          patch("wikilens.concepts.cluster_chunks", return_value=[cluster]):
+        mock_store.return_value.iter_rows.return_value = _rows_from_points(pts)
         findings = detect_unnamed_concepts(
             str(tmp_path / "db"),
             "chunks",
@@ -149,8 +149,9 @@ def test_absence_filter_excludes_named(tmp_path):
     ]
     cluster = _cluster(pts, cluster_id=1)
 
-    with patch("wikilens.concepts._iter_all_points", return_value=pts), \
+    with patch("wikilens.concepts.LanceDBStore") as mock_store, \
          patch("wikilens.concepts.cluster_chunks", return_value=[cluster]):
+        mock_store.return_value.iter_rows.return_value = _rows_from_points(pts)
         findings = detect_unnamed_concepts(
             str(tmp_path / "db"),
             "chunks",
@@ -171,8 +172,9 @@ def test_absence_filter_includes_unnamed(tmp_path):
     ]
     cluster = _cluster(pts, cluster_id=2)
 
-    with patch("wikilens.concepts._iter_all_points", return_value=pts), \
+    with patch("wikilens.concepts.LanceDBStore") as mock_store, \
          patch("wikilens.concepts.cluster_chunks", return_value=[cluster]):
+        mock_store.return_value.iter_rows.return_value = _rows_from_points(pts)
         findings = detect_unnamed_concepts(
             str(tmp_path / "db"),
             "chunks",
@@ -190,8 +192,9 @@ def test_absence_filter_includes_unnamed(tmp_path):
 
 
 def test_detect_unnamed_concepts_empty_db(tmp_path):
-    with patch("wikilens.concepts._iter_all_points", return_value=[]), \
+    with patch("wikilens.concepts.LanceDBStore") as mock_store, \
          patch("wikilens.concepts.cluster_chunks", return_value=[]):
+        mock_store.return_value.iter_rows.return_value = []
         findings = detect_unnamed_concepts(
             str(tmp_path / "db"),
             "chunks",

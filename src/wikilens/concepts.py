@@ -14,8 +14,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import numpy as np
+
+from wikilens.clustering import ChunkPoint, cluster_chunks
 from wikilens.embed import DEFAULT_DIM
-from wikilens.gap import ChunkPoint, _iter_all_points, cluster_chunks
 from wikilens.store import LanceDBStore
 
 if TYPE_CHECKING:
@@ -93,7 +95,17 @@ def detect_unnamed_concepts(
         ``ConceptFinding`` list sorted by confidence descending, len <= top_k.
     """
     store = LanceDBStore(db_path=db_path, dim=DEFAULT_DIM, table_name=table_name)
-    points: list[ChunkPoint] = _iter_all_points(store)
+    rows = store.iter_rows(["chunk_id", "source_rel", "text", "vector"])
+    points: list[ChunkPoint] = [
+        ChunkPoint(
+            chunk_id=row["chunk_id"],
+            source_rel=row["source_rel"],
+            text=row["text"],
+            vector=np.asarray(row["vector"], dtype=np.float32),
+        )
+        for row in rows
+        if row.get("vector") is not None
+    ]
 
     clusters = cluster_chunks(
         points,

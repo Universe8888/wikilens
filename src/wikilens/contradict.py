@@ -77,17 +77,8 @@ def _canonical(a: ChunkRef, b: ChunkRef, retrieval_score: float) -> CandidatePai
 
 
 def _iter_all_chunks(store: VectorStore) -> list[ChunkRef]:
-    """Pull every chunk from the store as a ChunkRef.
-
-    LanceDB-specific: uses ``_table.to_list()`` which is O(n) on table
-    size. For P4's target vault sizes (tens of thousands of chunks this
-    is fine. Swapping this for a paged scan is a Phase 4.5+ concern.
-    """
-    # The VectorStore protocol doesn't expose "iter all rows" — we
-    # reach into the LanceDB backend directly. Acceptable because P4
-    # only ships with LanceDB as a backend (same as P2/P3).
-    table = store._get_or_create_table()  # type: ignore[attr-defined]
-    rows = table.to_arrow().to_pylist()
+    """Pull every chunk from the store via the Protocol."""
+    rows = store.iter_rows(["chunk_id", "source_rel", "heading_path", "text"])
     out: list[ChunkRef] = []
     for row in rows:
         heading = row.get("heading_path") or ""

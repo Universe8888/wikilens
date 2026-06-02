@@ -386,9 +386,7 @@ def _mk_mock_store() -> MagicMock:
     store.search_dense.return_value = [hit]
     store.search_fts.return_value = [hit]
     # Full-table scan returns empty (no extra gaps_hint lookup needed here).
-    table_mock = MagicMock()
-    table_mock.to_arrow.return_value.to_pylist.return_value = []
-    store._get_or_create_table.return_value = table_mock
+    store.iter_rows.return_value = []
     return store
 
 

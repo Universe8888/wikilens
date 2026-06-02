@@ -129,12 +129,8 @@ def test_cluster_chunks_sorts_largest_first():
 
 def _fake_store(rows: list[dict]) -> MagicMock:
     """Build a VectorStore-shaped mock that yields the given rows on full scan."""
-    table = MagicMock()
-    arrow = MagicMock()
-    arrow.to_pylist.return_value = rows
-    table.to_arrow.return_value = arrow
     store = MagicMock()
-    store._get_or_create_table.return_value = table
+    store.iter_rows.return_value = rows
     return store
 
 
