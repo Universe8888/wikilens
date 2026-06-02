@@ -91,8 +91,9 @@ def test_ingest_is_idempotent(tmp_path: Path, embedder: BGEEmbedder):
     first = ingest_vault(vault, db_path=db, embedder=embedder)
     second = ingest_vault(vault, db_path=db, embedder=embedder)
 
-    # Same chunks emitted + same count indexed; store total should not double
-    assert second.chunks_emitted == first.chunks_emitted
+    # Incremental: second run skips unchanged files, emits nothing new
+    assert second.chunks_emitted == 0
+    assert second.files_unchanged == 2
     store = LanceDBStore(db_path=db, dim=embedder.dim)
     assert store.count() == first.chunks_indexed
 
@@ -107,12 +108,14 @@ def test_ingest_picks_up_new_file_on_rerun(tmp_path: Path, embedder: BGEEmbedder
     _make_note(vault, "b.md", "beta")
     r2 = ingest_vault(vault, db_path=db, embedder=embedder)
 
-    assert r2.chunks_emitted > r1.chunks_emitted
+    # Incremental: only the new file's chunks are emitted
+    assert r2.chunks_emitted >= 1
+    assert r2.files_unchanged == 1
     store = LanceDBStore(db_path=db, dim=embedder.dim)
-    assert store.count() == r2.chunks_emitted
+    assert store.count() == r1.chunks_indexed + r2.chunks_indexed
 
 
-def test_ingest_full_rebuild_removes_deleted_file_chunks(tmp_path: Path, embedder: BGEEmbedder):
+def test_ingest_removes_deleted_file_chunks_incrementally(tmp_path: Path, embedder: BGEEmbedder):
     vault = tmp_path / "vault"
     vault.mkdir()
     deleted = _make_note(vault, "delete-me.md", "# Delete Me\n\nold content that should vanish\n")
@@ -125,11 +128,15 @@ def test_ingest_full_rebuild_removes_deleted_file_chunks(tmp_path: Path, embedde
     deleted.unlink()
     second = ingest_vault(vault, db_path=db, embedder=embedder)
 
+    # Incremental: deleted file's chunks removed, kept file unchanged
+    assert second.files_removed == 1
+    assert second.chunks_removed >= 1
+    assert second.chunks_emitted == 0  # keep-me.md unchanged
+
     store = LanceDBStore(db_path=db, dim=embedder.dim)
     rows = store.iter_rows(["source_rel"])
     source_rels = {row["source_rel"] for row in rows}
 
-    assert store.count() == second.chunks_emitted
     assert "keep-me.md" in source_rels
     assert "delete-me.md" not in source_rels
 

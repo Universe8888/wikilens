@@ -12,6 +12,11 @@ def register(subparsers: argparse._SubParsersAction) -> None:
     p = subparsers.add_parser("ingest", help="Index a markdown vault.")
     p.add_argument("vault_path", type=Path)
     p.add_argument("--db", default=DEFAULT_DB_PATH, help="Store path (default: %(default)s)")
+    p.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="Force full rebuild (drop existing index and re-ingest everything)",
+    )
     p.set_defaults(func=run)
 
 
@@ -22,6 +27,7 @@ def run(args: argparse.Namespace) -> int:
     report = ingest_vault(
         vault_root=args.vault_path,
         db_path=args.db,
+        rebuild=args.rebuild,
     )
     print(report.summary())
     return 0

@@ -510,7 +510,7 @@ def chunk_note(
                 text.encode("utf-8")
             ).hexdigest()[:32]
             chunk_id = hashlib.sha256(
-                f"{rel}::{idx}".encode()
+                f"{rel}::{content_hash}::{idx}".encode()
             ).hexdigest()[:32]
             chunks.append(
                 Chunk(

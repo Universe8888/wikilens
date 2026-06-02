@@ -37,6 +37,10 @@ DEFAULT_TABLE = "chunks"
 # never become an injection sink if the ID scheme changes upstream.
 _CHUNK_ID_RE = re.compile(r"^[A-Za-z0-9_\-]{1,64}$")
 
+# source_rel is a POSIX relative path (forward slashes, no quotes).
+# Validate before interpolation into filter expressions.
+_SOURCE_REL_RE = re.compile(r"^[A-Za-z0-9_./ \-]{1,512}$")
+
 _log = logging.getLogger(__name__)
 
 
@@ -77,6 +81,10 @@ class VectorStore(Protocol):
 
     def fetch_vectors(self, chunk_ids: Sequence[str]) -> list[list[float]]:
         """Return dense vectors for the given chunk_ids, in order."""
+        ...
+
+    def delete_by_source_rel(self, source_rel: str) -> int:
+        """Delete all chunks from a given source file. Returns rows removed."""
         ...
 
 
@@ -181,6 +189,23 @@ class LanceDBStore:
         self._table = None
         self._fts_dirty = True
         self._get_or_create_table()
+
+    def delete_by_source_rel(self, source_rel: str) -> int:
+        """Delete all chunks from a given source file. Returns rows removed."""
+        if not _SOURCE_REL_RE.match(source_rel):
+            raise ValueError(f"invalid source_rel shape: {source_rel!r}")
+        table = self._get_or_create_table()
+        before = table.count_rows()
+        try:
+            table.delete(f"source_rel = '{source_rel}'")
+        except (ValueError, RuntimeError, OSError) as e:
+            _log.debug("delete_by_source_rel no-op: %s", e)
+            return 0
+        after = table.count_rows()
+        removed = before - after
+        if removed > 0:
+            self._fts_dirty = True
+        return removed
 
     def ensure_fts_index(self) -> None:
         """Build (or rebuild) the FTS index. Idempotent; cheap if already built."""
