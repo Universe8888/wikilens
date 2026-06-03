@@ -68,7 +68,15 @@ def main(argv: list[str] | None = None) -> int:
     if not getattr(args, "command", None):
         parser.print_help()
         return 0
-    return args.func(args)
+    try:
+        return args.func(args)
+    except Exception as exc:
+        from wikilens.cost import BudgetExceeded
+
+        if isinstance(exc, BudgetExceeded):
+            print("wikilens: budget cap exceeded, aborting.", file=sys.stderr)
+            return 2
+        raise
 
 
 if __name__ == "__main__":

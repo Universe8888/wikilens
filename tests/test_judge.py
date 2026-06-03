@@ -141,6 +141,8 @@ def _make_claude_judge_with_mock(responses: list[str]):
         judge._client = mock_client
         judge._model = "claude-sonnet-4-6"
         judge._max_tokens = 256
+        judge._cache = None
+        judge._cost_ctx = None
         judge.calls = 0
         judge.abstentions = 0
         return judge

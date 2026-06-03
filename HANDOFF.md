@@ -3,7 +3,7 @@
 **Purpose:** Let a fresh Claude Code (or similar agent) session pick up wikilens exactly
 where the previous session left off, without re-litigating decisions already made.
 
-**Last updated:** 2026-05-03 (P10 complete, tag `v0.10.0`; P11 deferred; P12 is next)
+**Last updated:** 2026-05-03 (P10 complete; P11 deferred; v0.11.0 tagged and pushed; PyPI publish in progress; launch posts drafted in .local/)
 
 ---
 

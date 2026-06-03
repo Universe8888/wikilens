@@ -199,6 +199,8 @@ def _make_openai_drafter(responses: list[str]) -> OpenAIDrafter:
     drafter._client = mock_client
     drafter._model = "gpt-4o"
     drafter._max_tokens = 1536
+    drafter._cache = None
+    drafter._cost_ctx = None
     drafter.calls = 0
     drafter.abstentions = 0
     return drafter
@@ -219,6 +221,8 @@ def _make_claude_drafter(responses: list[str]) -> ClaudeDrafter:
     drafter._client = mock_client
     drafter._model = "claude-sonnet-4-6"
     drafter._max_tokens = 1536
+    drafter._cache = None
+    drafter._cost_ctx = None
     drafter.calls = 0
     drafter.abstentions = 0
     return drafter

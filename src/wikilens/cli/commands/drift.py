@@ -65,6 +65,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
                    type=float, default=0.75, help=argparse.SUPPRESS)
     p.add_argument("--identical-threshold", dest="identical_threshold",
                    type=float, default=0.98, help=argparse.SUPPRESS)
+
+    from wikilens.cli._common import add_cost_cache_args
+
+    add_cost_cache_args(p)
     p.set_defaults(func=run)
 
 
@@ -92,9 +96,16 @@ def run(args: argparse.Namespace) -> int:
         return 2
 
     from wikilens.backends import resolve_backend
+    from wikilens.cli._common import open_cost_cache
 
-    judge, err = resolve_backend("drift", args.judge, model=getattr(args, "model", None))
+    cache, cost_ctx = open_cost_cache(args, db_dir=str(vault_path))
+
+    judge, err = resolve_backend(
+        "drift", args.judge, model=getattr(args, "model", None),
+        cache=cache, cost_ctx=cost_ctx,
+    )
     if err is not None:
+        cache.close()
         return err
 
     align_threshold = getattr(args, "align_threshold", DEFAULT_ALIGN_THRESHOLD)
@@ -180,4 +191,8 @@ def run(args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(format_markdown(report))
 
+    if cost_ctx.calls > 0 or cost_ctx.cached_calls > 0:
+        print(cost_ctx.footer(), file=sys.stderr)
+
+    cache.close()
     return 1 if report.findings else 0

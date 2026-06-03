@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
-from typing import Literal, Protocol, runtime_checkable
+from typing import Any, Literal, Protocol, runtime_checkable
 
 from wikilens._env import load_dotenv_if_present
 
@@ -170,6 +170,8 @@ class ClaudeJudge:
         self,
         model: str = DEFAULT_CLAUDE_MODEL,
         max_tokens: int = 256,
+        cache: Any = None,
+        cost_ctx: Any = None,
     ):
         load_dotenv_if_present()
         api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -189,6 +191,8 @@ class ClaudeJudge:
         self._client = _anthropic.Anthropic(api_key=api_key)
         self._model = model
         self._max_tokens = max_tokens
+        self._cache = cache
+        self._cost_ctx = cost_ctx
         self.calls: int = 0
         self.abstentions: int = 0
 
@@ -213,13 +217,53 @@ class ClaudeJudge:
                     else ""
                 )
             )
-            response = self._client.messages.create(
-                model=self._model,
-                max_tokens=self._max_tokens,
-                system=system,
-                messages=[{"role": "user", "content": user_content}],
-            )
-            raw = getattr(response.content[0], "text", "").strip()
+
+            if self._cache is not None and self._cost_ctx is not None:
+                from wikilens.cache import (
+                    RawCompletion,
+                    complete_with_cache_and_cost,
+                    estimate_prompt_tokens,
+                    make_key,
+                )
+
+                key = make_key(
+                    family="contradict", model=self._model, system=system, user=user_content
+                )
+
+                def _call(
+                    client=self._client, model=self._model, max_tokens=self._max_tokens,
+                    sys=system, usr=user_content,
+                ):
+                    resp = client.messages.create(
+                        model=model, max_tokens=max_tokens,
+                        system=sys, messages=[{"role": "user", "content": usr}],
+                    )
+                    text = getattr(resp.content[0], "text", "").strip()
+                    return RawCompletion(
+                        text=text,
+                        prompt_tokens=getattr(resp.usage, "input_tokens", 0),
+                        completion_tokens=getattr(resp.usage, "output_tokens", 0),
+                    )
+
+                raw = complete_with_cache_and_cost(
+                    _call,
+                    key,
+                    cache=self._cache,
+                    cost_ctx=self._cost_ctx,
+                    estimate=lambda sys=system, usr=user_content, max_tokens=self._max_tokens: (  # type: ignore[misc]
+                        estimate_prompt_tokens(sys, usr),
+                        max_tokens,
+                    ),
+                )
+            else:
+                response = self._client.messages.create(
+                    model=self._model,
+                    max_tokens=self._max_tokens,
+                    system=system,
+                    messages=[{"role": "user", "content": user_content}],
+                )
+                raw = getattr(response.content[0], "text", "").strip()
+
             try:
                 return _parse_verdict(raw)
             except ValueError as e:
@@ -250,6 +294,8 @@ class OpenAIJudge:
         self,
         model: str = DEFAULT_OPENAI_MODEL,
         max_tokens: int = 256,
+        cache: Any = None,
+        cost_ctx: Any = None,
     ):
         load_dotenv_if_present()
         api_key = os.environ.get("OPENAI_API_KEY")
@@ -269,6 +315,8 @@ class OpenAIJudge:
         self._client = _openai.OpenAI(api_key=api_key)
         self._model = model
         self._max_tokens = max_tokens
+        self._cache = cache
+        self._cost_ctx = cost_ctx
         self.calls: int = 0
         self.abstentions: int = 0
 
@@ -289,16 +337,61 @@ class OpenAIJudge:
                 if attempt > 0
                 else ""
             )
-            response = self._client.chat.completions.create(
-                model=self._model,
-                max_tokens=self._max_tokens,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user_content},
-                ],
-            )
-            content = response.choices[0].message.content
-            raw = (content or "").strip()
+
+            if self._cache is not None and self._cost_ctx is not None:
+                from wikilens.cache import (
+                    RawCompletion,
+                    complete_with_cache_and_cost,
+                    estimate_prompt_tokens,
+                    make_key,
+                )
+
+                key = make_key(
+                    family="contradict", model=self._model, system=system, user=user_content
+                )
+
+                def _call(
+                    client=self._client, model=self._model, max_tokens=self._max_tokens,
+                    sys=system, usr=user_content,
+                ):
+                    resp = client.chat.completions.create(
+                        model=model, max_tokens=max_tokens,
+                        messages=[
+                            {"role": "system", "content": sys},
+                            {"role": "user", "content": usr},
+                        ],
+                    )
+                    content = resp.choices[0].message.content
+                    text = (content or "").strip()
+                    usage = resp.usage
+                    return RawCompletion(
+                        text=text,
+                        prompt_tokens=getattr(usage, "prompt_tokens", 0),
+                        completion_tokens=getattr(usage, "completion_tokens", 0),
+                    )
+
+                raw = complete_with_cache_and_cost(
+                    _call,
+                    key,
+                    cache=self._cache,
+                    cost_ctx=self._cost_ctx,
+                    estimate=lambda sys=system, usr=user_content, max_tokens=self._max_tokens: (  # type: ignore[misc]
+                        estimate_prompt_tokens(sys, usr),
+                        max_tokens,
+                    ),
+                )
+            else:
+                response = self._client.chat.completions.create(
+                    model=self._model,
+                    max_tokens=self._max_tokens,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": user_content},
+                    ],
+                )
+                content = response.choices[0].message.content
+                raw = (content or "").strip()
+
             try:
                 return _parse_verdict(raw)
             except ValueError as e:

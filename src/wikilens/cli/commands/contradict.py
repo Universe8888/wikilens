@@ -50,6 +50,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--json", action="store_true",
         help="Emit JSON instead of markdown (schema_version: 1).",
     )
+
+    from wikilens.cli._common import add_cost_cache_args
+
+    add_cost_cache_args(p)
     p.set_defaults(func=run)
 
 
@@ -90,32 +94,46 @@ def run(args: argparse.Namespace) -> int:
         return 2
 
     from wikilens.backends import resolve_backend
+    from wikilens.cli._common import open_cost_cache
 
-    judge, err = resolve_backend("contradict", args.judge, model=getattr(args, "model", None))
-    if err is not None:
-        return err
+    cache, cost_ctx = open_cost_cache(args, db_dir=args.db)
 
-    pairs = generate_candidate_pairs(store, embedder=embedder, top_k=args.top_k)
-    judged_pairs = pairs[: args.sample] if args.sample is not None and args.sample >= 0 else pairs
+    try:
+        judge, err = resolve_backend(
+            "contradict", args.judge,
+            model=getattr(args, "model", None), cache=cache, cost_ctx=cost_ctx,
+        )
+        if err is not None:
+            return err
 
-    findings: list[Finding] = []
-    for p in judged_pairs:
-        verdict = judge.score_pair(p.a.text, p.b.text)
-        if verdict.verdict and verdict.score >= args.min_score:
-            findings.append(Finding(pair=p, verdict=verdict))
+        pairs = generate_candidate_pairs(store, embedder=embedder, top_k=args.top_k)
+        judged_pairs = (
+            pairs[: args.sample] if args.sample is not None and args.sample >= 0 else pairs
+        )
 
-    report = ContradictReport(
-        vault_root=str(args.vault_path),
-        chunks_scanned=row_count,
-        candidates=len(pairs),
-        judged=len(judged_pairs),
-        judge_name=judge.name,
-        findings=tuple(findings),
-    )
+        findings: list[Finding] = []
+        for p in judged_pairs:
+            verdict = judge.score_pair(p.a.text, p.b.text)
+            if verdict.verdict and verdict.score >= args.min_score:
+                findings.append(Finding(pair=p, verdict=verdict))
 
-    if args.json:
-        sys.stdout.write(format_json(report, only=only_tuple))  # type: ignore[arg-type]
-    else:
-        sys.stdout.write(format_markdown(report, only=only_tuple))  # type: ignore[arg-type]
+        report = ContradictReport(
+            vault_root=str(args.vault_path),
+            chunks_scanned=row_count,
+            candidates=len(pairs),
+            judged=len(judged_pairs),
+            judge_name=judge.name,
+            findings=tuple(findings),
+        )
 
-    return 1 if report.total_findings > 0 else 0
+        if args.json:
+            sys.stdout.write(format_json(report, only=only_tuple))  # type: ignore[arg-type]
+        else:
+            sys.stdout.write(format_markdown(report, only=only_tuple))  # type: ignore[arg-type]
+
+        if cost_ctx.calls > 0 or cost_ctx.cached_calls > 0:
+            print(cost_ctx.footer(), file=sys.stderr)
+
+        return 1 if report.total_findings > 0 else 0
+    finally:
+        cache.close()

@@ -59,6 +59,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--json", action="store_true",
         help="Emit JSON report instead of markdown (schema_version: 1).",
     )
+
+    from wikilens.cli._common import add_cost_cache_args
+
+    add_cost_cache_args(p)
     p.set_defaults(func=run)
 
 
@@ -69,9 +73,16 @@ def run(args: argparse.Namespace) -> int:
     db_path = getattr(args, "db", DEFAULT_DB_PATH)
 
     from wikilens.backends import resolve_backend
+    from wikilens.cli._common import open_cost_cache
 
-    judge, err = resolve_backend("concepts", args.judge, model=getattr(args, "model", None))
+    cache, cost_ctx = open_cost_cache(args, db_dir=db_path)
+
+    judge, err = resolve_backend(
+        "concepts", args.judge, model=getattr(args, "model", None),
+        cache=cache, cost_ctx=cost_ctx,
+    )
     if err is not None:
+        cache.close()
         return err
 
     try:
@@ -120,4 +131,8 @@ def run(args: argparse.Namespace) -> int:
                 print(f"**Notes:** {', '.join(f.supporting_notes)}")
                 print(f"**Term frequency in cluster:** {f.term_freq_in_cluster:.0%}\n")
 
+    if cost_ctx.calls > 0 or cost_ctx.cached_calls > 0:
+        print(cost_ctx.footer(), file=sys.stderr)
+
+    cache.close()
     return 1 if findings else 0

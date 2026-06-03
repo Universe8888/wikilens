@@ -215,6 +215,8 @@ def _make_claude_generator(responses: list[str]):
         gen._client = mock_client
         gen._model = "claude-sonnet-4-6"
         gen._max_tokens = 1024
+        gen._cache = None
+        gen._cost_ctx = None
         gen.calls = 0
         gen.abstentions = 0
         return gen

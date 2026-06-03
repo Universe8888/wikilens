@@ -59,6 +59,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "--json", action="store_true",
         help="Emit JSON instead of markdown (schema_version: 1).",
     )
+
+    from wikilens.cli._common import add_cost_cache_args
+
+    add_cost_cache_args(p)
     p.set_defaults(func=run)
 
 
@@ -80,39 +84,51 @@ def run(args: argparse.Namespace) -> int:
         return 2
 
     from wikilens.backends import resolve_backend
+    from wikilens.cli._common import open_cost_cache
 
-    generator, err = resolve_backend("gap", args.judge, model=getattr(args, "model", None))
-    if err is not None:
-        return err
+    cache, cost_ctx = open_cost_cache(args, db_dir=args.db)
 
-    clusters, findings = generate_gaps(
-        store,
-        generator,
-        k=args.k,
-        seed=args.seed,
-        min_cluster_size=args.min_cluster_size,
-        max_clusters=args.max_clusters,
-        top_gaps_per_cluster=args.top_gaps_per_cluster,
-        sample=args.sample,
-    )
-    clusters_processed = (
-        min(args.sample, len(clusters))
-        if (args.sample is not None and args.sample >= 0)
-        else len(clusters)
-    )
+    try:
+        generator, err = resolve_backend(
+            "gap", args.judge, model=getattr(args, "model", None),
+            cache=cache, cost_ctx=cost_ctx,
+        )
+        if err is not None:
+            return err
 
-    report = GapReport(
-        vault_root=str(args.vault_path),
-        chunks_scanned=row_count,
-        clusters=tuple(clusters),
-        clusters_processed=clusters_processed,
-        findings=tuple(findings),
-        generator_name=generator.name,
-    )
+        clusters, findings = generate_gaps(
+            store,
+            generator,
+            k=args.k,
+            seed=args.seed,
+            min_cluster_size=args.min_cluster_size,
+            max_clusters=args.max_clusters,
+            top_gaps_per_cluster=args.top_gaps_per_cluster,
+            sample=args.sample,
+        )
+        clusters_processed = (
+            min(args.sample, len(clusters))
+            if (args.sample is not None and args.sample >= 0)
+            else len(clusters)
+        )
 
-    if args.json:
-        sys.stdout.write(format_json(report))
-    else:
-        sys.stdout.write(format_markdown(report))
+        report = GapReport(
+            vault_root=str(args.vault_path),
+            chunks_scanned=row_count,
+            clusters=tuple(clusters),
+            clusters_processed=clusters_processed,
+            findings=tuple(findings),
+            generator_name=generator.name,
+        )
 
-    return 1 if report.total_findings > 0 else 0
+        if args.json:
+            sys.stdout.write(format_json(report))
+        else:
+            sys.stdout.write(format_markdown(report))
+
+        if cost_ctx.calls > 0 or cost_ctx.cached_calls > 0:
+            print(cost_ctx.footer(), file=sys.stderr)
+
+        return 1 if report.total_findings > 0 else 0
+    finally:
+        cache.close()

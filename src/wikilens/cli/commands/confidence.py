@@ -60,6 +60,10 @@ def register(subparsers: argparse._SubParsersAction) -> None:
         "-v", "--verbose", action="store_true",
         help="Print progress to stderr.",
     )
+
+    from wikilens.cli._common import add_cost_cache_args
+
+    add_cost_cache_args(p)
     p.set_defaults(func=run)
 
 
@@ -70,9 +74,16 @@ def run(args: argparse.Namespace) -> int:
     vault_path = str(args.vault_path.resolve())
 
     from wikilens.backends import resolve_backend
+    from wikilens.cli._common import open_cost_cache
 
-    judge, err = resolve_backend("confidence", args.judge, model=getattr(args, "model", None))
+    cache, cost_ctx = open_cost_cache(args, db_dir=vault_path)
+
+    judge, err = resolve_backend(
+        "confidence", args.judge, model=getattr(args, "model", None),
+        cache=cache, cost_ctx=cost_ctx,
+    )
     if err is not None:
+        cache.close()
         return err
 
     sample: int | None = getattr(args, "sample", None)
@@ -101,4 +112,8 @@ def run(args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(format_markdown(report))
 
+    if cost_ctx.calls > 0 or cost_ctx.cached_calls > 0:
+        print(cost_ctx.footer(), file=sys.stderr)
+
+    cache.close()
     return 1 if report.has_findings else 0

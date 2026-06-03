@@ -30,6 +30,85 @@ Honest numbers across the project's eval suites. Every run is reproducible from 
 
 Each harness **appends** a timestamped section below; prior runs are preserved so regressions are visible side-by-side.
 
+## 2026-06-02 12:29:03 — P6 eval (16f5d44)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).
+- Drafter: `mock`. Judge: `mock`.
+- Judged: 10. Skipped: 0.
+- Wall clock: 16.9s.
+
+Pass rate (all 4 axes >= 4): 10/10 = 1.00
+Skip / external-research rate: 0/10 = 0.00
+Attribution rate (automated): 1.00  (target >= 0.9)
+
+| gap_id | faith | cov | attr_q | struct | pass |
+|--------|-------|-----|--------|--------|------|
+| calvin-cycle                        | 4 | 4 | 4 | 4 | ✓ |
+| async-await-python-web              | 4 | 4 | 4 | 4 | ✓ |
+| peace-of-westphalia-terms           | 4 | 4 | 4 | 4 | ✓ |
+| photosystem-mechanisms              | 4 | 4 | 4 | 4 | ✓ |
+| spanish-dutch-1648                  | 4 | 4 | 4 | 4 | ✓ |
+| cast-iron-seasoning                 | 4 | 4 | 4 | 4 | ✓ |
+| reducing-sugars-definition          | 4 | 4 | 4 | 4 | ✓ |
+| django-database-migrations          | 4 | 4 | 4 | 4 | ✓ |
+| wsgi-vs-asgi                        | 4 | 4 | 4 | 4 | ✓ |
+| fond-and-deglazing                  | 4 | 4 | 4 | 4 | ✓ |
+
+| **mean** | 4.0 | 4.0 | 4.0 | 4.0 | — |
+
+## 2026-06-02 12:28:19 — P5 eval (16f5d44)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (57 chunks, 7 clusters).
+- Generator: `mock`. Gap proposals: 7. Gold gaps: 10.
+- Matcher: `substring` (threshold ≥ 4/5).
+- Wall clock: 2.1s.
+
+Cluster-stage recall: 0/10 = 0.00
+
+| Stage        | TP | FP | FN | Precision | Recall | F1   |
+|--------------|----|----|----|-----------|--------|------|
+| matcher      |  0 |  7 | 10 |      0.00 |   0.00 | 0.00 |
+
+## 2026-06-02 12:27:30 — P4 eval (16f5d44)
+
+- Vault: `C:/Projects2026/wikilens/fixtures/contradictions_vault` (48 chunks, 202 candidate pairs).
+- Judge: `mock`. Labeled pairs judged: 0.
+- Wall clock: 2.8s.
+
+| Class    | TP | FP | FN | Precision | Recall | F1   |
+|----------|----|----|----|-----------|--------|------|
+| factual  |  0 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+| temporal |  0 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+| overall  |  0 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+
+## 2026-06-02 12:27:05 — P3 eval (16f5d44)
+
+- Vault: `fixtures/audit_vault` (16 notes).
+- Findings: 19 across four defect classes.
+- Detectors: pure functions over the in-memory link graph, no models.
+
+| Class    | TP | FP | FN | Precision | Recall | F1   |
+|----------|----|----|----|-----------|--------|------|
+| broken   |  4 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+| one_way  |  8 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+| orphans  |  6 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+| shadowed |  1 |  0 |  0 |      1.00 |   1.00 | 1.00 |
+
+## 2026-06-02 12:26:48 — P2 eval (16f5d44)
+
+- Corpus: 152 chunks across the sample vault.
+- Eval: 20 hand-written queries, mixed easy/medium/hard.
+- Hardware: developer laptop, CPU-only (no GPU).
+
+| Mode | Hit@5 | Recall@5 | Easy | Medium | Hard | p50 (ms) | p95 (ms) | mean (ms) |
+|------|-------|----------|------|--------|------|----------|----------|-----------|
+| `dense` | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 21 | 24 | 119 |
+| `bm25` | 1.00 | 0.97 | 1.00 | 1.00 | 1.00 | 6 | 6 | 7 |
+| `hybrid` | 1.00 | 0.97 | 1.00 | 1.00 | 1.00 | 43 | 49 | 43 |
+| `rerank` | 1.00 | 0.97 | 1.00 | 1.00 | 1.00 | 1473 | 1775 | 1550 |
+
+Eval set: 20 queries.
+
 ## 2026-05-01 18:27:23 — P6 eval (0eab57a)
 
 - Vault: `C:/Projects2026/wikilens/fixtures/gaps_vault` (10 gaps evaluated).

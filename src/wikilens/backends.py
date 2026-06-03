@@ -8,7 +8,11 @@ are defined exactly once here.
 from __future__ import annotations
 
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from wikilens.cache import NullCache, VerdictCache
+    from wikilens.cost import CostContext
 
 DEFAULT_OPENAI_MODEL = "gpt-4o"
 DEFAULT_CLAUDE_MODEL = "claude-sonnet-4-6"
@@ -52,11 +56,17 @@ def resolve_backend(
     judge_kind: str,
     *,
     model: str | None = None,
+    cache: VerdictCache | NullCache | None = None,
+    cost_ctx: CostContext | None = None,
 ) -> tuple[Any, int | None]:
     """Resolve and instantiate the correct backend for a CLI command.
 
     Returns (backend_instance, None) on success, or (None, exit_code) on failure.
     The exit_code is always 2 (bad input / config error).
+
+    ``cache`` and ``cost_ctx`` are threaded into networked backends only.
+    Mock backends (``judge_kind == "none"``) never receive them — structurally
+    guaranteeing zero egress and zero cost accounting on the ``--judge none`` path.
     """
     registry = _AGENT_REGISTRY.get(command)
     if registry is None:
@@ -93,7 +103,7 @@ def resolve_backend(
 
         mod = importlib.import_module(module_path)
         cls = getattr(mod, class_name)
-        return cls(model=effective_model), None
+        return cls(model=effective_model, cache=cache, cost_ctx=cost_ctx), None
     except (OSError, ImportError) as e:
         print(f"wikilens {command}: {e}", file=sys.stderr)
         return None, 2
