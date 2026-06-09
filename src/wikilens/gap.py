@@ -11,8 +11,6 @@ stateless and model-agnostic.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-
 import numpy as np
 
 from wikilens.clustering import ChunkPoint, Cluster, cluster_chunks, default_k
@@ -60,8 +58,16 @@ def generate_gaps(
     max_clusters: int = DEFAULT_MAX_CLUSTERS,
     top_gaps_per_cluster: int = DEFAULT_TOP_GAPS_PER_CLUSTER,
     sample: int | None = None,
+    workers: int = 1,
 ) -> tuple[list[Cluster], list[GapFinding]]:
-    """End-to-end pipeline: full-table scan → cluster → per-cluster generate."""
+    """End-to-end pipeline: full-table scan → cluster → per-cluster generate.
+
+    ``workers`` (M6) sets the number of concurrent ``propose_gaps`` calls; the
+    per-cluster results are collected in cluster order then flattened, so the
+    findings list is identical for any worker count (``workers=1`` is serial).
+    """
+    from wikilens.executor import parallel_map
+
     points = _iter_all_points(store)
     clusters = cluster_chunks(
         points,
@@ -73,16 +79,23 @@ def generate_gaps(
     if not clusters:
         return clusters, []
 
-    to_process: Iterable[Cluster] = clusters
+    to_process: list[Cluster] = list(clusters)
     if sample is not None and sample >= 0:
-        to_process = list(clusters)[:sample]
+        to_process = to_process[:sample]
 
-    findings: list[GapFinding] = []
-    for cluster in to_process:
-        candidates = generator.propose_gaps(
+    # Parallelize the LLM call per cluster; parallel_map preserves cluster
+    # order so the flattened findings are deterministic regardless of workers.
+    per_cluster_candidates = parallel_map(
+        lambda cluster: generator.propose_gaps(
             _cluster_chunks_as_input(cluster),
             top_k=top_gaps_per_cluster,
-        )
+        ),
+        to_process,
+        max_workers=workers,
+    )
+
+    findings: list[GapFinding] = []
+    for cluster, candidates in zip(to_process, per_cluster_candidates, strict=True):
         for candidate in candidates:
             findings.append(
                 GapFinding(

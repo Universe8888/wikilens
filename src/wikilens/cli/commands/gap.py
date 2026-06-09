@@ -84,7 +84,7 @@ def run(args: argparse.Namespace) -> int:
         return 2
 
     from wikilens.backends import resolve_backend
-    from wikilens.cli._common import open_cost_cache
+    from wikilens.cli._common import open_cost_cache, resolve_workers
 
     cache, cost_ctx = open_cost_cache(args, db_dir=args.db)
 
@@ -105,6 +105,7 @@ def run(args: argparse.Namespace) -> int:
             max_clusters=args.max_clusters,
             top_gaps_per_cluster=args.top_gaps_per_cluster,
             sample=args.sample,
+            workers=resolve_workers(args, args.judge),
         )
         clusters_processed = (
             min(args.sample, len(clusters))

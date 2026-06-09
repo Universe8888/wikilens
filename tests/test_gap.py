@@ -239,3 +239,71 @@ def test_cluster_dataclass_size_property():
     pts = (_point("a", "a.md", [0.0, 0.0]), _point("b", "b.md", [0.0, 0.0]))
     c = Cluster(cluster_id=1, points=pts)
     assert c.size == 2
+
+
+# --------------------------------------------------------------------------- #
+# M6 Phase 4d: parallel per-cluster generation                                #
+# --------------------------------------------------------------------------- #
+
+
+class _ContentGenerator:
+    """Content-deterministic generator: candidate derives from cluster text.
+
+    Verdict/output depends only on the cluster's chunk_ids, never on call
+    order, so workers=1 and workers=8 must yield identical findings.
+    """
+
+    name = "content-gen"
+
+    def propose_gaps(self, chunks, top_k):  # type: ignore[no-untyped-def]
+        first_id = chunks[0][0] if chunks else "none"
+        # kebab-case the id (chunk_ids use underscores; titles must not).
+        slug = first_id.replace("_", "-")
+        return [
+            GapCandidate(
+                gap_question=f"q-{first_id}?",
+                suggested_note_title=f"title-{slug}",
+                rationale="r",
+            )
+        ]
+
+
+def _separable_rows(n_blobs: int) -> list[dict]:
+    rows = []
+    for b in range(n_blobs):
+        for i in range(3):
+            rows.append({
+                "chunk_id": f"blob{b}_{i}",
+                "source_rel": f"b{b}.md",
+                "text": f"blob {b} content {i}",
+                "vector": [b * 10.0 + 0.01 * i, b * 10.0],
+            })
+    return rows
+
+
+def test_generate_gaps_parallel_matches_serial():
+    rows = _separable_rows(6)
+    serial_clusters, serial = generate_gaps(
+        _fake_store(rows), _ContentGenerator(), k=6, min_cluster_size=3,
+        top_gaps_per_cluster=1, workers=1,
+    )
+    par_clusters, parallel = generate_gaps(
+        _fake_store(rows), _ContentGenerator(), k=6, min_cluster_size=3,
+        top_gaps_per_cluster=1, workers=8,
+    )
+    def sig(fs):
+        return [(f.cluster_id, f.candidate.suggested_note_title) for f in fs]
+
+    # Identical findings, identical order, regardless of worker count.
+    assert sig(serial) == sig(parallel)
+    assert len(serial) == 6
+
+
+def test_generate_gaps_workers_one_is_default():
+    # Omitting workers must behave exactly like the pre-M6 serial path.
+    rows = _separable_rows(3)
+    _, findings = generate_gaps(
+        _fake_store(rows), _ContentGenerator(), k=3, min_cluster_size=3,
+        top_gaps_per_cluster=1,
+    )
+    assert len(findings) == 3
