@@ -243,6 +243,7 @@ class OpenAIConfidenceJudge:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -280,6 +281,7 @@ class OpenAIConfidenceJudge:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.chat.completions.create(
@@ -364,6 +366,7 @@ class ClaudeConfidenceJudge:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -395,6 +398,7 @@ class ClaudeConfidenceJudge:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.messages.create(

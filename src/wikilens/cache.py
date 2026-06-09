@@ -201,9 +201,11 @@ class VerdictCache:
 
     def get(self, key: CacheKey) -> str | None:
         """Return the cached completion text, or ``None`` on a miss."""
-        if self._degraded or self._conn is None:
+        if self._degraded:
             return None
         with self._lock:
+            if self._conn is None:
+                return None
             row = self._conn.execute(
                 "SELECT completion FROM entries WHERE key = ?", (key.digest(),)
             ).fetchone()
@@ -215,9 +217,11 @@ class VerdictCache:
         ``family``/``model``/``created`` are stored for observability and future
         selective invalidation; only ``completion`` is read back by ``get``.
         """
-        if self._degraded or self._conn is None:
+        if self._degraded:
             return
         with self._lock:
+            if self._conn is None:
+                return
             self._conn.execute(
                 "INSERT OR REPLACE INTO entries "
                 "(key, family, model, completion, created) VALUES (?, ?, ?, ?, ?)",
@@ -250,6 +254,17 @@ def open_cache(no_cache: bool, db_dir: str | Path) -> VerdictCache | NullCache:
     return VerdictCache(db_path)
 
 
+def is_valid_json(text: str) -> bool:
+    """Return True if ``text`` is parseable JSON — a cache-write guard."""
+    import json as _json
+
+    try:
+        _json.loads(text)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
 def estimate_prompt_tokens(*segments: str, overhead: int = 48) -> int:
     """Return a conservative upper bound on prompt tokens for budget gating."""
     if not segments:
@@ -267,6 +282,7 @@ def complete_with_cache_and_cost(
     cost_ctx: CostContext,
     estimate: Callable[[], tuple[int, int]] | None = None,
     retry: Callable[[Callable[[], RawCompletion]], RawCompletion] | None = None,
+    validate: Callable[[str], bool] | None = None,
 ) -> str:
     """Run ``fn`` through the verdict cache, budget gate, and cost accounting.
 
@@ -284,6 +300,11 @@ def complete_with_cache_and_cost(
     ``lambda f: f()``) to override the schedule or disable backoff. The cache
     check and budget gate run exactly once, outside the retry, so retries never
     re-reserve budget or double-count.
+
+    ``validate`` (optional) checks the raw completion text before caching.
+    If it returns ``False`` the result is still returned (for the caller's
+    parse-retry loop) but is NOT written to the cache, so a subsequent warm
+    run can re-attempt the call instead of replaying a guaranteed failure.
     """
     hit = cache.get(key)
     if hit is not None:
@@ -322,5 +343,6 @@ def complete_with_cache_and_cost(
         completion_tokens=rc.completion_tokens,
         reserved_usd=reserved_usd,
     )
-    cache.put(key, rc.text)
+    if validate is None or validate(rc.text):
+        cache.put(key, rc.text)
     return rc.text

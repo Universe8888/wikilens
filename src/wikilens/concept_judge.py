@@ -208,6 +208,7 @@ class OpenAIConceptJudge:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -244,6 +245,7 @@ class OpenAIConceptJudge:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.chat.completions.create(
@@ -327,6 +329,7 @@ class ClaudeConceptJudge:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -358,6 +361,7 @@ class ClaudeConceptJudge:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.messages.create(

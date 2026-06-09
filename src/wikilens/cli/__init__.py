@@ -76,6 +76,13 @@ def main(argv: list[str] | None = None) -> int:
         if isinstance(exc, BudgetExceeded):
             print("wikilens: budget cap exceeded, aborting.", file=sys.stderr)
             return 2
+        status = getattr(exc, "status_code", None)
+        if isinstance(status, int) and status >= 400:
+            print(
+                f"wikilens: API error (HTTP {status}: {type(exc).__name__})",
+                file=sys.stderr,
+            )
+            return 3
         raise
 
 

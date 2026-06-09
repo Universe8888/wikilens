@@ -1,8 +1,8 @@
-"""Output formatters for `wikilens drift` (P8).
+"""Output formatters + judge loop for `wikilens drift` (P8/M6).
 
-Mirrors contradict_format.py: pipeline stays pure, presentation lives here.
-The JSON schema is part of the public interface — bump JSON_SCHEMA_VERSION
-on any breaking change.
+Mirrors contradict_format.py: pipeline stays pure, presentation and the
+order-preserving judge loop live here.  The JSON schema is part of the public
+interface — bump JSON_SCHEMA_VERSION on any breaking change.
 """
 
 from __future__ import annotations
@@ -10,8 +10,12 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
-from wikilens.drift import DriftEvent, DriftReport
+from wikilens.drift import CandidatePair, DriftEvent, DriftReport
+
+if TYPE_CHECKING:
+    from wikilens.drift_judge import DriftJudge
 
 JSON_SCHEMA_VERSION = 1
 
@@ -21,6 +25,52 @@ class DriftFinding:
     """A DriftEvent packaged for output (thin wrapper for report assembly)."""
 
     event: DriftEvent
+
+
+def judge_drift_pairs(
+    pairs: list[CandidatePair],
+    judge: DriftJudge,
+    *,
+    min_score: int,
+    workers: int = 1,
+) -> tuple[list[DriftEvent], int]:
+    """Judge candidate drift pairs; return (findings, pairs_judged) (M6).
+
+    Runs ``judge.score_pair`` over ``pairs`` with up to ``workers`` concurrent
+    calls (``workers=1`` is serial), preserving input order, then keeps the
+    pairs whose verdict is drift and clears ``min_score``. Order-preserving so
+    the report's findings list is byte-identical for any worker count.
+    """
+    from wikilens.executor import parallel_map
+
+    verdicts = parallel_map(
+        lambda pair: judge.score_pair(
+            pair.note_rel,
+            pair.before_claim,
+            str(pair.before.timestamp),
+            pair.after_claim,
+            str(pair.after.timestamp),
+        ),
+        pairs,
+        max_workers=workers,
+    )
+
+    findings: list[DriftEvent] = []
+    for pair, verdict in zip(pairs, verdicts, strict=True):
+        if verdict.drift and verdict.score >= min_score:
+            findings.append(
+                DriftEvent(
+                    note_rel=pair.note_rel,
+                    before=pair.before,
+                    after=pair.after,
+                    before_claim=pair.before_claim,
+                    after_claim=pair.after_claim,
+                    drift_type=verdict.type,
+                    score=verdict.score,
+                    reasoning=verdict.reasoning,
+                )
+            )
+    return findings, len(pairs)
 
 
 def _ts_to_iso(ts: int) -> str:

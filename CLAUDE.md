@@ -11,6 +11,11 @@
 - Keep files under 500 lines
 - Validate input at system boundaries
 
+## Agent Claims Require Spot-Check
+Never include an agent/workflow finding in a plan or commit without reading the cited file:line yourself. Agent reports can overclaim (flags user-invisible counters as "ACTIVE RISK") or underclaim (misses a thread-safety prerequisite entirely). Cite the verification in your plan rationale.
+
+**Verify-by:** next plan references an agent finding → the plan doc contains "verified at <file>:<line>" for each claim adopted.
+
 ## Agent Comms (SendMessage-First Coordination)
 
 Named agents coordinate via `SendMessage`, not polling or shared state.

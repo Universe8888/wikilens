@@ -42,7 +42,6 @@ _RETRYABLE_NAMES = frozenset(
         "APITimeoutError",
         "InternalServerError",
         "ServiceUnavailableError",
-        "APIStatusError",
         "Timeout",
         "ConnectionError",
     }

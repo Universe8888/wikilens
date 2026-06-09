@@ -284,6 +284,7 @@ class OpenAIDriftJudge:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -320,6 +321,7 @@ class OpenAIDriftJudge:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.chat.completions.create(
@@ -423,6 +425,7 @@ class ClaudeDriftJudge:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -454,6 +457,7 @@ class ClaudeDriftJudge:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.messages.create(

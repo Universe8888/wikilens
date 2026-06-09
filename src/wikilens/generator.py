@@ -260,6 +260,7 @@ class ClaudeGenerator:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -291,6 +292,7 @@ class ClaudeGenerator:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.messages.create(
@@ -384,6 +386,7 @@ class OpenAIGenerator:
                     RawCompletion,
                     complete_with_cache_and_cost,
                     estimate_prompt_tokens,
+                    is_valid_json,
                     make_key,
                 )
 
@@ -420,6 +423,7 @@ class OpenAIGenerator:
                         estimate_prompt_tokens(sys, usr),
                         max_tokens,
                     ),
+                    validate=is_valid_json,
                 )
             else:
                 response = self._client.chat.completions.create(

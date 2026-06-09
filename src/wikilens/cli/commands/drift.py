@@ -160,7 +160,7 @@ def run(args: argparse.Namespace) -> int:
     report.pairs_filtered = report.pairs_considered - len(pairs_to_judge)
 
     from wikilens.cli._common import resolve_workers
-    from wikilens.drift import judge_drift_pairs
+    from wikilens.drift_format import judge_drift_pairs
 
     findings, judged = judge_drift_pairs(
         pairs_to_judge,

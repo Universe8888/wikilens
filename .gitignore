@@ -70,6 +70,10 @@ Thumbs.db
 *.log
 logs/
 
+# Session logs & gotchas (local dev artifacts)
+gotchas.md
+docs/sessions/
+
 # Test & coverage
 .pytest_cache/
 .coverage

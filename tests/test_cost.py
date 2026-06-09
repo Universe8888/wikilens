@@ -147,24 +147,12 @@ class TestCostContextRecording:
 
 class TestBudgetGate:
     """The invariant that matters most: abort BEFORE the egress that would
-    exceed budget. would_exceed()/check_before_call() are the pre-call gate;
-    record() is honest post-call accounting."""
+    exceed budget. check_before_call() is the pre-call gate; record() is
+    honest post-call accounting."""
 
     def test_no_max_cost_never_exceeds(self):
         ctx = CostContext(max_cost=None)
-        assert ctx.would_exceed(99999.0) is False
         ctx.check_before_call(99999.0)  # must not raise
-
-    def test_would_exceed_true_when_next_call_crosses_cap(self):
-        ctx = CostContext(max_cost=1.0)
-        ctx.usd = 0.9
-        assert ctx.would_exceed(0.2) is True
-        assert ctx.would_exceed(0.05) is False
-
-    def test_would_exceed_uses_committed_plus_next(self):
-        ctx = CostContext(max_cost=1.0)
-        assert ctx.would_exceed(1.5) is True
-        assert ctx.would_exceed(1.0) is False  # exactly at cap is allowed
 
     def test_check_before_call_raises_before_egress(self):
         import pytest

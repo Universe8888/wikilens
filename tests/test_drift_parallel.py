@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import threading
 
-from wikilens.drift import CandidatePair, Revision, judge_drift_pairs
+from wikilens.drift import CandidatePair, Revision
+from wikilens.drift_format import judge_drift_pairs
 from wikilens.drift_judge import DriftVerdict
 
 

@@ -8,11 +8,11 @@ Design notes:
 - ``estimate_usd`` is pure: ``PRICES.get(model, ZERO_PRICE)``. An unknown
   model never crashes — it estimates $0 but emits a ONE-TIME stderr
   warning so a silent $0 is never invisible.
-- The budget gate is PRE-EGRESS: callers call ``would_exceed`` /
-  ``check_before_call`` with the upcoming call's estimate and abort BEFORE
-  the network egress. ``record`` is honest POST-call accounting against the
-  returned ``usage``. This satisfies "abort before exceeding budget" — the
-  call that would cross the cap never executes.
+- The budget gate is PRE-EGRESS: callers call ``check_before_call`` with
+  the upcoming call's estimate and abort BEFORE the network egress.
+  ``record`` is honest POST-call accounting against the returned ``usage``.
+  This satisfies "abort before exceeding budget" — the call that would
+  cross the cap never executes.
 - ``BudgetExceeded`` is a leaf exception (subclass of ``Exception`` only):
   the CLI catches it at the command boundary and maps it to exit code 2,
   and it is NOT caught by any handler the CLI uses for findings.
@@ -173,19 +173,6 @@ class CostContext:
     _families: set[str] = field(default_factory=set)
     _reserved: float = 0.0
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
-
-    def would_exceed(self, next_estimate_usd: float = 0.0) -> bool:
-        """True if a cap is set and committed+reserved spend + next crosses it.
-
-        Exactly hitting the cap is allowed (``>`` not ``>=``). This is a
-        read-only probe; it accounts for outstanding reservations so it is
-        consistent with the value the locked gate would compute, but callers
-        that need the race-free guarantee must use ``check_before_call``.
-        """
-        if self.max_cost is None:
-            return False
-        with self._lock:
-            return self.usd + self._reserved + next_estimate_usd > self.max_cost
 
     def check_before_call(self, next_estimate_usd: float = 0.0) -> None:
         """Atomically reserve budget for the next call, or raise ``BudgetExceeded``.

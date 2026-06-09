@@ -85,6 +85,10 @@ or run `python -m wikilens.cli` while developing.
 
 ## Usage
 
+All LLM commands support `--workers N` for parallel execution, `--max-cost $`
+for a hard budget cap, and `--no-cache` to bypass the verdict cache. A warm
+re-run with an unchanged vault costs zero API calls (cached verdicts replay).
+
 ```bash
 # Build the index (full rebuild each run; incremental is deferred).
 wikilens ingest ./my-vault
@@ -128,9 +132,15 @@ wikilens answer ./my-vault --gaps gaps.json --judge none        # dry-run (no AP
 ```
 
 `contradict`, `gap`, and `answer` exit 0 when clean, 1 when findings / partial
-coverage reported. `answer` exits 2 on bad input or file collisions when
-`--write` is set. Set `OPENAI_API_KEY` (or `ANTHROPIC_API_KEY` for
-`--judge claude`) in your shell or in a `.env` file at the repo root.
+coverage reported, 2 on budget-exceeded or bad input. Set `OPENAI_API_KEY`
+(or `ANTHROPIC_API_KEY` for `--judge claude`) in your shell or `.env`.
+
+```bash
+# Parallelism and cost control (all LLM commands):
+wikilens contradict ./my-vault --judge openai --workers 8    # 8 concurrent calls
+wikilens gap ./my-vault --judge openai --max-cost 2.00       # hard $2 ceiling
+wikilens confidence ./my-vault --judge openai --no-cache     # bypass cache
+```
 
 ```bash
 # Drift — surface notes where beliefs shifted over the vault's git history.
