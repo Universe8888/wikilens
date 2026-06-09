@@ -8,6 +8,14 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **`--workers N` flag on all six LLM commands** (`contradict`, `gap`, `drift`, `concepts`, `confidence`, `answer`). Runs the per-item LLM calls concurrently over a bounded `ThreadPoolExecutor` (default 8; `1` = serial). I/O-bound work, so concurrency cuts wall-clock roughly linearly with worker count up to the API's rate limit. `--judge none` always runs serially (the mock makes no network calls).
+- **Exponential-backoff retry for transient API errors** (`wikilens/retry.py`). A 429 / 5xx / connection drop now retries with exponentially increasing, jittered delays instead of aborting the run. Terminal errors (budget cap, malformed JSON) are never retried.
+
+### Changed
+- **Budget cap (`--max-cost`) is now concurrency-safe.** `CostContext` uses a reserve-then-settle gate under a lock, so N concurrent calls can no longer race past the ceiling (previously a TOCTOU window). Output is byte-identical to serial runs for any worker count — the per-item loops collect results in input order and re-apply each command's existing sort.
+- **Verdict cache is thread-safe** — the shared sqlite connection is opened with `check_same_thread=False` and serialized under a lock, so worker threads can read/write it without `ProgrammingError`.
+
 ---
 
 ## [0.11.0] — 2026-05-03
