@@ -19,9 +19,12 @@ import re
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from wikilens.drift_judge import DriftJudge
 
 
 class _Embedder(Protocol):
@@ -106,6 +109,55 @@ class DriftReport:
     pairs_filtered: int = 0
     pairs_judged: int = 0
     findings: list[DriftEvent] = field(default_factory=list)
+
+
+def judge_drift_pairs(
+    pairs: list[CandidatePair],
+    judge: DriftJudge,
+    *,
+    min_score: int,
+    workers: int = 1,
+) -> tuple[list[DriftEvent], int]:
+    """Judge candidate drift pairs; return (findings, pairs_judged) (M6).
+
+    Runs ``judge.score_pair`` over ``pairs`` with up to ``workers`` concurrent
+    calls (``workers=1`` is serial), preserving input order, then keeps the
+    pairs whose verdict is drift and clears ``min_score``. Order-preserving so
+    the report's findings list is byte-identical for any worker count. Returns
+    the judged count alongside, so the caller sets ``report.pairs_judged``
+    without a per-iteration mutable counter (which a parallel loop can't share
+    safely).
+    """
+    from wikilens.executor import parallel_map
+
+    verdicts = parallel_map(
+        lambda pair: judge.score_pair(
+            pair.note_rel,
+            pair.before_claim,
+            str(pair.before.timestamp),
+            pair.after_claim,
+            str(pair.after.timestamp),
+        ),
+        pairs,
+        max_workers=workers,
+    )
+
+    findings: list[DriftEvent] = []
+    for pair, verdict in zip(pairs, verdicts, strict=True):
+        if verdict.drift and verdict.score >= min_score:
+            findings.append(
+                DriftEvent(
+                    note_rel=pair.note_rel,
+                    before=pair.before,
+                    after=pair.after,
+                    before_claim=pair.before_claim,
+                    after_claim=pair.after_claim,
+                    drift_type=verdict.type,
+                    score=verdict.score,
+                    reasoning=verdict.reasoning,
+                )
+            )
+    return findings, len(pairs)
 
 
 # ---------------------------------------------------------------------------

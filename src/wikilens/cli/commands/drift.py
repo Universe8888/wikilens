@@ -76,7 +76,6 @@ def run(args: argparse.Namespace) -> int:
     from wikilens.drift import (
         DEFAULT_ALIGN_THRESHOLD,
         DEFAULT_IDENTICAL_THRESHOLD,
-        DriftEvent,
         DriftReport,
         GitError,
         build_candidate_pairs,
@@ -84,7 +83,6 @@ def run(args: argparse.Namespace) -> int:
         walk_note_revisions,
     )
     from wikilens.drift_format import format_json, format_markdown
-    from wikilens.drift_judge import DriftVerdict
     from wikilens.embed import BGEEmbedder
 
     vault_path = args.vault_path.resolve()
@@ -161,30 +159,17 @@ def run(args: argparse.Namespace) -> int:
     )
     report.pairs_filtered = report.pairs_considered - len(pairs_to_judge)
 
-    for pair in pairs_to_judge:
-        before_date = str(pair.before.timestamp)
-        after_date = str(pair.after.timestamp)
-        verdict: DriftVerdict = judge.score_pair(
-            pair.note_rel,
-            pair.before_claim,
-            before_date,
-            pair.after_claim,
-            after_date,
-        )
-        report.pairs_judged += 1
-        if verdict.drift and verdict.score >= args.min_score:
-            report.findings.append(
-                DriftEvent(
-                    note_rel=pair.note_rel,
-                    before=pair.before,
-                    after=pair.after,
-                    before_claim=pair.before_claim,
-                    after_claim=pair.after_claim,
-                    drift_type=verdict.type,
-                    score=verdict.score,
-                    reasoning=verdict.reasoning,
-                )
-            )
+    from wikilens.cli._common import resolve_workers
+    from wikilens.drift import judge_drift_pairs
+
+    findings, judged = judge_drift_pairs(
+        pairs_to_judge,
+        judge,
+        min_score=args.min_score,
+        workers=resolve_workers(args, args.judge),
+    )
+    report.pairs_judged += judged
+    report.findings.extend(findings)
 
     if args.json:
         sys.stdout.write(format_json(report))
