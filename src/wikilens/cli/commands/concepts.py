@@ -85,6 +85,8 @@ def run(args: argparse.Namespace) -> int:
         cache.close()
         return err
 
+    from wikilens.cli._common import resolve_workers
+
     try:
         findings = detect_unnamed_concepts(
             db_path=db_path,
@@ -94,6 +96,7 @@ def run(args: argparse.Namespace) -> int:
             min_cluster_size=args.min_cluster_size,
             top_k=args.top_k,
             absence_threshold=args.absence_threshold,
+            workers=resolve_workers(args, args.judge),
         )
     except Exception as e:
         print(f"wikilens concepts: {e}", file=sys.stderr)

@@ -98,6 +98,8 @@ def run(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
 
+    from wikilens.cli._common import resolve_workers
+
     report = run_confidence(
         vault_path=vault_path,
         judge=judge,
@@ -105,6 +107,7 @@ def run(args: argparse.Namespace) -> int:
         sample=sample,
         only=only,
         min_confidence=min_confidence,
+        workers=resolve_workers(args, args.judge),
     )
 
     if args.json:

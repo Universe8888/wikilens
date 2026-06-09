@@ -121,6 +121,7 @@ def run_confidence(
     sample: int | None = None,
     only: str | None = None,
     min_confidence: float = 0.0,
+    workers: int = 1,
 ) -> ConfidenceReport:
     """Run the epistemic confidence pipeline over a vault.
 
@@ -162,12 +163,23 @@ def run_confidence(
     if sample is not None:
         records_to_judge = all_records[:sample]
 
+    # Parallelize the per-claim judge call (M6); parallel_map preserves input
+    # order and the result is sorted below, so output is identical for any
+    # worker count. Counters are folded serially after collection — a
+    # per-iteration += can't be shared safely across threads.
+    from wikilens.executor import parallel_map
+
+    verdicts = parallel_map(
+        lambda record: judge.classify(record.claim_text, record.context),
+        records_to_judge,
+        max_workers=workers,
+    )
+
     findings: list[ConfidenceFinding] = []
     judge_calls = 0
     judge_abstentions = 0
 
-    for record in records_to_judge:
-        verdict = judge.classify(record.claim_text, record.context)
+    for record, verdict in zip(records_to_judge, verdicts, strict=True):
         judge_calls += 1
         if verdict.confidence == 0.0 and verdict.level == 3:
             # Sentinel returned on exhausted retries

@@ -77,6 +77,7 @@ def detect_unnamed_concepts(
     min_cluster_size: int = 3,
     top_k: int = 10,
     absence_threshold: float = 0.20,
+    workers: int = 1,
 ) -> list[ConceptFinding]:
     """Full pipeline: scan → cluster → judge → filter → rank.
 
@@ -113,11 +114,20 @@ def detect_unnamed_concepts(
         min_cluster_size=min_cluster_size,
     )
 
-    findings: list[ConceptFinding] = []
-    for cluster in clusters:
-        cluster_pts = list(cluster.points)
-        proposal: ConceptProposal = judge.propose(cluster_pts)
+    # Parallelize the per-cluster judge call (M6); parallel_map preserves
+    # cluster order, and the result is sorted by confidence below, so output
+    # is identical for any worker count.
+    from wikilens.executor import parallel_map
 
+    cluster_point_lists = [list(cluster.points) for cluster in clusters]
+    proposals: list[ConceptProposal] = parallel_map(
+        judge.propose, cluster_point_lists, max_workers=workers
+    )
+
+    findings: list[ConceptFinding] = []
+    for cluster, cluster_pts, proposal in zip(
+        clusters, cluster_point_lists, proposals, strict=True
+    ):
         term_lower = proposal.proposed_term.lower()
         hits = sum(1 for p in cluster_pts if term_lower in p.text.lower())
         freq = hits / len(cluster_pts) if cluster_pts else 0.0
