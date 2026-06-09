@@ -247,6 +247,7 @@ def complete_with_cache_and_cost(
     cache: VerdictCache | NullCache,
     cost_ctx: CostContext,
     estimate: Callable[[], tuple[int, int]] | None = None,
+    retry: Callable[[Callable[[], RawCompletion]], RawCompletion] | None = None,
 ) -> str:
     """Run ``fn`` through the verdict cache, budget gate, and cost accounting.
 
@@ -256,6 +257,14 @@ def complete_with_cache_and_cost(
     failed call never permanently consumes budget. This keeps sequential runs
     accurate (no phantom-reservation creep) and concurrent runs cap-safe when a
     single ``cost_ctx`` is shared across worker threads.
+
+    ``retry`` (M6) wraps the network egress so the whole transient-retry
+    sequence runs inside the single reserve/settle bracket: a 429-then-success
+    counts as one live call, one reservation, one cache entry. It defaults to
+    ``wikilens.retry.with_backoff``; pass a custom wrapper (or a no-op
+    ``lambda f: f()``) to override the schedule or disable backoff. The cache
+    check and budget gate run exactly once, outside the retry, so retries never
+    re-reserve budget or double-count.
     """
     hit = cache.get(key)
     if hit is not None:
@@ -274,10 +283,16 @@ def complete_with_cache_and_cost(
         reserved_usd = _estimate_usd(key.model, prompt_est, completion_est)
         cost_ctx.check_before_call(reserved_usd)
 
+    if retry is None:
+        from wikilens.retry import with_backoff
+
+        retry = with_backoff
+
     try:
-        rc = fn()
+        rc = retry(fn)
     except BaseException:
-        # The call failed before producing usage; free its reservation so the
+        # The call failed (transient retries exhausted, or a non-retryable
+        # error) before producing usage; free its reservation so the
         # tentatively-held budget returns to the pool for other calls.
         cost_ctx.release(reserved_usd)
         raise

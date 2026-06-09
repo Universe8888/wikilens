@@ -482,6 +482,47 @@ class TestCompleteWithCacheAndCost:
                 complete_with_cache_and_cost(fn, key, cache=cache, cost_ctx=cost)
             assert cache.get(key) is None
 
+    def test_transient_fn_error_is_retried_then_settles_once(self, tmp_path: Path) -> None:
+        """A transient network error inside fn() is retried by the helper.
+
+        M6: the helper wraps fn() in with_backoff, so a 429-then-success
+        sequence yields one successful completion, one record() (not three),
+        and one cached entry — the reservation is settled exactly once.
+        """
+        from wikilens.retry import with_backoff
+
+        cost = FakeCostContext()
+        key = _key()
+        attempts = {"n": 0}
+
+        class _RateLimitError(Exception):
+            status_code = 429
+
+        def flaky() -> RawCompletion:
+            attempts["n"] += 1
+            if attempts["n"] < 3:
+                raise _RateLimitError("slow down")
+            return RawCompletion(text="finally", prompt_tokens=7, completion_tokens=2)
+
+        delays: list[float] = []
+        with VerdictCache(tmp_path / "c.sqlite3") as cache:
+            out = complete_with_cache_and_cost(
+                flaky,
+                key,
+                cache=cache,
+                cost_ctx=cost,
+                estimate=lambda: (10, 5),
+                retry=lambda f: with_backoff(
+                    f, sleep=delays.append, jitter=lambda d: d, base_delay=1.0
+                ),
+            )
+            assert out == "finally"
+            assert attempts["n"] == 3
+            assert delays == [1.0, 2.0]  # two backoffs before the 3rd attempt
+            assert len(cost.records) == 1  # settled once, not per-attempt
+            assert cost.releases == []  # success path never releases
+            assert cache.get(key) == "finally"
+
     def test_fn_failure_releases_reservation(self, tmp_path: Path) -> None:
         """If fn() raises, the reserved budget is released (M6 reserve-then-settle).
 
