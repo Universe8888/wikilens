@@ -248,12 +248,21 @@ def complete_with_cache_and_cost(
     cost_ctx: CostContext,
     estimate: Callable[[], tuple[int, int]] | None = None,
 ) -> str:
-    """Run ``fn`` through the verdict cache, budget gate, and cost accounting."""
+    """Run ``fn`` through the verdict cache, budget gate, and cost accounting.
+
+    Uses the reserve-then-settle budget gate (M6): ``check_before_call``
+    reserves ``reserved_usd`` under the cap, ``record`` settles it on success,
+    and ``release`` frees it if ``fn`` raises before producing usage — so a
+    failed call never permanently consumes budget. This keeps sequential runs
+    accurate (no phantom-reservation creep) and concurrent runs cap-safe when a
+    single ``cost_ctx`` is shared across worker threads.
+    """
     hit = cache.get(key)
     if hit is not None:
         cost_ctx.record_hit()
         return hit
 
+    reserved_usd = 0.0
     if estimate is not None:
         prompt_est, completion_est = estimate()
         prompt_est = int(prompt_est)
@@ -262,16 +271,22 @@ def complete_with_cache_and_cost(
             raise ValueError("token estimates must be non-negative")
         from wikilens.cost import estimate_usd as _estimate_usd
 
-        cost_ctx.check_before_call(
-            _estimate_usd(key.model, prompt_est, completion_est)
-        )
+        reserved_usd = _estimate_usd(key.model, prompt_est, completion_est)
+        cost_ctx.check_before_call(reserved_usd)
 
-    rc = fn()
+    try:
+        rc = fn()
+    except BaseException:
+        # The call failed before producing usage; free its reservation so the
+        # tentatively-held budget returns to the pool for other calls.
+        cost_ctx.release(reserved_usd)
+        raise
     cost_ctx.record(
         family=key.family,
         model=key.model,
         prompt_tokens=rc.prompt_tokens,
         completion_tokens=rc.completion_tokens,
+        reserved_usd=reserved_usd,
     )
     cache.put(key, rc.text)
     return rc.text

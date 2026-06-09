@@ -28,6 +28,7 @@ backends), so ``import wikilens.cli`` stays light.
 from __future__ import annotations
 
 import sys
+import threading
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -136,11 +137,31 @@ class BudgetExceeded(Exception):  # noqa: N818 — spec-mandated public name cau
 
 @dataclass
 class CostContext:
-    """Per-invocation token/$ accumulator + budget gate.
+    """Per-invocation token/$ accumulator + budget gate (thread-safe, M6).
 
     Created ONCE per command in the CLI ``run()`` and threaded only into the
     networked backends. ``Mock*`` never receives one and never calls
     ``record``, so a ``--judge none`` footer shows 0 live calls / $0.0000.
+
+    **Concurrency (M6):** M6 parallelizes the per-item LLM loops with a
+    ThreadPoolExecutor, so a single ``CostContext`` is shared across worker
+    threads. The budget gate therefore uses **reserve-then-settle** under one
+    ``threading.Lock``:
+
+    - ``check_before_call`` atomically checks ``usd + reserved + next`` against
+      the cap and, if it fits, **reserves** the estimate. Reserving (not just
+      reading committed ``usd``) is what closes the TOCTOU race: two threads
+      can no longer both pass the same check, because the first thread's
+      reservation is visible to the second under the lock.
+    - ``record`` **settles**: releases the matching reservation and adds the
+      honest post-call usage.
+    - ``release`` frees a reservation when a reserved call fails before
+      settling, so a transient error does not permanently waste budget.
+
+    The lock also guards the plain accumulators (``calls``, token counts,
+    ``usd``, ``_families``), whose ``+=`` / ``set.add`` are not atomic across
+    threads. ``_reserved`` is private bookkeeping and never appears in the
+    footer or any JSON.
     """
 
     max_cost: float | None = None
@@ -150,27 +171,54 @@ class CostContext:
     completion_tokens: int = 0
     usd: float = 0.0
     _families: set[str] = field(default_factory=set)
+    _reserved: float = 0.0
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
     def would_exceed(self, next_estimate_usd: float = 0.0) -> bool:
-        """True if a cap is set and committed spend + the next call crosses it.
+        """True if a cap is set and committed+reserved spend + next crosses it.
 
-        Exactly hitting the cap is allowed (``>`` not ``>=``); this is the
-        pre-call gate the CLI uses to decide whether to make the next egress.
+        Exactly hitting the cap is allowed (``>`` not ``>=``). This is a
+        read-only probe; it accounts for outstanding reservations so it is
+        consistent with the value the locked gate would compute, but callers
+        that need the race-free guarantee must use ``check_before_call``.
         """
         if self.max_cost is None:
             return False
-        return self.usd + next_estimate_usd > self.max_cost
+        with self._lock:
+            return self.usd + self._reserved + next_estimate_usd > self.max_cost
 
     def check_before_call(self, next_estimate_usd: float = 0.0) -> None:
-        """Raise ``BudgetExceeded`` BEFORE egress if the next call crosses cap.
+        """Atomically reserve budget for the next call, or raise ``BudgetExceeded``.
 
-        Call this immediately before each live LLM call. Because it raises
-        before the call runs, the crossing call never executes — no network
-        egress, no spend — satisfying "abort before exceeding budget".
+        Call this immediately before each live LLM call. Under the lock it
+        checks ``usd + reserved + next`` against the cap; if it fits, it
+        **reserves** ``next_estimate_usd`` and returns, otherwise it raises and
+        reserves nothing. Because the reservation is taken under the same lock
+        as the check, concurrent callers cannot both pass against the same
+        remaining budget — the crossing call never executes (no egress, no
+        spend). The caller MUST later either ``record(reserved_usd=...)`` to
+        settle or ``release(...)`` to free the reservation.
         """
-        if self.would_exceed(next_estimate_usd):
-            assert self.max_cost is not None  # guaranteed by would_exceed
-            raise BudgetExceeded(spent_usd=self.usd, max_cost=self.max_cost)
+        if self.max_cost is None:
+            return
+        with self._lock:
+            if self.usd + self._reserved + next_estimate_usd > self.max_cost:
+                raise BudgetExceeded(
+                    spent_usd=self.usd + self._reserved, max_cost=self.max_cost
+                )
+            self._reserved += next_estimate_usd
+
+    def release(self, reserved_usd: float = 0.0) -> None:
+        """Free a reservation taken by ``check_before_call`` without settling.
+
+        Used when a reserved call fails before producing usage (e.g. a network
+        error that exhausts retries), so the budget it tentatively held is
+        returned to the pool for other calls.
+        """
+        if not reserved_usd:
+            return
+        with self._lock:
+            self._reserved = max(0.0, self._reserved - reserved_usd)
 
     def record(
         self,
@@ -179,30 +227,38 @@ class CostContext:
         model: str,
         prompt_tokens: int,
         completion_tokens: int,
+        reserved_usd: float = 0.0,
     ) -> None:
-        """Account for one LIVE (non-cached) call using the returned usage.
+        """Settle one LIVE (non-cached) call using the returned usage.
 
-        Honest post-call accounting: adds tokens and the USD estimate. The
-        cap is enforced pre-egress by ``check_before_call``; ``record`` does
-        not raise, so the actual returned usage is always captured faithfully.
+        Honest post-call accounting under the lock: releases the matching
+        reservation (``reserved_usd``, default 0 for non-gated callers), then
+        adds tokens and the USD estimate. ``record`` does not raise, so the
+        actual returned usage is always captured faithfully.
         """
-        self._families.add(family)
-        self.calls += 1
-        self.prompt_tokens += prompt_tokens
-        self.completion_tokens += completion_tokens
-        self.usd += estimate_usd(model, prompt_tokens, completion_tokens)
+        spent = estimate_usd(model, prompt_tokens, completion_tokens)
+        with self._lock:
+            if reserved_usd:
+                self._reserved = max(0.0, self._reserved - reserved_usd)
+            self._families.add(family)
+            self.calls += 1
+            self.prompt_tokens += prompt_tokens
+            self.completion_tokens += completion_tokens
+            self.usd += spent
 
     def record_hit(self) -> None:
         """Account for one warm-cache hit: no live call, no tokens, no spend.
 
         This is the M5 "warm cache reports zero new spend" signal.
         """
-        self.cached_calls += 1
+        with self._lock:
+            self.cached_calls += 1
 
     def footer(self) -> str:
         """One human-readable line for STDERR (never stdout — INV2)."""
-        return (
-            f"cost: {self.calls} live calls ({self.cached_calls} cached), "
-            f"{self.prompt_tokens} prompt + {self.completion_tokens} completion "
-            f"tokens, ~${self.usd:.4f}"
-        )
+        with self._lock:
+            return (
+                f"cost: {self.calls} live calls ({self.cached_calls} cached), "
+                f"{self.prompt_tokens} prompt + {self.completion_tokens} completion "
+                f"tokens, ~${self.usd:.4f}"
+            )

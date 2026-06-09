@@ -48,6 +48,7 @@ class FakeCostContext:
         self.hits = 0
         self.records: list[dict[str, object]] = []
         self.pre_checks: list[float] = []
+        self.releases: list[float] = []
         self._budget_error = budget_error
         self._pre_budget_error = pre_budget_error
 
@@ -59,6 +60,9 @@ class FakeCostContext:
         if self._pre_budget_error is not None:
             raise self._pre_budget_error
 
+    def release(self, reserved_usd: float = 0.0) -> None:
+        self.releases.append(reserved_usd)
+
     def record(
         self,
         *,
@@ -66,6 +70,7 @@ class FakeCostContext:
         model: str,
         prompt_tokens: int,
         completion_tokens: int,
+        reserved_usd: float = 0.0,
     ) -> None:
         if self._budget_error is not None:
             raise self._budget_error
@@ -475,4 +480,32 @@ class TestCompleteWithCacheAndCost:
         with VerdictCache(db) as cache:
             with pytest.raises(_BudgetExceededError):
                 complete_with_cache_and_cost(fn, key, cache=cache, cost_ctx=cost)
+            assert cache.get(key) is None
+
+    def test_fn_failure_releases_reservation(self, tmp_path: Path) -> None:
+        """If fn() raises, the reserved budget is released (M6 reserve-then-settle).
+
+        A live call that fails before producing usage must hand its tentatively
+        reserved budget back via release(), never settle it via record(), and
+        never poison the cache.
+        """
+        cost = FakeCostContext()
+        key = _key()
+
+        def boom() -> RawCompletion:
+            raise RuntimeError("network died mid-call")
+
+        with VerdictCache(tmp_path / "c.sqlite3") as cache:
+            with pytest.raises(RuntimeError, match="network died"):
+                complete_with_cache_and_cost(
+                    boom,
+                    key,
+                    cache=cache,
+                    cost_ctx=cost,
+                    estimate=lambda: (40_000, 0),
+                )
+            # Reserved on the pre-check, then released on failure; never recorded.
+            assert cost.pre_checks == [pytest.approx(0.10)]
+            assert cost.releases == [pytest.approx(0.10)]
+            assert cost.records == []
             assert cache.get(key) is None
