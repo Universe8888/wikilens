@@ -9,6 +9,11 @@ from pathlib import Path
 
 DEFAULT_DB_PATH = ".wikilens/db"
 
+# Default worker count for the M6 parallel LLM loops. I/O-bound (network)
+# work, so a modest pool well above CPU count is appropriate; the executor
+# caps each run at this many concurrent calls. ``--workers 1`` forces serial.
+DEFAULT_WORKERS = 8
+
 
 def warn_if_first_run() -> None:
     """Print a one-time notice when local HF models have not been downloaded yet."""
@@ -40,6 +45,29 @@ def add_cost_cache_args(parser: argparse.ArgumentParser) -> None:
         "--max-cost", type=float, default=None,
         help="USD budget ceiling. Abort (exit 2) before exceeding this.",
     )
+    parser.add_argument(
+        "--workers", type=int, default=DEFAULT_WORKERS,
+        help=(
+            "Concurrent LLM calls (default: %(default)s). 1 = serial. "
+            "Ignored for --judge none (the mock backend always runs serially)."
+        ),
+    )
+
+
+def resolve_workers(args: argparse.Namespace, judge_kind: str) -> int:
+    """Worker count for the per-item LLM loop, validated and mock-aware.
+
+    The mock backend (``--judge none``) makes no network calls, so concurrency
+    buys nothing and would make its stateful, seeded verdict cycling
+    non-deterministic — force serial. A non-positive ``--workers`` is clamped
+    to 1 so a bad value degrades to serial rather than crashing.
+    """
+    if judge_kind == "none":
+        return 1
+    raw = getattr(args, "workers", DEFAULT_WORKERS)
+    if raw is None:
+        raw = DEFAULT_WORKERS
+    return max(1, int(raw))
 
 
 def open_cost_cache(args: argparse.Namespace, db_dir: str | None = None):

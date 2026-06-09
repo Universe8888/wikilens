@@ -35,6 +35,7 @@ import hashlib
 import math
 import sqlite3
 import sys
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -147,20 +148,35 @@ class NullCache:
 
 
 class VerdictCache:
-    """sqlite-backed raw-completion cache.
+    """sqlite-backed raw-completion cache (thread-safe, M6).
 
     Opens (creating if needed) a sqlite file and an ``entries`` table. On a
     corrupt file it prints a stderr warning and degrades to "always miss" (the
     ``_degraded`` flag) rather than crashing the run.
+
+    **Concurrency (M6):** M6 runs the per-item LLM loop over a
+    ThreadPoolExecutor, and every worker shares one ``VerdictCache`` instance.
+    Python's ``sqlite3`` connection rejects cross-thread use by default
+    (``check_same_thread=True`` -> ``ProgrammingError``), and concurrent
+    statements on one connection are not safe regardless. So the connection is
+    opened with ``check_same_thread=False`` and every ``get``/``put`` is
+    serialized under one ``threading.Lock``. WAL mode (already set) keeps that
+    serialization cheap. The lock is per-instance; distinct processes still
+    coordinate through sqlite's own file locking.
     """
 
     def __init__(self, db_path: str | Path) -> None:
         self._db_path = Path(db_path)
         self._degraded = False
         self._conn: sqlite3.Connection | None = None
+        self._lock = threading.Lock()
         try:
             self._db_path.parent.mkdir(parents=True, exist_ok=True)
-            self._conn = sqlite3.connect(str(self._db_path))
+            # check_same_thread=False: worker threads from the M6 pool share
+            # this connection; we serialize all access with self._lock below.
+            self._conn = sqlite3.connect(
+                str(self._db_path), check_same_thread=False
+            )
             self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.execute("PRAGMA synchronous=NORMAL")
             self._conn.execute(
@@ -187,9 +203,10 @@ class VerdictCache:
         """Return the cached completion text, or ``None`` on a miss."""
         if self._degraded or self._conn is None:
             return None
-        row = self._conn.execute(
-            "SELECT completion FROM entries WHERE key = ?", (key.digest(),)
-        ).fetchone()
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT completion FROM entries WHERE key = ?", (key.digest(),)
+            ).fetchone()
         return None if row is None else str(row[0])
 
     def put(self, key: CacheKey, completion: str) -> None:
@@ -200,17 +217,19 @@ class VerdictCache:
         """
         if self._degraded or self._conn is None:
             return
-        self._conn.execute(
-            "INSERT OR REPLACE INTO entries "
-            "(key, family, model, completion, created) VALUES (?, ?, ?, ?, ?)",
-            (key.digest(), key.family, key.model, completion, time.time()),
-        )
-        self._conn.commit()
+        with self._lock:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO entries "
+                "(key, family, model, completion, created) VALUES (?, ?, ?, ?, ?)",
+                (key.digest(), key.family, key.model, completion, time.time()),
+            )
+            self._conn.commit()
 
     def close(self) -> None:
-        if self._conn is not None:
-            self._conn.close()
-            self._conn = None
+        with self._lock:
+            if self._conn is not None:
+                self._conn.close()
+                self._conn = None
 
     def __enter__(self) -> VerdictCache:
         return self
