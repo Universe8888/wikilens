@@ -189,3 +189,30 @@ controls. Pattern to follow: write the pipeline function signature first
 (including the new parameter), then add the argparse arg, then thread
 `args.x` to the pipeline call. The type checker will surface missing params
 if the function signatures are annotated.
+
+---
+
+## [2026-06-03] M5 verdict cache + cost-guard integration
+
+- **Type**: REDO
+  - **What happened**: Workflow agent `parallel[0]` (cache.py builder) reported failure but had written correct files to disk. Wasted time investigating whether to rebuild.
+  - **Fix**: After any workflow failure, immediately `ls` + run gates on the expected output before trusting the status. The failure may be in structured-output reporting, not the build.
+  - **Severity**: MEDIUM
+
+- **Type**: ASSUMPTION
+  - **What happened**: `add_cost_cache_args()` registered `--max-pairs`, but `contradict.py` already had `--sample --max-pairs` as an alias. argparse raised `ArgumentError` at import time, breaking all commands (71 test failures).
+  - **Fix**: Before adding any flag in a shared helper, grep all command files for the same flag name. If a per-command version exists, skip or reconcile — never double-register.
+  - **Severity**: MEDIUM
+
+- **Type**: REDO
+  - **What happened**: 12 mypy "Cannot infer type of lambda" errors from `estimate=lambda` patterns in agent-edited backend files. Required bulk `sed` fix.
+  - **Fix**: Include `# type: ignore[misc]` guidance in agent prompts when the pattern uses default-arg lambdas that mypy cannot infer.
+  - **Severity**: LOW
+
+## [2026-06-09 17:30] M6 concurrency + backoff (mid-session)
+
+- **Type**: ASSUMPTION
+  - **Step**: M6 Phase 2/3 — adding `retry.py` / `executor.py` with `TypeVar`-based generics.
+  - **What happened**: The repo's ruff config enforces **UP047** ("generic function should use type parameters"). Old-style `T = TypeVar("T")` + `def f(x: T) -> T` is a lint ERROR here. I shipped Phase 2 (`5987ab1`) with retry.py red on `ruff check .` because I only re-ran ruff on the *test* files after fixing an N818, not the full repo — the "Found 2 errors" line included 1 UP047 in src I didn't read closely.
+  - **Fix**: (1) Use PEP 695 syntax for generics in this repo: `def with_backoff[T](fn: Callable[[], T]) -> T:` and `def parallel_map[In, Out](...)`. Works on py312+ (CI is py3.12, local 3.14). (2) After any lint fix, re-run the FULL `make lint` (`ruff check .`), never just the file you touched — error counts conflate src + test findings.
+  - **Severity**: MEDIUM

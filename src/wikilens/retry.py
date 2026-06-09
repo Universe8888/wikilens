@@ -25,11 +25,8 @@ from __future__ import annotations
 import random
 import time
 from collections.abc import Callable
-from typing import TypeVar
 
 from wikilens.cost import BudgetExceeded
-
-T = TypeVar("T")
 
 # Status codes worth retrying: 429 (rate limit) + the transient 5xx family.
 # 529 is Anthropic's "overloaded". 4xx client errors (400/401/403/404/422) are
@@ -83,7 +80,7 @@ def default_jitter(delay: float) -> float:
     return random.uniform(0.0, delay)  # noqa: S311 - jitter, not crypto
 
 
-def with_backoff(
+def with_backoff[T](
     fn: Callable[[], T],
     *,
     is_retryable: Callable[[BaseException], bool] = is_transient_http_error,
