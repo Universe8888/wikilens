@@ -139,6 +139,8 @@ def run(args: argparse.Namespace) -> int:
             from wikilens.rerank import BGEReranker
             reranker = BGEReranker()
 
+        from wikilens.cli._common import resolve_workers
+
         drafts = draft_answers(
             gaps,
             store,
@@ -150,6 +152,7 @@ def run(args: argparse.Namespace) -> int:
             min_supporting=args.min_supporting,
             sample=args.sample,
             drafter_model=drafter_model,
+            workers=resolve_workers(args, args.judge),
         )
 
         report = AnswerReport(
