@@ -106,3 +106,42 @@ class TestParallelMap:
     def test_invalid_max_workers_raises(self) -> None:
         with pytest.raises(ValueError, match="max_workers"):
             parallel_map(lambda x: x, [1, 2], max_workers=0)
+
+    def test_abort_does_not_block_on_in_flight_workers(self) -> None:
+        """An aborting batch must return promptly, not wait on busy workers.
+
+        Adversarial-verify finding: with `with ThreadPoolExecutor() as pool`,
+        __exit__ calls shutdown(wait=True), which blocks until every RUNNING
+        worker returns. If those workers are parked in backoff sleep, a
+        BudgetExceeded breach hangs for tens of seconds. The fix returns
+        promptly (already-running workers can't be force-killed, but our code
+        no longer waits on them). We prove it by parking 3 workers on an Event
+        and asserting parallel_map raises within a short window.
+        """
+        release = threading.Event()
+        raised: dict[str, bool] = {}
+
+        def worker(x: int) -> int:
+            if x == 0:
+                raise BudgetExceeded(spent_usd=5.0, max_cost=5.0)
+            release.wait(timeout=10)  # simulate a worker parked in backoff
+            return x
+
+        def run() -> None:
+            try:
+                parallel_map(worker, list(range(4)), max_workers=4)
+            except BudgetExceeded:
+                raised["ok"] = True
+
+        runner = threading.Thread(target=run)
+        runner.start()
+        runner.join(timeout=3.0)
+        try:
+            assert raised.get("ok"), (
+                "parallel_map did not return within 3s — it blocked on "
+                "in-flight workers (shutdown(wait=True) in __exit__)."
+            )
+        finally:
+            # Release the parked workers so they (and the test process) exit.
+            release.set()
+            runner.join(timeout=10)
