@@ -9,10 +9,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from wikilens.contradict import CandidatePair
 from wikilens.judge import JudgeVerdict
+
+if TYPE_CHECKING:
+    from wikilens.judge import Judge
 
 ScopeClass = Literal["factual", "temporal"]
 ALL_SCOPES: tuple[ScopeClass, ...] = ("factual", "temporal")
@@ -31,6 +34,37 @@ class Finding:
 
     pair: CandidatePair
     verdict: JudgeVerdict
+
+
+def judge_pairs(
+    pairs: list[CandidatePair],
+    judge: Judge,
+    *,
+    min_score: float,
+    workers: int = 1,
+) -> list[Finding]:
+    """Judge every candidate pair and return findings in INPUT order (M6).
+
+    Runs ``judge.score_pair`` over ``pairs`` with up to ``workers`` concurrent
+    calls (``workers=1`` is the serial path), then keeps the pairs whose
+    verdict cleared ``min_score``. Because ``parallel_map`` preserves input
+    position, the findings list is identical — same members, same order — for
+    any worker count, so the JSON/markdown output is stable regardless of
+    concurrency. The judge must be safe to call from multiple threads; the
+    networked judges are (their shared cost gate and cache are locked).
+    """
+    from wikilens.executor import parallel_map
+
+    verdicts = parallel_map(
+        lambda p: judge.score_pair(p.a.text, p.b.text),
+        pairs,
+        max_workers=workers,
+    )
+    return [
+        Finding(pair=p, verdict=v)
+        for p, v in zip(pairs, verdicts, strict=True)
+        if v.verdict and v.score >= min_score
+    ]
 
 
 @dataclass(frozen=True)

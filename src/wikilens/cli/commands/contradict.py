@@ -62,9 +62,9 @@ def run(args: argparse.Namespace) -> int:
     from wikilens.contradict_format import (
         ALL_SCOPES,
         ContradictReport,
-        Finding,
         format_json,
         format_markdown,
+        judge_pairs,
     )
     from wikilens.embed import BGEEmbedder
     from wikilens.store import LanceDBStore
@@ -111,11 +111,14 @@ def run(args: argparse.Namespace) -> int:
             pairs[: args.sample] if args.sample is not None and args.sample >= 0 else pairs
         )
 
-        findings: list[Finding] = []
-        for p in judged_pairs:
-            verdict = judge.score_pair(p.a.text, p.b.text)
-            if verdict.verdict and verdict.score >= args.min_score:
-                findings.append(Finding(pair=p, verdict=verdict))
+        from wikilens.cli._common import resolve_workers
+
+        findings = judge_pairs(
+            judged_pairs,
+            judge,
+            min_score=args.min_score,
+            workers=resolve_workers(args, args.judge),
+        )
 
         report = ContradictReport(
             vault_root=str(args.vault_path),
