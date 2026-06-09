@@ -216,3 +216,15 @@ if the function signatures are annotated.
   - **What happened**: The repo's ruff config enforces **UP047** ("generic function should use type parameters"). Old-style `T = TypeVar("T")` + `def f(x: T) -> T` is a lint ERROR here. I shipped Phase 2 (`5987ab1`) with retry.py red on `ruff check .` because I only re-ran ruff on the *test* files after fixing an N818, not the full repo — the "Found 2 errors" line included 1 UP047 in src I didn't read closely.
   - **Fix**: (1) Use PEP 695 syntax for generics in this repo: `def with_backoff[T](fn: Callable[[], T]) -> T:` and `def parallel_map[In, Out](...)`. Works on py312+ (CI is py3.12, local 3.14). (2) After any lint fix, re-run the FULL `make lint` (`ruff check .`), never just the file you touched — error counts conflate src + test findings.
   - **Severity**: MEDIUM
+
+- **Type**: ASSUMPTION
+  - **Step**: M6 Phase 4 — parallelizing the per-item LLM loops; assumed the shared `VerdictCache` was concurrency-ready.
+  - **What happened**: Python `sqlite3.connect()` defaults to `check_same_thread=True`. The moment a ThreadPoolExecutor worker touched the cache connection created on the main thread, it raised `ProgrammingError: SQLite objects created in a thread can only be used in that same thread`. The M6 scout report had mapped the loops and the cost-gate race but never inspected the cache's thread-safety — it was a hidden Phase-4 prerequisite.
+  - **Fix**: Open the connection with `check_same_thread=False` AND serialize every `get`/`put`/`close` under a per-instance `threading.Lock` (the connection object isn't safe for concurrent statements even with the flag). When parallelizing anything, audit EVERY shared resource the workers touch (cost ctx, cache, store, embedder), not just the obvious accumulator — write a forced-contention test (50-thread Barrier) per resource.
+  - **Severity**: HIGH
+
+- **Type**: APPROACH (worked well)
+  - **Step**: M6 Phase 4 — proving parallel output == serial output for 6 commands.
+  - **What happened**: Seeded mocks (MockJudge/MockGenerator) cycle verdicts by call-INDEX, so they're useless for proving order-determinism under parallelism (output depends on completion order with them). 
+  - **Fix**: Use a **content-deterministic** fake (verdict derived from the input text, not a call counter) to assert `workers=1` output == `workers=8` output, plus a **Barrier judge** (N workers must all arrive before any returns) to prove real concurrency without flaky timing/sleep. This pattern made every Phase-4 parallel test fast and deterministic.
+  - **Severity**: LOW
