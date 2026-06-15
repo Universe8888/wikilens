@@ -83,3 +83,6 @@ htmlcov/
 
 # wikilens: example output from README quickstart (gap --json > gaps.json)
 gaps.json
+
+# CI: workspace-local HuggingFace model cache (HF_HOME in ci.yml)
+.hf-cache/

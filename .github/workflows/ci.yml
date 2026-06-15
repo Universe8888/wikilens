@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  # Pin a workspace-local HuggingFace cache so it can be restored across runs.
+  HF_HOME: ${{ github.workspace }}/.hf-cache
+  HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
+
 jobs:
   checks:
     strategy:
@@ -40,7 +45,18 @@ jobs:
       - name: Typecheck
         run: python -m mypy src
 
+      # The test suite ingests vaults, which downloads two ~270 MB BGE models from
+      # HuggingFace. Cache them so they download once, and retry the fetch so a
+      # transient HF rate-limit (HTTP 429) doesn't red-fail an otherwise-green build.
+      - name: Cache HuggingFace models
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HF_HOME }}
+          key: hf-models-${{ runner.os }}-bge-small-v1.5-reranker-base
+
+      - name: Pre-fetch models (retry on transient HF errors)
+        shell: bash
+        run: python scripts/prefetch_models.py
+
       - name: Test
-        env:
-          HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
         run: python -m pytest --cov=wikilens --cov-fail-under=84
