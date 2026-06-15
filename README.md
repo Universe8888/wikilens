@@ -1,8 +1,18 @@
 # wikilens
 
+[![PyPI version](https://img.shields.io/pypi/v/wikilens.svg)](https://pypi.org/project/wikilens/)
+[![CI](https://github.com/Universe8888/wikilens/actions/workflows/ci.yml/badge.svg)](https://github.com/Universe8888/wikilens/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/pypi/pyversions/wikilens.svg)](https://pypi.org/project/wikilens/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![coverage](https://img.shields.io/badge/coverage-%E2%89%A584%25-brightgreen)](.github/workflows/ci.yml)
+
 8 evaluated agents, one command, any Markdown vault — turning a folder of notes into a queryable, auditable, self-aware knowledge system.
 
 **Status:** Pre-1.0 · 8 agents shipped, all with hand-labeled evals. [See full benchmark numbers →](./BENCHMARK.md)
+
+![wikilens audit running on a sample vault](./demo.gif)
+
+<sup>`audit` runs offline in under a second — no index, no model, no API key. Reproduce the recording with `demo.tape` (vhs).</sup>
 
 ---
 
@@ -18,6 +28,51 @@
 | `concepts` | Clusters of notes circling an unnamed concept | F1 >= 0.70 targets met |
 | `confidence` | Claims below an epistemic threshold (5-level scale) | F1 = 0.89 |
 | `query` | Semantic search over the indexed vault | Hit@5 = 1.00 |
+
+---
+
+## See it run
+
+`audit` needs no index, no model download, and no API key — it's a pure-function
+graph scan over the vault. Point it at the bundled fixture and you get a report like
+this in under a second:
+
+```console
+$ wikilens audit fixtures/audit_vault
+# Link audit — audit_vault
+
+Scanned 16 notes. 19 findings.
+
+## Broken links (4)
+- `jupiter` → `great-red-spot` [[...]]
+- `mars` → `pluto` [[...]]
+- `solo-comet` → `nonexistent-meteor` [[...]]
+- `telescopes` → `hubble` ![[...]]
+
+## One-way links (8)
+- `asteroids` → `mars` (no backlink)
+- `drifter` → `mars` (no backlink)
+- `ideas-overview` → `journal/ideas` (no backlink)
+- `ideas-overview` → `notes/ideas` (no backlink)
+- `lonely-rock` → `asteroids` (no backlink)
+- `mercury` → `venus` (no backlink)
+- `telescopes` → `jupiter` (no backlink)
+- `venus` → `mars` (no backlink)
+
+## Orphan notes (6)
+- `drifter` (1 outbound, 0 inbound)
+- `ideas-overview` (1 outbound, 0 inbound)
+- `lonely-rock` (1 outbound, 0 inbound)
+- `mercury` (1 outbound, 0 inbound)
+- `solo-comet` (1 outbound, 0 inbound)
+- `telescopes` (2 outbound, 0 inbound)
+
+## Shadowed links (1)
+- `ideas-overview` → `ideas` (candidates: `journal/ideas`, `notes/ideas`)
+```
+
+Exit code is `1` when findings are reported (`0` when clean) — so `audit` doubles as a
+pre-commit / CI gate.
 
 ---
 

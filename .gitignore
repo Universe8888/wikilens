@@ -80,3 +80,6 @@ docs/sessions/
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+
+# wikilens: example output from README quickstart (gap --json > gaps.json)
+gaps.json
