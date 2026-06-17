@@ -8,7 +8,7 @@
 
 8 evaluated agents, one command, any Markdown vault — turning a folder of notes into a queryable, auditable, self-aware knowledge system.
 
-**Status:** Pre-1.0 · 8 agents shipped, all with hand-labeled evals. [See full benchmark numbers →](./BENCHMARK.md)
+**Status:** Pre-1.0 · 8 agents shipped, 6 with hand-labeled evals (`drift` and `concepts` have eval harnesses + targets but no published run yet). [See full per-run benchmark history →](./BENCHMARK.md)
 
 ![wikilens audit running on a sample vault](./demo.gif)
 
@@ -18,16 +18,35 @@
 
 ## Agents
 
-| Command | What it finds | Best metric |
-|---------|--------------|-------------|
-| `audit` | Broken wikilinks, one-way links, orphan notes, shadowed basenames | F1 = 1.00 |
-| `contradict` | Contradicting claim pairs across notes | F1 = 0.82 |
-| `gap` | Unanswered questions implied by vault content | Recall = 1.00 |
-| `answer` | Drafts cited stub notes answering identified gaps | Pass rate = 0.80 |
-| `drift` | Notes where beliefs shifted over git history | Targets: P>=0.80, R>=0.80 |
-| `concepts` | Clusters of notes circling an unnamed concept | F1 >= 0.70 targets met |
-| `confidence` | Claims below an epistemic threshold (5-level scale) | F1 = 0.89 |
-| `query` | Semantic search over the indexed vault | Hit@5 = 1.00 |
+Scores are **observed ranges across the runs logged in [`BENCHMARK.md`](./BENCHMARK.md)**, not
+best-case cherry-picks. Where a single number is shown, runs are consistent; where a range is
+shown, the result varies by judge model, threshold, or config, and the spread is reported honestly.
+
+| Command | What it finds | Measured (see BENCHMARK.md) |
+|---------|--------------|------------------------------|
+| `audit` | Broken wikilinks, one-way links, orphan notes, shadowed basenames | **F1 = 1.00** (deterministic graph scan, no model) |
+| `query` | Semantic search over the indexed vault | **Hit@5 = 1.00**, Recall@5 0.97–1.00 (20-query set) |
+| `contradict` | Contradicting claim pairs across notes | **F1 = 0.82** overall (factual 0.84 · temporal 0.67) |
+| `confidence` | Claims below an epistemic threshold (5-level scale) | **F1 0.66–0.89** by judge/config; recall is the weak axis |
+| `answer` | Drafts cited stub notes answering identified gaps | **Pass rate 0.40–0.80** (best 0.80); attribution 0.90–1.00 |
+| `gap` | Unanswered questions implied by vault content | **Cluster recall = 1.00**, but matcher precision 0.19–0.48 (over-generates) |
+| `drift` | Notes where beliefs shifted over git history | Harness + targets (P≥0.80, R≥0.80); **not yet benchmarked** |
+| `concepts` | Clusters of notes circling an unnamed concept | Harness + target (F1≥0.70); **not yet benchmarked** |
+
+### How to read these numbers
+
+- **Eval sets are small** (16–249 items per fixture). These show the approach works on labeled
+  ground truth; they are not yet large-scale guarantees. A 1,000+-note benchmark is on the roadmap.
+- **LLM-judged agents vary by judge.** `confidence`, `answer`, and `gap` move with the judge model
+  and threshold — the ranges above are real, and every run is timestamped in `BENCHMARK.md` so
+  regressions are visible side-by-side.
+- **Known weak spots, stated plainly:** `gap` over-generates (high recall, low precision — it
+  proposes more questions than the gold set, so it errs toward surfacing too much rather than
+  missing things); `confidence` recall lags precision; `drift`/`concepts` have harnesses but no
+  published numbers yet. These are tracked in [`ROADMAP.md`](./ROADMAP.md).
+
+If a metric can't be reproduced from a fresh clone via `make benchmark` (or the per-agent eval
+scripts with a judge key), it doesn't belong in this table.
 
 ---
 
@@ -84,7 +103,7 @@ It is:
 
 - **Local-first.** Runs on your machine. Your notes never leave unless you explicitly call a remote LLM.
 - **Agent-based.** Individual capabilities are isolated agents with measured performance.
-- **Evaluated, not vibes.** Every agent ships with a labeled test fixture and a reported score.
+- **Evaluated, not vibes.** Every shipped agent has a labeled test fixture and a reported score — including the runs where it underperforms.
 - **Markdown-native.** Understands Obsidian-flavored syntax: `[[wikilinks]]`, YAML frontmatter, callouts, embeds.
 
 It is not:
@@ -228,7 +247,8 @@ wikilens confidence ./my-vault --judge none            # dry-run (no API)
 
 ## Benchmark
 
-Full tables and per-run history in [`BENCHMARK.md`](./BENCHMARK.md). Reproduce any suite:
+Full tables and per-run history in [`BENCHMARK.md`](./BENCHMARK.md). Every run is timestamped and
+appended (never overwritten), so regressions are visible side-by-side. Reproduce any suite:
 
 ```bash
 make lint
@@ -246,7 +266,7 @@ published LLM-judged numbers, run the individual eval scripts with
 ## Design principles
 
 1. **No silent steps.** Every agent explains what it did and why.
-2. **Reproducible evaluation.** `make benchmark` produces the numbers in `BENCHMARK.md`.
+2. **Reproducible evaluation.** `make benchmark` produces the numbers in `BENCHMARK.md` — including the bad runs.
 3. **No vendor lock.** Swappable embeddings, swappable LLMs, swappable vector stores.
 4. **Fail loud.** Broken inputs are surfaced, never guessed.
 
