@@ -1,0 +1,46 @@
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: local
+    hooks:
+      - id: wikilens-sanitization
+        name: wikilens sanitization gate
+        entry: python scripts/check_sanitization.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: wikilens-line-count
+        name: wikilens line-count warning
+        entry: python scripts/check_line_count.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: wikilens-ruff
+        name: wikilens ruff
+        entry: python -m ruff check .
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: wikilens-gitleaks-staged
+        name: wikilens gitleaks staged scan
+        entry: gitleaks git --staged --redact --no-banner
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: wikilens-mypy
+        name: wikilens mypy
+        entry: python -m mypy src
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+      - id: wikilens-pytest
+        name: wikilens pytest
+        entry: python -m pytest
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
