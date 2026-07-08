@@ -27,8 +27,8 @@ stays import-light like ``cost.py`` / ``cache.py`` / ``retry.py``.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
-from concurrent.futures import FIRST_EXCEPTION, ThreadPoolExecutor, wait
+from collections.abc import Callable, Iterator, Sequence
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 
 
 def parallel_map[In, Out](
@@ -59,6 +59,19 @@ def parallel_map[In, Out](
         return [fn(item) for item in items]
 
     results: list[Out] = [None] * len(items)  # type: ignore[list-item]
+
+    def submit_next(
+        item_iter: Iterator[tuple[int, In]],
+        future_to_index: dict[Future[Out], int],
+    ) -> Future[Out] | None:
+        try:
+            index, item = next(item_iter)
+        except StopIteration:
+            return None
+        future = pool.submit(fn, item)
+        future_to_index[future] = index
+        return future
+
     # NB: deliberately NOT a `with ThreadPoolExecutor() as pool` block —
     # its __exit__ calls shutdown(wait=True), which blocks until every running
     # worker returns. On an exception (e.g. BudgetExceeded) that would hang the
@@ -66,14 +79,26 @@ def parallel_map[In, Out](
     # wait=True on success, wait=False + cancel_futures=True on abort.
     pool = ThreadPoolExecutor(max_workers=max_workers)
     try:
-        future_to_index = {pool.submit(fn, item): i for i, item in enumerate(items)}
-        pending = set(future_to_index)
+        item_iter = iter(enumerate(items))
+        future_to_index: dict[Future[Out], int] = {}
+        pending: set[Future[Out]] = set()
+        for _ in range(min(max_workers, len(items))):
+            future = submit_next(item_iter, future_to_index)
+            if future is not None:
+                pending.add(future)
+
         while pending:
-            done, pending = wait(pending, return_when=FIRST_EXCEPTION)
+            done, pending = wait(pending, return_when=FIRST_COMPLETED)
             for future in done:
                 # .result() re-raises a worker exception here; the except
                 # block then cancels pending work and returns without waiting.
                 results[future_to_index[future]] = future.result()
+                future_to_index.pop(future, None)
+            while len(pending) < max_workers:
+                future = submit_next(item_iter, future_to_index)
+                if future is None:
+                    break
+                pending.add(future)
     except BaseException:
         # Drop still-queued work and return immediately. Running workers can't
         # be cancelled, but we don't wait for them — the per-call budget gate
